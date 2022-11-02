@@ -36,6 +36,12 @@ try:
 except:
     pass
 
+# Try to import the new Stanford
+try:
+    import stanza
+except:
+    pass
+
 
 class NER():
     """ A class which wraps several NLP engines for NER
@@ -73,6 +79,16 @@ class NER():
         map = {'PERSON': 'PER',
             'DATE': 'MISC',
             'ORGANIZATION': 'ORG'}
+        return map.get(entity, None)
+
+    @staticmethod
+    def stanza_entity_map(entity : str):
+        """ Return a common entity type if likely to be PII, or None
+        Common types are PERSON, ORGANIZATION, DATE.
+        """
+        map = {'PERSON': 'PER',
+            'DATE': 'MISC',
+            'FAC': 'ORG'}
         return map.get(entity, None)
 
 
@@ -139,13 +155,35 @@ class NER():
                 if os.path.isdir(stanford_path):
                     self.engine_data_dir = stanford_path
                     break
+            # XXX temporary hack
             self.engine_data_dir = '../../Stanford-NER-Python/stanford-ner/'
             if not self.engine_data_dir:
                 logging.error('stanford_ner requested but no data directory found')
                 return
             logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, self.engine_model, self.engine_data_dir))
+        elif engine == 'stanza':
+            if 'stanza' not in sys.modules:
+                logging.error('stanza requested but not available')
+                return
+            self._engine_name = engine
+            self.engine_model = model
+            self.engine_version = stanza.__version__
+            self.engine_data_dir = None
+            stanza_path_list = [ os.getenv('STANZA_DATA_ROOT', '.stanford_ner'),
+                os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'stanza'),
+                os.path.join(os.environ.get('HOME'), 'stanza_resources')]
+            for stanza_path in stanza_path_list:
+                if os.path.isdir(stanza_path):
+                    self.engine_data_dir = stanza_path
+                    break
+            if not self.engine_data_dir:
+                logging.error('stanza requested but no data directory found')
+                return
+            self.stanza_nlp = stanza.Pipeline('en',
+                download_method=None,
+                dir=self.engine_data_dir)
         else:
-            logging.error('unknown NER engine %s (expected spacy or flair or stanford)' % engine)
+            logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza)' % engine)
             return
 
     def __repr__(self):
@@ -175,7 +213,7 @@ class NER():
         elif self._engine_name == 'flair':
             sentence = Sentence(text)
             self.tagger.predict(sentence)
-            entities = sentence.get_spans('ner') # XXX check this shouldn't be the model name?
+            entities = sentence.get_spans('ner')
             # ner-english has 4 classes: PER,LOC,ORG,MISC
             entities_list = [ {'text':e.text, 'label':NER.flair_entity_map(e.get_label('ner').value)}
                 for e in entities if NER.flair_entity_map(e.get_label('ner').value) ]
@@ -186,6 +224,12 @@ class NER():
             entities_list = [ {'text':e[0], 'label':NER.stanford_entity_map(e[1])}
                 for e in entities if NER.stanford_entity_map(e[1]) ]
             return entities_list
+        elif self._engine_name == 'stanza':
+            entities = self.stanza_nlp(text).entities
+            entities_list = [ {'text':e['text'], 'label':NER.stanford_entity_map(e['type'])}
+                for e in entities if NER.stanza_entity_map(e['type']) ]
+            print(doc.entities)
+            return []
         return []
 
 
