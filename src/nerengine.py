@@ -8,7 +8,6 @@
 # Main program:
 #  no arguments, runs through a set of test strings
 #  argument: tests each NER with the given string
-#   try: "McDonald,Ernest J 1308656131 TIS_ TIB: 1.8 SE Golden Jubilee National Hospital 15.05.50 22/06/2016 SIEMENS VFX9-4 / PV-Ven 2D THI / 3.08 MHz 10 dB / DR 55 SC 2 Map ETRS 3 VEL / 4.0 MHz 0 dB / Flow Gen PRF 867 /F 2 cmi LEFT SEV 7fps 6cm Fr84"
 
 import logging
 import os
@@ -85,10 +84,17 @@ class NER():
     def stanza_entity_map(entity : str):
         """ Return a common entity type if likely to be PII, or None
         Common types are PERSON, ORGANIZATION, DATE.
+        See https://stanfordnlp.github.io/stanza/ner_models.html
         """
-        map = {'PERSON': 'PER',
-            'DATE': 'MISC',
-            'FAC': 'ORG'}
+        map = {
+            'PER': 'PER',
+            'PERSON': 'PER',
+            'LOC': 'LOC',
+            'LOCATION': 'LOC',
+            'FAC': 'ORG',
+            'ORG': 'ORG',
+            'ORGANIZATION': 'ORG',
+            'DATE': 'MISC'}
         return map.get(entity, None)
 
 
@@ -180,6 +186,7 @@ class NER():
                 logging.error('stanza requested but no data directory found')
                 return
             self.stanza_nlp = stanza.Pipeline('en',
+                processors='tokenize,ner',
                 download_method=None,
                 dir=self.engine_data_dir)
         else:
@@ -226,10 +233,9 @@ class NER():
             return entities_list
         elif self._engine_name == 'stanza':
             entities = self.stanza_nlp(text).entities
-            entities_list = [ {'text':e['text'], 'label':NER.stanford_entity_map(e['type'])}
-                for e in entities if NER.stanza_entity_map(e['type']) ]
-            print(doc.entities)
-            return []
+            entities_list = [ {'text':e.text, 'label':NER.stanford_entity_map(e.type)}
+                for e in entities if NER.stanza_entity_map(e.type) ]
+            return entities_list
         return []
 
 
@@ -266,22 +272,23 @@ if __name__ == '__main__':
         "King Hospital"
     ]
 
-    for engine in ['spacy', 'flair', 'stanford']:
+    def run(input):
+        entities = ner_engine.detect(input)
+        result = '[%d] %s' % (len(entities),
+            '/ '.join([e['text'] for e in entities]))
+        print('%s /FROM "%s"' % (result, input))
+
+    for engine in ['stanza', 'spacy', 'flair', 'stanford', 'stanza']:
         ner_engine = NER(engine)
         if not ner_engine.isValid():
             continue
-        print(ner_engine)
+        print('============================= %s' % ner_engine)
         if len(sys.argv) > 1:
-            input = sys.argv[1]
-            entities = ner_engine.detect(input)
-            result = '[%d] %s' % (len(entities),
-                '/ '.join([e['text'] for e in entities]))
-            print('%s /FROM "%s"' % (result, input))
+            run(sys.argv[1])
         else:
+            run("McDonald,Ernest J 1308656131 TIS_ TIB: 1.8 SE Golden Jubilee National Hospital 15.05.50 22/06/2016 SIEMENS VFX9-4 / PV-Ven 2D THI / 3.08 MHz 10 dB / DR 55 SC 2 Map ETRS 3 VEL / 4.0 MHz 0 dB / Flow Gen PRF 867 /F 2 cmi LEFT SEV 7fps 6cm Fr84")
+            run("WOOD GENERAL HOSPITAL MISS BETH LESLEY MCDONALD WEIGHT BEARING OFD 14 CM OFD 17.5 18 8 2  2 OFD 16")
             for person in persons:
                 for hospital in hospitals:
                     input = 'We are taking %s to %s today.' % (person, hospital)
-                    entities = ner_engine.detect(input)
-                    result = '[%d] %s' % (len(entities),
-                        '/ '.join([e['text'] for e in entities]))
-                    print('%s /FROM "%s"' % (result, input))
+                    run(input)
