@@ -2,6 +2,11 @@
 
 Anonymisation of text burned into the pixels of DICOM images.
 
+Contents:
+* [dcmaudit](doc/dcmaudit.md) - view DICOM images, annotate regions to redact
+* [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
+* [review_SR_report](doc/review_SR_report.md) - view DICOM Structured Reports, review possible PII from IsIdentifiable report
+
 Summary of procedure:
 * extract all the potentially useful information from MongoDB and store in CSV files (quicker than querying MongoDB every time)
 * extract a random sample of DICOM filenames from the CSV files, eg. 20 for every combination of modality + ImageType + Manufacturer
@@ -46,10 +51,17 @@ https://pydicom.github.io/pydicom/stable/old/image_data_handlers.html#supported-
   - `pytorch_model.bin` (downloaded from huggingface, manually installed as filename 4f4cdab26f24cb98b732b389e6cebc646c36f54cfd6e0b7d3b90b25656e4262f)
 * pytesseract (v0.3.8 because of python 3.6) - to extract text from images
   - `eng.traineddata` language model (manually installed)
+* stanford CoreNLP - to detect named entities in text
+  - https://github.com/philipperemy/Stanford-NER-Python
+  - includes the CoreNLP Java software (for Java 1.8 not Java 11)
+* stanza - to detect named entities in text
+  - model downloaded from https://huggingface.co/stanfordnlp/stanza-en/resolve/v1.4.1/models/default.zip
 * numpy
 * opencv-python-headless
 * Pillow
-* other dependencies, such as pytorch
+* pytorch CPU version (if no GPU available)
+  - `pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu`
+* other dependencies of the above
 
 # Installation notes
 
