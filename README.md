@@ -65,6 +65,32 @@ https://pydicom.github.io/pydicom/stable/old/image_data_handlers.html#supported-
 
 # Installation notes
 
+You will need to have `SMI_ROOT` and `PACS_ROOT` in the environment.
+
 To prevent flair from trying to download models from huggingface on the internet (and crashing when it can't connect) try `export HF_HUB_OFFLINE=1`
 
-You will need to have `SMI_ROOT` and `PACS_ROOT` in the environment.
+## easyocr
+
+Copy the `.pth` files into `$SMI_ROOT/data/easyocr`
+
+## spacy
+
+Inside your virtual environment run `python -m spacy download en_core_web_trf`
+
+## tesseract
+
+Download the file `eng.traineddata` and copy it to `$SMI_ROOT/data/tessdata`
+
+## flair
+
+Download the file `pytorch_model.bin` from huggingface, copy it to `$SMI_ROOT/data/flair/models/ner-english` and make a symlink from `4f4cdab26f24cb98b732b389e6cebc646c36f54cfd6e0b7d3b90b25656e4262f`
+
+## stanford
+
+Download the repo https://github.com/philipperemy/Stanford-NER-Python
+and run `init.sh` to unpack the zip to the `stanford-ner` directory.
+Copy that directory into `$SMI_ROOT/data/stanford`
+
+## stanza
+
+Download the models `default.zip` and unpack it into `$SMI_ROOT/data/stanza/en/`
