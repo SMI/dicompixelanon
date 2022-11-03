@@ -134,37 +134,37 @@ class App:
         self.tk_app = tkinter.Tk()
         self.tk_app.wm_title(("dcmaudit"))
         self.tk_app.wm_iconname(("dcmaudit"))
-        self.tk_app.wm_protocol('WM_DELETE_WINDOW', self.close)
+        self.tk_app.wm_protocol('WM_DELETE_WINDOW', self.quit)
 
 
         self.app_image = tkinter.Label(self.tk_app)
         self.app_image.pack(side="bottom")
-        self.app_image.bind("<Button-1>", self.press)
-        self.app_image.bind("<Button1-Motion>", self.motion)
-        self.app_image.bind("<Motion>", self.idle_motion)
-        self.app_image.bind("<ButtonRelease-1>", self.end)
-        self.app_image.bind("<Enter>", self.enter)
-        self.app_image.bind("<Leave>", self.leave)
-        #self.app_image.bind("<Configure>", self.on_resize)
-        #self.tk_app.bind("<Return>", self.done_file)
-        self.tk_app.bind("<Escape>", self.escape_file)
-        self.tk_app.bind("<Shift-Escape>", self.prev_file)
-        self.tk_app.bind("<t>", self.tag_file)
-        self.tk_app.bind("<n>", self.next_frame)
-        self.tk_app.bind("<N>", self.done_file)
-        self.tk_app.bind("<p>", self.prev_frame)
-        self.tk_app.bind("<P>", self.prev_file)
-        self.tk_app.bind("<f>", self.ffwd_frame)
-        self.tk_app.bind("<i>", self.info_file)
-        self.tk_app.bind("<o>", self.ocr_frame)
-        self.tk_app.bind("<r>", self.redact)
-        self.tk_app.bind("<A>", self.apply_all_possible_rects)
-        self.app_image.bind("<ButtonRelease-2>", self.apply_possible_rect)
-        self.app_image.bind("<ButtonRelease-3>", self.apply_possible_rect)
-        self.tk_app.bind("<q>", self.quit)
-        self.tk_app.bind("<Z>", self.undo_file)
+        self.app_image.bind("<Button-1>", self.press_event)
+        self.app_image.bind("<Button1-Motion>", self.motion_event)
+        self.app_image.bind("<Motion>", self.idle_motion_event)
+        self.app_image.bind("<ButtonRelease-1>", self.release_event)
+        self.app_image.bind("<Enter>", self.enter_event)
+        self.app_image.bind("<Leave>", self.leave_event)
         self.app_image.bind("<Button1-Enter>", "#nothing")
         self.app_image.bind("<Button1-Leave>", "#nothing")
+        self.app_image.bind("<ButtonRelease-2>", self.apply_possible_rect_event)
+        self.app_image.bind("<ButtonRelease-3>", self.apply_possible_rect_event)
+        #self.app_image.bind("<Configure>", self.on_resize)
+        #self.tk_app.bind("<Return>", self.done_file_event)
+        self.tk_app.bind("<Escape>", self.escape_file_event)
+        self.tk_app.bind("<Shift-Escape>", self.prev_file_event)
+        self.tk_app.bind("<t>", self.tag_file_event)
+        self.tk_app.bind("<n>", self.next_frame_event)
+        self.tk_app.bind("<N>", self.done_file_event)
+        self.tk_app.bind("<p>", self.prev_frame_event)
+        self.tk_app.bind("<P>", self.prev_file_event)
+        self.tk_app.bind("<f>", self.ffwd_frame_event)
+        self.tk_app.bind("<i>", self.info_file_event)
+        self.tk_app.bind("<o>", self.ocr_frame_event)
+        self.tk_app.bind("<r>", self.redact_event)
+        self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
+        self.tk_app.bind("<q>", self.quit_event)
+        self.tk_app.bind("<Z>", self.undo_file_event)
         self.render_flag = False # indicate that window should be rendered at next idle time
         self.wait_flag = tkinter.IntVar(self.tk_app) # effectively the return code -1=exit 0=cancel 1=done image
 
@@ -177,19 +177,19 @@ class App:
         self.menu_button.pack(side="left")
         self.menu = tkinter.Menu(self.menu_button)
         self.menu_button.config(menu=self.menu)
-        self.menu.add_command(label='Redact [r]', command=lambda: self.redact(None))
-        self.menu.add_command(label='Info [i]', command=lambda: self.info_file(None))
-        self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame(None))
-        self.menu.add_command(label='Apply all suggested rects [A]', command=lambda: self.apply_all_possible_rects(None))
-        self.menu.add_command(label='Next frame [n]', command=lambda: self.next_frame(None))
-        self.menu.add_command(label='Fast forward frames [f]', command=lambda: self.ffwd_frame(None))
-        self.menu.add_command(label='Previous frame [p]', command=lambda: self.prev_frame(None))
-        self.menu.add_command(label='Mark done; Next file [N]', command=lambda: self.done_file(None))
-        self.menu.add_command(label='Next file [Esc]', command=lambda: self.escape_file(None))
-        self.menu.add_command(label='Prev file [P]', command=lambda: self.prev_file(None))
-        self.menu.add_command(label='Tag file [t]', command=lambda: self.tag_file(None))
-        self.menu.add_command(label='Undo file [Z]', command=lambda: self.undo_file(None))
-        self.menu.add_command(label='Quit [q]', command=lambda: self.quit(None))
+        self.menu.add_command(label='Redact [r]', command=lambda: self.redact_event(None))
+        self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
+        self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
+        self.menu.add_command(label='Apply all suggested rects [A]', command=lambda: self.apply_all_possible_rects_event(None))
+        self.menu.add_command(label='Next frame [n]', command=lambda: self.next_frame_event(None))
+        self.menu.add_command(label='Fast forward frames [f]', command=lambda: self.ffwd_frame_event(None))
+        self.menu.add_command(label='Previous frame [p]', command=lambda: self.prev_frame_event(None))
+        self.menu.add_command(label='Mark done; Next file [N]', command=lambda: self.done_file_event(None))
+        self.menu.add_command(label='Next file [Esc]', command=lambda: self.escape_file_event(None))
+        self.menu.add_command(label='Prev file [P]', command=lambda: self.prev_file_event(None))
+        self.menu.add_command(label='Tag file [t]', command=lambda: self.tag_file_event(None))
+        self.menu.add_command(label='Undo file [Z]', command=lambda: self.undo_file_event(None))
+        self.menu.add_command(label='Quit [q]', command=lambda: self.quit_event(None))
 
         self.info_label = tkinter.Label(self.tk_app)
         self.info_label.pack(side="left")
@@ -238,7 +238,7 @@ class App:
 
     # User interface events
 
-    def tag_file(self, event):
+    def tag_file_event(self, event):
         logging.debug('Tag file')
         # Add to database
         filename = self.dcm.get_filename()
@@ -246,30 +246,30 @@ class App:
         db.toggle_tag(filename)
         self.update_info_label()
 
-    def next_frame(self, event):
+    def next_frame_event(self, event):
         logging.debug('Next Frame')
         # Simply indicate to GUI loop that user has finished this frame.
         # The image index will be incremented elsewhere.
-        self.escape(event)
+        self.cancel()
         return
 
-    def prev_frame(self, event):
+    def prev_frame_event(self, event):
         logging.debug('Prev Frame')
         # Simply indicate to GUI loop that user has finished this frame.
         # Rewind by 2 because image index will be incremented elsewhere.
         self.dcm.prev_idx()
-        self.escape(event)
+        self.cancel()
         return
 
-    def ffwd_frame(self, event):
+    def ffwd_frame_event(self, event):
         logging.debug('Fast-forward Frame')
         # Simply indicate to GUI loop that user has finished this frame.
         # Index will be incremented elsewhere so set up ready for that.
         self.dcm.ffwd_idx()
-        self.escape(event)
+        self.cancel()
         return
 
-    def ocr_frame(self, event):
+    def ocr_frame_event(self, event):
         logging.debug('OCR frame')
         # Create a popup window and put a progress bar inside it
         popup = tkinter.Toplevel()
@@ -321,7 +321,7 @@ class App:
         draw.rectangle(onscreen_rect, fill=App.redact_colour)
         self.render()
 
-    def redact(self, event):
+    def redact_event(self, event):
         """ Redact the currently displayed rectangle
         """
         frame, overlay = self.dcm.get_current_frame_overlay()
@@ -337,7 +337,7 @@ class App:
         # Redact on image
         self.redact_dicomrect(dicomrect)
 
-    def apply_possible_rect(self, event):
+    def apply_possible_rect_event(self, event):
         """ Redact any rectangle from the list possible_rects if
         it contains the mouse coordinate in event.x,y (right-click)
         by adding the rect to the database and redacting on-screen.
@@ -355,7 +355,7 @@ class App:
                 # Redact on image
                 self.redact_dicomrect(dicomrect)
 
-    def apply_all_possible_rects(self, event):
+    def apply_all_possible_rects_event(self, event):
         """ Redact all rectangles from the list possible_rects
         by adding the rects to the database and redacting on-screen.
         """
@@ -370,17 +370,17 @@ class App:
             if (dicomrect.F() == frame and dicomrect.O() == overlay):
                 self.redact_dicomrect(dicomrect)
 
-    def undo_file(self, event):
+    def undo_file_event(self, event):
         """ Remove all database entries for the current DICOM file.
-        Triggers prev_frame so that the current frame can be refreshed onscreen.
+        Triggers prev_frame_event so that the current frame can be refreshed onscreen.
         """
         filename = self.dcm.get_filename()
         logging.info('Remove all DB entries for %s' % filename)
         db = DicomRectDB()
         db.remove_file(filename)
-        self.prev_frame(None)
+        self.prev_frame_event(None)
 
-    def info_file(self, event):
+    def info_file_event(self, event):
         """ Display a dialog showing the content of some DICOM tags.
         """
         man = str(self.dcm.get_tag('Manufacturer'))
@@ -422,20 +422,20 @@ class App:
                 "q = quit\n")
         return
 
-    def press(self, event):
+    def press_event(self, event):
         """ Internal: mouse pressed to start a drag
         """
         self.drag_start(event.x, event.y)
         return
 
-    def motion(self, event):
+    def motion_event(self, event):
         """ Internal: mouse moved whilst button pressed
         """
         self.drag_continue(event.x, event.y)
         return
 
-    def idle_motion(self, event):
-        what = self.classify(event.x, event.y)
+    def idle_motion_event(self, event):
+        what = self.classify_coord_as_drag(event.x, event.y)
         if self.if_busy:
             cursor = "watch"
         else:
@@ -443,45 +443,46 @@ class App:
         self.app_image.configure(cursor=cursor)
         return
 
-    def quit(self, event):
-        self.close()
+    def quit_event(self, event):
+        self.quit()
 
-    def end(self, event):
+    def release_event(self, event):
         self.drag_end(event.x, event.y)
         return
 
-    def enter(self, event):
+    def enter_event(self, event):
         self.show_handles = True
         self.render()
         return
 
-    def leave(self, event):
+    def leave_event(self, event):
         self.show_handles = False
         self.render()
         return
 
-    def done_file(self, event):
+    def done_file_event(self, event):
         self.done()
         return
 
-    def prev_file(self, event):
+    def prev_file_event(self, event):
         self.prev()
         return
 
-    def escape(self, event):
-        self.cancel()
-        return
+    def escape_file_event(self, event):
+        self.next_file()
 
-    def close(self):
-        """ Called when user actually wants to quit.
-        """
-        self.wait_flag.set(App.RC_QUIT)
+    # Functionality
 
-    def escape_file(self, event):
+    def next_file(self):
         """ Called when user wants to move to next image
         without marking the current one as done.
         """
         self.wait_flag.set(App.RC_NEXTIMAGE)
+
+    def quit(self):
+        """ Called when user actually wants to quit.
+        """
+        self.wait_flag.set(App.RC_QUIT)
 
     def cancel(self):
         """ Called when user presses Escape,
@@ -524,12 +525,12 @@ class App:
         self.drag_l0 = self.rect_l
         self.drag_r0 = self.rect_r
         self.drag_b0 = self.rect_b
-        self.state = self.classify(x, y)
+        self.state = self.classify_coord_as_drag(x, y)
 
     def drag_continue(self, x, y):
         dx = (x - self.drag_x0) * int(self.image_scale)
         dy = (y - self.drag_y0) * int(self.image_scale)
-        new_top, new_left, new_right, new_bottom = self.get_corners()
+        new_top, new_left, new_right, new_bottom = self.get_drag_rect()
         if self.state == App.DRAG_C:
             # A center drag bumps into the edges
             if dx > 0:
@@ -571,24 +572,24 @@ class App:
         self.state = App.DRAG_NONE
 
 
-    def get_corners(self):
+    def get_drag_rect(self):
         """ Return t,l,r,b of the drag rectangle
         """
         #return self.rect_top, self.rect_left, self.rect_right, self.rect_bottom
         return self.rect_t, self.rect_l, self.rect_r, self.rect_b
 
-    def get_screencorners(self):
+    def get_scaled_drag_rect(self):
         """ Return t,l,r,b of the drag rectangle scaled to screen coords
         """
-        t, l, r, b = self.get_corners()
+        t, l, r, b = self.get_drag_rect()
         return(int(t/int(self.image_scale)), int(l/int(self.image_scale)),
                int(r/int(self.image_scale)), int(b/int(self.image_scale)))
 
-    def classify(self, x, y):
+    def classify_coord_as_drag(self, x, y):
         """ Return a DRAG_ code if the x,y is inside a drag rectangle region.
         Returns DRAG_NONE if the x,y is outside the rectangle.
         """
-        t, l, r, b = self.get_screencorners()
+        t, l, r, b = self.get_scaled_drag_rect()
         dx = (r - l) / 4
         dy = (b - t) / 4
 
@@ -610,7 +611,7 @@ class App:
             if y < b-dy: return App.DRAG_R
             return App.DRAG_BR
 
-    def wait(self):
+    def wait_for_flag(self):
         self.tk_app.wait_variable(self.wait_flag)
         value = self.wait_flag.get()
         return value
@@ -648,7 +649,7 @@ class App:
             self.info_label.configure(text="\n\n")
             return
 
-        #tt, ll, rr, bb = self.get_corners()
+        #tt, ll, rr, bb = self.get_drag_rect()
         #ratio = self.describe_ratio()
         #self.inf.configure(text=
         #    "Left:  %4d  Top:    %4d    Right: %4d  Bottom: %4d\n"
@@ -661,7 +662,7 @@ class App:
         """ Applies the drag rectangles onto the image and returns a new image.
         """
         # XXX could also use the list of redaction rectangles to redact the image.
-        t, l, r, b = self.get_screencorners()
+        t, l, r, b = self.get_scaled_drag_rect()
         #logging.debug('Rendering rect at %d,%d,%d,%d' % (l,r,t,b))
         if self.show_handles:
             dx = (r - l) / 4
@@ -786,7 +787,7 @@ class App:
         """ Returns -1 (close = quit) or 0 (cancel = next image) or 1 (done)
         """
         self.set_busy(0)
-        v = self.wait()
+        v = self.wait_for_flag()
         self.set_busy()
         logging.debug('XXX GUI loop finished with v=%d (-1=quit,0=next/prev frame,1=next image)' % v)
         return v
