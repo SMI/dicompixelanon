@@ -77,10 +77,19 @@ def stanford_ner(text, verbose=True, stanford_dir=None):
     outfile = tempfile.NamedTemporaryFile()
     out = outfile.name
 
-    command = 'cd {}; {} -mx1g -cp "*:lib/*" edu.stanford.nlp.ie.NERClassifierCombiner ' \
-               '-ner.model classifiers/english.all.3class.distsim.crf.ser.gz ' \
-               '-outputFormat tabbedEntities -textFile {} > {}' \
-        .format(stanford_dir, JAVA_BIN_PATH, filename, out)
+    # Find Java 8, in case the default is Java 11.
+    #   the isdir test also works with symbolic links.
+    for path in [
+        '/usr/lib/jvm/java-8-openjdk-amd64',
+        '/usr/lib/jvm/jre-1.8.0',
+        '/usr/lib/jvm/java-1.8.0']:
+        if os.path.isdir(path):
+            JAVA_BIN_PATH = os.path.join(path, 'bin/java')
+
+    command = f'{JAVA_BIN_PATH} -mx1g -cp "{stanford_dir}/*:{stanford_dir}/lib/*" ' \
+               f'edu.stanford.nlp.ie.NERClassifierCombiner ' \
+               f'-ner.model {stanford_dir}/classifiers/english.all.3class.distsim.crf.ser.gz ' \
+               f'-outputFormat tabbedEntities -textFile {filename} > {out}'
 
     if verbose:
         debug_print('Executing command = {}'.format(command), verbose)
