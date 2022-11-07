@@ -156,13 +156,13 @@ class NER():
             # '../../Stanford-NER-Python/stanford-ner/'
             stanford_path_list = [ os.getenv('CORENLP_DATA_ROOT', '.stanford_ner'),
                 os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'stanford_ner'),
+                '../../Stanford-NER-Python/stanford-ner/',    # checked-out source tree
+                '../../../Stanford-NER-Python/stanford-ner/', # checked-out source tree
                 os.path.join(os.environ.get('HOME'), '.stanford_ner')]
             for stanford_path in stanford_path_list:
                 if os.path.isdir(stanford_path):
                     self.engine_data_dir = stanford_path
                     break
-            # XXX temporary hack
-            self.engine_data_dir = '../../Stanford-NER-Python/stanford-ner/'
             if not self.engine_data_dir:
                 logging.error('stanford_ner requested but no data directory found')
                 return
@@ -278,7 +278,7 @@ if __name__ == '__main__':
             '/ '.join([e['text'] for e in entities]))
         print('%s /FROM "%s"' % (result, input))
 
-    for engine in ['stanza', 'spacy', 'flair', 'stanford', 'stanza']:
+    for engine in ['spacy', 'flair', 'stanford', 'stanza']:
         ner_engine = NER(engine)
         if not ner_engine.isValid():
             continue
