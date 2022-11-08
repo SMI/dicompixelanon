@@ -10,3 +10,4 @@ opencv-python-headless
 easyocr
 spacy
 flair
+stanza
