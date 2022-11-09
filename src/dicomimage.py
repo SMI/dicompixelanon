@@ -191,15 +191,20 @@ class DicomImage:
         The returned image is scaled to 8-bit (but not equalised).
         XXX should raise exceptions rather than returning None.
         """
-        def equalise_np(arr):
-            """ equalise to 8-bit
+        def rescale_np(arr, invert):
+            """ Rescale a numpy array to use the full 8-bit range of pixel values.
+            Input can be 8 or 16 bit and may only use a subset of that range.
+            Also optionally inverts the pixel values (black<->white).
             """
             minval = arr.min()
             maxval = arr.max()
-            if maxval - minval > 256:
-                return ((arr.astype(np.uint16) - minval) * 255.0 / (maxval - minval)).astype(np.uint8)
+            scale = 255.0 * (maxval - minval)
+            srctype = np.uint16 if (maxval - minval > 255) else np.uint8
+            if invert:
+                arr = ((maxval - arr.astype(srctype)) * scale).astype(np.uint8)
             else:
-                return ((arr.astype(np.uint8) - minval) * 255.0 / (maxval - minval)).astype(np.uint8)
+                arr = ((arr.astype(srctype) - minval) * scale).astype(np.uint8)
+            return arr
 
         if frame > self.num_frames-1:
             logging.error('ERROR: frame %d > %d' % (frame, self.num_frames-1))
@@ -210,6 +215,8 @@ class DicomImage:
         if overlay >=0 and frame >=0 and frame > self.overlay_group_num_frames[overlay]:
             logging.error('ERROR: frame %d of overlay %d not found' % (frame, overlay))
             return None
+
+        inverted = self.get_tag('PhotometricInterpretation') == 'MONOCHROME1'
 
         if frame >= 0 and overlay < 0:
             if self.num_frames == 1:
@@ -227,7 +234,7 @@ class DicomImage:
                 else:
                     pix_extracted = (pix_extracted + 128).astype(np.uint8)
             # Equalise it before returning
-            return Image.fromarray(equalise_np(pix_extracted))
+            return Image.fromarray(rescale_np(pix_extracted, inverted))
         if overlay >= 0:
             overlay_group = self.overlay_group_list[overlay]
             # See if the overlay is stored in the high bits of the pixel data
@@ -239,11 +246,11 @@ class DicomImage:
             if overlay_bit_pos > 0:
                 pixdata = self.pixel_data
                 if pixdata.ndim == 2:
-                    return Image.fromarray(equalise_np(pixdata & (1<<overlay_bit_pos)))
+                    return Image.fromarray(rescale_np(pixdata & (1<<overlay_bit_pos), False))
                 if pixdata.ndim == 3:
-                    return Image.fromarray(equalise_np(pixdata[frame,:,:] & (1<<overlay_bit_pos)))
+                    return Image.fromarray(rescale_np(pixdata[frame,:,:] & (1<<overlay_bit_pos), False))
                 else:
-                    return Image.fromarray(equalise_np(pixdata[frame,:,:,:] & (1<<overlay_bit_pos)))
+                    return Image.fromarray(rescale_np(pixdata[frame,:,:,:] & (1<<overlay_bit_pos), False))
             # If the requested overlay group exists
             if [overlay_group, DicomImage.elem_OverlayData] in self.ds:
                 overlay_width = self.ds[overlay_group, DicomImage.elem_OverlayCols].value
@@ -258,14 +265,14 @@ class DicomImage:
             # Check for multiple frames in overlay
             overlay_num_frames = self.ds[overlay_group, DicomImage.elem_OverlayNumFrames].value if [overlay_group, DicomImage.elem_OverlayNumFrames] in self.ds else 1
             if overlay_num_frames == 1:
-                return Image.fromarray(equalise_np(overlay_data))
+                return Image.fromarray(rescale_np(overlay_data, False))
             else:
                 if overlay_data.ndim == 3:
                     # the first dimension is the frame
-                    return Image.fromarray(equalise_np(overlay_data[frame_num,:,:]))
+                    return Image.fromarray(rescale_np(overlay_data[frame_num,:,:], False))
                 else:
                     # assume the fourth dimension is RGB
-                    return Image.fromarray(equalise_np(overlay_data[frame_num,:,:,:]))
+                    return Image.fromarray(rescale_np(overlay_data[frame_num,:,:,:], False))
 
     def idx_to_tuple(self, n = -1):
         """ Sequential index into the image frames,
