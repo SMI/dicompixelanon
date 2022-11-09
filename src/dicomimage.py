@@ -191,14 +191,16 @@ class DicomImage:
         The returned image is scaled to 8-bit (but not equalised).
         XXX should raise exceptions rather than returning None.
         """
-        def rescale_np(arr, invert):
+        def rescale_np(arr, invert = False):
             """ Rescale a numpy array to use the full 8-bit range of pixel values.
             Input can be 8 or 16 bit and may only use a subset of that range.
             Also optionally inverts the pixel values (black<->white).
             """
             minval = arr.min()
             maxval = arr.max()
-            scale = 255.0 * (maxval - minval)
+            if minval == maxval:
+                return arr
+            scale = 255.0 / (maxval - minval)
             srctype = np.uint16 if (maxval - minval > 255) else np.uint8
             if invert:
                 arr = ((maxval - arr.astype(srctype)) * scale).astype(np.uint8)
