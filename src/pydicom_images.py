@@ -193,6 +193,7 @@ if __name__ == "__main__":
     parser.add_argument('-x', '--extract', action="store_true", help='extract PNG/TIFF files to input dir (or current dir)')
     parser.add_argument('-i', '--identify', action="store_true", help='identify only')
     parser.add_argument('--ocr', action='store', help='OCR using "tesseract" or "easyocr", output to stdout', default=None)
+    parser.add_argument('--csv', action="store_true", help='output CSV header when using --ocr', default=False)
     parser.add_argument('--pii', action='store', help='Check OCR output for PII using "spacy" or "flair" (add ,model if needed)', default=None)
     parser.add_argument('--rects', action="store_true", help='Output each OCR rectangle separately with coordinates', default=False)
     parser.add_argument('--no-overlays', action="store_true", help='Do not process any DICOM overlays', default=False)
@@ -225,20 +226,21 @@ if __name__ == "__main__":
                 warn('Cannot run NLP on the OCR output because %s is not installed' % pii_params[0])
                 nlp_engine = None
         # Output header for CSV format
-        csv_writer = csv.writer(sys.stdout)
-        csv_writer.writerow([
-            'filename',
-            'frame',
-            'overlay',
-            'imagetype',
-            'manufacturer',
-            'burnedinannotation',
-            'ocr_engine',
-            'left', 'top', 'right', 'bottom',
-            'ocr_text',
-            'ner_engine',
-            'is_sensitive'
-        ])
+        if args.csv:
+            csv_writer = csv.writer(sys.stdout)
+            csv_writer.writerow([
+                'filename',
+                'frame',
+                'overlay',
+                'imagetype',
+                'manufacturer',
+                'burnedinannotation',
+                'ocr_engine',
+                'left', 'top', 'right', 'bottom',
+                'ocr_text',
+                'ner_engine',
+                'is_sensitive'
+            ])
 
     # Process files
     for file in args.files:
