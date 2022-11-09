@@ -1,4 +1,10 @@
-""" Rectangle classes
+""" Rectangle classes.
+  Rect is the base class, holding only a rectangle (top, bottom, left, right).
+  It also has 'contains' methods to test if a given rectangle is inside.
+  DicomRect is a subclass which also holds frame, overlay properties.
+  It also overrides the 'contains' method to check frame,overlay match.
+  DicomOcrRect is a subclass which also holds output from OCR and NER
+  tests for PII.
 """
 
 class Rect:
@@ -42,6 +48,9 @@ class Rect:
         t,b,l,r = other_rect.get_rect()
         return self.contains(l, t) and self.contains(r, b)
 
+
+# ---------------------------------------------------------------------
+
 class DicomRect(Rect):
     """ Holds one rectangle and which image frame/overlay it applies to.
     Coordinates start at 0, top left.
@@ -73,6 +82,8 @@ class DicomRect(Rect):
         return rc
 
 
+# ---------------------------------------------------------------------
+
 def add_Rect_to_list(rectlist, addrect):
     """ Extend the given list of rectangles with the given rectangle.
     Works with Rect or DicomRect objects.
@@ -88,6 +99,9 @@ def add_Rect_to_list(rectlist, addrect):
         if rect.contains_rect(addrect):
             continue
     rectlist.append(addrect)
+
+
+# ---------------------------------------------------------------------
 
 def test_rect():
     r = Rect(1, 11, 2, 12)
