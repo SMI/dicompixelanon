@@ -31,6 +31,6 @@ for modality; do
   touch $log
 
   ./random_combinations_files.py -n 20 -F "${FILTER}" $root/extract_BIA_from_${modality}.csv_filepos.csv | \
-      xargs -n 20 ./pydicom_images.py -v --ocr ${OCR} --pii ${NER} --rects -i   >> $log
+      xargs -n 20 ./pydicom_images.py -v --ocr ${OCR} --pii ${NLP} --rects -i   >> $log
 
 done
