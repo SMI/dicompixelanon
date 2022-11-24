@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
+# Redact a DICOM image to deidentify it:
+#  * can remove the overlay planes stored in the high bits of the image data
+#  * can redact rectangles from any of the image frames or overlay frames
+
+# TODO: change all errors to raise exceptions
+# NOTE:
+#   overlays may be smaller than their images. Rectangle coordinates
+#     are within the overlay, not relative to the original image, so
+#     if you want to use image coordinates you'll need to subtract
+#     the overlay origin coordinate.
 
 import logging
+import numpy as np
+import os
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
-from dicomimage import DicomImage
 import sys
 
 logger = logging.getLogger(__name__)
@@ -73,7 +84,7 @@ def remove_overlays_in_high_bits(ds):
 
     # Sanity check that image has pixels
     if not 'PixelData' in ds:
-        logger.debug('no pixel data present')
+        logger.error('no pixel data present')
         return
 
     # bits_allocated is the physical space used, 1 or a multiple of 8.
@@ -89,9 +100,9 @@ def remove_overlays_in_high_bits(ds):
     # Instead we simply mask off everything outside the bits_stored bits.
     overlay_bitmask = 0
     for overlay_num in range(16):
-        overlay_bit = overlay_bit_position(overlay_num)
+        overlay_bit = overlay_bit_position(ds, overlay_num)
         if overlay_bit > 0:
-            logger.debug('Found overlay %d in high-bit %d' % (overlay_num, overlay_bit))
+            logger.debug('found overlay %d in high-bit %d' % (overlay_num, overlay_bit))
             overlay_bitmask |= (1 << overlay_bit)
     logger.debug('bits_stored = %d (image bits used)' % bits_stored)
     logger.debug('bits_allocated = %d (physical space needed)' % bits_allocated)
@@ -102,17 +113,17 @@ def remove_overlays_in_high_bits(ds):
     # Can only handle greyscale or palette images
     # XXX would an overlay every be present in an RGB image? Doesn't make sense?
     if photometric not in ['MONOCHROME1', 'MONOCHROME2', 'PALETTE COLOR']:
-        logger.debug('cannot remove overlays from %s' % photometric)
+        logger.error('cannot remove overlays from %s' % photometric)
         return
 
     # Can only handle 1 sample per pixel
     # XXX would an overlay be present if multiple samples per pixel? Doesn't make sense?
     if samples > 1:
-        logger.debug('cannot remove overlays from %d samples per pixel' % samples)
+        logger.error('cannot remove overlays from %d samples per pixel' % samples)
         return
 
     pixel_data = ds.pixel_array # this can raise an exception in some files
-    logger.debug('ndim = %d (should be the same as samples)' % pixel_data.ndim)
+    logger.debug('ndim = %d' % pixel_data.ndim)
 
     # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
     masked = (pixel_data & bit_mask)
@@ -130,14 +141,14 @@ def remove_overlays_in_high_bits(ds):
     return
 
 
-def redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list):
+def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
     """
     """
     # bits_allocated is the physical space used, 1 or a multiple of 8.
     # bits_stored is the number of meaningful bits within those allocated.
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
     bits_allocated = ds['BitsAllocated'].value if 'BitsAllocated' in ds else -1
-    overlay_bit = overlay_bit_position(overlay)
+    overlay_bit = overlay_bit_position(ds, overlay)
     bit_mask = ~(1 << overlay_bit)
     samples = ds['SamplesPerPixel'].value if 'SamplesPerPixel' in ds else -1
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
@@ -145,24 +156,27 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list):
     # Can only handle greyscale or palette images
     # XXX would an overlay every be present in an RGB image? Doesn't make sense?
     if photometric not in ['MONOCHROME1', 'MONOCHROME2', 'PALETTE COLOR']:
-        logger.debug('cannot remove overlays from %s' % photometric)
+        logger.error('cannot remove overlays from %s' % photometric)
         return
 
     # Can only handle 1 sample per pixel
     # XXX would an overlay be present if multiple samples per pixel? Doesn't make sense?
     if samples > 1:
-        logger.debug('cannot remove overlays from %d samples per pixel' % samples)
+        logger.error('cannot remove overlays from %d samples per pixel' % samples)
         return
 
     pixel_data = ds.pixel_array # this can raise an exception in some files
-    logger.debug('ndim = %d (should be the same as samples)' % pixel_data.ndim)
+    #logger.debug('ndim = %d' % pixel_data.ndim)
+
+    # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
+    # Can't simply &=bit_mask if dtype differs so use 1-elem array.
+    bit_mask_arr = np.array([bit_mask], dtype=pixel_data.dtype)
 
     for rect in rect_list:
         x0, y0, w, h = rect
         x1 = x0 + w
         y1 = y0 + h
-        # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
-        pixel_data[y0:y1, x0:x1] &= bit_mask
+        pixel_data[y0:y1, x0:x1] &= bit_mask_arr
 
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
@@ -170,31 +184,37 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list):
     return
 
 
-def redact_rectangles_from_image_frame(ds, frame, rect_list):
+def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
     """ Redact a list of rectangles from a specific image frame
     counting from zero.
     """
-    redacted_colour = 0
-
     samples = ds['SamplesPerPixel'].value if 'SamplesPerPixel' in ds else -1
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
     num_frames = ds['NumberOfFrames'].value if 'NumberOfFrames' in ds else 1
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
-    bit_mask = (~((~0) << bits_stored))
+    bit_mask = ((~0) << bits_stored)
+
+    if frame >= num_frames:
+        logger.error('cannot redact frame %d, max is %d' % (frame, num_frames-1))
+        return
 
     pixel_data = ds.pixel_array # this can raise an exception in some files
-    logger.debug('ndim = %d (should be the same as samples)' % pixel_data.ndim)
+    #logger.debug('ndim = %d (should be the same as samples)' % pixel_data.ndim)
+
+    # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
+    # Can't simply &=bit_mask if dtype differs so use 1-elem array.
+    bit_mask_arr = np.array([bit_mask], dtype=pixel_data.dtype)
 
     for rect in rect_list:
         x0, y0, w, h = rect
         x1 = x0 + w
         y1 = y0 + h
         if pixel_data.ndim == 2:
-            pixel_data[y0:y1, x0:x1] = redacted_colour
+            pixel_data[y0:y1, x0:x1] &= bit_mask_arr
         elif pixel_data.ndim == 3:
-            pixel_data[frame, y0:y1, x0:x1] = redacted_colour
+            pixel_data[frame, y0:y1, x0:x1] &= bit_mask_arr
         elif pixel_data.ndim == 4:
-            pixel_data[frame, :, y0:y1, x0:x1] = redacted_colour
+            pixel_data[frame, :, y0:y1, x0:x1] &= bit_mask_arr
 
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
@@ -202,14 +222,14 @@ def redact_rectangles_from_image_frame(ds, frame, rect_list):
     return
 
 
-def redact_rectangles_from_overlay_frame(ds, frame, overlay, rect_list):
+def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
     """ Redact a list of rectangles from a specific frame of an overlay.
     Frame and overlay count from zero.
     """
     redacted_colour = 0
 
     overlay_group_num = overlay_tag_group_from_index(overlay)
-    if not [overlay_group_num, DicomImage.elem_OverlayData] in ds:
+    if not [overlay_group_num, elem_OverlayData] in ds:
         logger.error('no overlay data found for overlay %d' % overlay)
         return
 
@@ -226,7 +246,7 @@ def redact_rectangles_from_overlay_frame(ds, frame, overlay, rect_list):
 
     packed_bytes = pack_bits(pixel_data)
 
-    ds[overlay_group_num, DicomImage.elem_OverlayData] = packed_bytes
+    ds[overlay_group_num, elem_OverlayData] = packed_bytes
     # XXX not sure if there's a transfer syntax for overlaydata
     return
 
@@ -245,18 +265,18 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
         return
 
     if not 'PixelData' in ds:
-        logger.debug('no pixel data present')
+        logger.error('no pixel data present')
         return
 
     if overlay == -1:
         return redact_rectangles_from_image_frame(ds, frame, rect_list)
 
     if overlay < 0 or overlay > 15:
-        logger.debug('invalid overlay requested %d' % overlay)
+        logger.error('invalid overlay requested %d' % overlay)
         return
 
-    if overlay_bit_index(ds, overlay) > 0:
-        if frame > -1:
+    if overlay_bit_position(ds, overlay) > 0:
+        if frame > 0:
             logger.error('cannot specify an overlay frame %d when overlay %d is in image high bits' % (frame, overlay))
             return
         return redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list)
@@ -274,9 +294,21 @@ if __name__ == '__main__':
     ds.save_as(filename + ".nooverlays.dcm")
 
     ds = pydicom.dcmread(filename)
-    redact_rectangle(ds, frame=0, overlay=-1, rect_list=[(100, 100, 75, 50)])
-    ds.save_as(filename + ".redactedframe.dcm")
+    #redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(10,10, 20,10)])
+    #redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(20,20, 20,10)])
+    redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(200,200, 20,10)])
+    redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(220,220, 20,10)])
+    ds.save_as(filename + ".redactedframes.dcm")
 
     ds = pydicom.dcmread(filename)
-    redact_rectangle(ds, frame=0, overlay=0, rect_list=[(100, 100, 75, 50)])
-    ds.save_as(filename + ".redactedoverlay.dcm")
+    redact_rectangles(ds, overlay=0, frame=0, rect_list=[(10,10, 20,20), (30,30, 20,10)])
+    redact_rectangles(ds, overlay=1, frame=0, rect_list=[(10,10, 20,20), (40,40, 20,10)])
+    redact_rectangles(ds, overlay=2, frame=0, rect_list=[(10,10, 20,20), (50,50, 20,10)])
+    redact_rectangles(ds, overlay=3, frame=0, rect_list=[(10,10, 20,20), (60,60, 20,10)])
+    redact_rectangles(ds, overlay=4, frame=0, rect_list=[(10,10, 20,20), (70,70, 20,10)])
+    redact_rectangles(ds, overlay=5, frame=0, rect_list=[(10,10, 20,20), (80,80, 20,10)])
+    redact_rectangles(ds, overlay=6, frame=0, rect_list=[(10,10, 20,20), (90,90, 20,10)])
+    redact_rectangles(ds, overlay=7, frame=0, rect_list=[(10,10, 20,20), (100,100, 20,10)])
+    redact_rectangles(ds, overlay=8, frame=0, rect_list=[(10,10, 20,20), (110,110, 20,10)])
+    redact_rectangles(ds, overlay=9, frame=0, rect_list=[(10,10, 20,20), (120,120, 20,10)])
+    ds.save_as(filename + ".redactedoverlays.dcm")
