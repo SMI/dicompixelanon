@@ -184,7 +184,7 @@ class DicomImage:
 
     def image(self, frame = -1, overlay = -1):
         """ Return a PIL image from the requested frame or overlay.
-        frame and overlay count from zero.
+        frame and overlay count from zero, or None if error occurs.
         If you specify both frame and overlay you get that frame
         from that overlay, it doesn't overlay the overlay onto the
         normal frame.
@@ -254,7 +254,10 @@ class DicomImage:
                 else:
                     return Image.fromarray(rescale_np(pixdata[frame,:,:,:] & (1<<overlay_bit_pos), False))
             # If the requested overlay group exists
-            if [overlay_group, DicomImage.elem_OverlayData] in self.ds:
+            if ([overlay_group, DicomImage.elem_OverlayData] in self.ds and
+                    [overlay_group, DicomImage.elem_OverlayData] in self.ds and
+                    [overlay_group, DicomImage.elem_OverlayCols] in self.ds and
+                    self.ds[overlay_group, DicomImage.elem_OverlayCols].value):
                 overlay_width = self.ds[overlay_group, DicomImage.elem_OverlayCols].value
                 overlay_height = self.ds[overlay_group, DicomImage.elem_OverlayRows].value
                 overlay_origin = self.ds[overlay_group, DicomImage.elem_OverlayOrigin].value # seems to be origin [1,1] not [0,0]
@@ -264,6 +267,8 @@ class DicomImage:
                 overlay_x = overlay_origin[0] if overlay_origin[0] else 1
                 overlay_y = overlay_origin[1] if overlay_origin[1] else 1
                 overlay_data = self.ds.overlay_array(overlay_group) # might raise an exception
+            else:
+                return None
             # Check for multiple frames in overlay
             overlay_num_frames = self.ds[overlay_group, DicomImage.elem_OverlayNumFrames].value if [overlay_group, DicomImage.elem_OverlayNumFrames] in self.ds else 1
             if overlay_num_frames == 1:
