@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.DEBUG)
 #  various compression
 filename = 'XA_GE_JPEG_02_with_Overlays.dcm'   # has high-bit overlays
 filename = 'MR-SIEMENS-DICOM-WithOverlays.dcm' # has separate overlays
+filename = 'GE_DLX-8-MONO2-Multiframe.dcm'     # has multiple frames
 
 elem_OverlayBitPosition = 0x0102
 elem_OverlayData = 0x3000
