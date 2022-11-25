@@ -127,8 +127,8 @@ def process_dicom(filename, to_save = False, output_format = 'png', ocr_engine =
     try:
         ds = pydicom.dcmread(filename)
         dicomimg = DicomImage(filename)
-    except:
-        err('ERROR reading DICOM file %s' % filename)
+    except Exception as e:
+        err('ERROR reading DICOM file %s (%s)' % (filename, e))
         return
 
     # Check that it's an image file
@@ -137,8 +137,8 @@ def process_dicom(filename, to_save = False, output_format = 'png', ocr_engine =
         return
     try:
         pixel_data = ds.pixel_array
-    except:
-        err('ERROR decoding pixel data from DICOM file %s' % filename)
+    except Exception as e:
+        err('ERROR decoding pixel data from DICOM file %s (%s)' % (filename, e))
         return
 
     # Check if we can write to same directory, otherwise use current dir
