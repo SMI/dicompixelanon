@@ -247,7 +247,7 @@ def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
 
     packed_bytes = pack_bits(pixel_data)
 
-    ds[overlay_group_num, elem_OverlayData] = packed_bytes
+    ds[overlay_group_num, elem_OverlayData].value = packed_bytes
     # XXX not sure if there's a transfer syntax for overlaydata
     return
 
