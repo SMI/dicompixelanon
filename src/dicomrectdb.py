@@ -153,11 +153,12 @@ class DicomRectDB():
     def query_rects(self, filename, frame = -1, overlay = -1):
         """ Return a list of DicomRect objects for the given filename
         by reading from the database.
-        Filtered to just the given frame and overlay, if specified.
+        Filtered to just the given frame and overlay, if specified,
+        or returns all if both frame and overlay are unspecified or -1.
         """
         rc = []
         for row in self.db(self.db.DicomRects.filename == filename).select():
-            if (row.frame == frame) and (row.overlay == overlay):
+            if ((row.frame == frame) and (row.overlay == overlay)) or (frame == -1 and overlay == -1):
                 dicomrect = DicomRect(top = row.top, bottom = row.bottom,
                     left = row.left, right = row.right,
                     frame = row.frame, overlay = row.overlay)
