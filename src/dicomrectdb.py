@@ -3,6 +3,7 @@ import getpass # for getuser
 import json
 import logging
 import os
+import sys
 from pydal import DAL, Field
 from rect import Rect, DicomRect, add_Rect_to_list
 
@@ -196,3 +197,10 @@ class DicomRectDB():
                 add_Rect_to_list(rect_list, rect)
         logging.debug('Found suggested rectangles: %s' % (rect_list))
         return rect_list
+
+
+if __name__ == '__main__':
+    if len(sys.argv)>1:
+        DicomRectDB.db_path = sys.argv[1]
+    db = DicomRectDB()
+    db.query_all()
