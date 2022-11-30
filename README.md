@@ -5,6 +5,7 @@ Anonymisation of text burned into the pixels of DICOM images.
 Contents:
 * [dcmaudit](doc/dcmaudit.md) - view DICOM images, annotate regions to redact
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
+* [redact_dicom](doc/redact_dicom.md) - redact regions from DICOM images
 * [review_SR_report](doc/review_SR_report.md) - view DICOM Structured Reports, review possible PII from IsIdentifiable report
 
 Summary of procedure:
@@ -27,9 +28,10 @@ Utilities:
 
 Some sample data is provided as part of the GDCM repo:
 
-* https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.bz2/download (corrupt)
-* https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.gz/download
-* https://sourceforge.net/projects/gdcm/files/gdcmConformanceTests/gdcmConformanceTests/gdcmConformanceTests.tar.bz2/download
+* See https://gdcm.sourceforge.net/wiki/index.php/Sample_DataSet (list of sample datasets)
+* https://sourceforge.net/projects/gdcm/files/gdcmConformanceTests/gdcmConformanceTests/gdcmConformanceTests.tar.bz2/download (gdcm Conformance tests)
+* https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.gz/download (gdcm Data)
+* https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.bz2/download (corrupt version of gdcm Data)
 
 # Requirements
 
