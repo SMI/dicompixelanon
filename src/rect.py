@@ -27,6 +27,9 @@ class Rect:
     def ltrb(self):
         return (self.left, self.top, self.right, self.bottom)
 
+    def ltwh(self):
+        return (self.left, self.top, 1 + self.right - self.left, 1 + self.bottom - self.top)
+
     def T(self):
         return self.top
     def B(self):
