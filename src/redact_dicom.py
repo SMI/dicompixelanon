@@ -361,6 +361,44 @@ def read_DicomRect_list_from_database(db_filename=None, filename=None, frame=-1,
 
 # ---------------------------------------------------------------------
 
+def decode_rect_list_string(rect_str):
+    """
+    x0,y0,x1,y1
+    x0,y0,+w,+h
+     with frame,overlay appended
+     separated by ; with optional brackets for clarity
+    eg. (10,10,30,30,0,-1);10,10,+20,+20
+    """
+    print(rect_str)
+    rect_list = []
+    rect_str = rect_str.replace('(', '')
+    rect_str = rect_str.replace(')', '')
+    rect_str = rect_str.replace(' ', '')
+    rect_arr = rect_str.split(';')
+    for rect in rect_arr:
+        frame = -1
+        overlay = -1
+        rect_elems = rect.split(',')
+        x0 = int(rect_elems[0])
+        y0 = int(rect_elems[1])
+        if '+' in rect_elems[2]:
+            x1 = int(rect_elems[2]) + x0
+        else:
+            x1 = int(rect_elems[2])
+        if '+' in rect_elems[3]:
+            y1 = int(rect_elems[3]) + y0
+        else:
+            y1 = int(rect_elems[3])
+        if len(rect_elems) > 4:
+            frame = int(rect_elems[4])
+        if len(rect_elems) > 5:
+            overlay = int(rect_elems[5])
+        dr = DicomRect(left = x0, top = y0, right = x1, bottom = y1, frame = frame, overlay = overlay)
+        rect_list.append(dr)
+    return rect_list
+
+# ---------------------------------------------------------------------
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Redact DICOM')
@@ -369,6 +407,7 @@ if __name__ == '__main__':
     parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles')
     parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM path to be redacted', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
+    parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h; ...')
     args = parser.parse_args()
 
     rect_list = []
@@ -376,6 +415,9 @@ if __name__ == '__main__':
         rect_list += read_DicomRect_list_from_database(db_filename = args.db, filename = args.dicom)
     if args.csv:
         rect_list += read_DicomRect_list_from_csv(csv_filename = args.csv, filename = args.dicom)
+    if args.rects:
+        for rect_str in args.rects:
+            rect_list += decode_rect_list_string(rect_str)
 
     if args.dicom and rect_list:
         infile = args.dicom
