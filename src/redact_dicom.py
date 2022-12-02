@@ -10,12 +10,19 @@
 #     if you want to use image coordinates you'll need to subtract
 #     the overlay origin coordinate.
 
+import argparse
 import logging
 import numpy as np
 import os
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
+from rect import DicomRect
 import sys
+try:
+    from dicomrectdb import DicomRectDB
+    dbEnabled = True
+except:
+    dbEnabled = False
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -39,6 +46,8 @@ elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
 
 
+# ---------------------------------------------------------------------
+
 def mark_as_uncompressed(ds):
     """ Call this after you've uncompressed the PixelData
     and written it back into the dataset using tobytes()
@@ -48,6 +57,8 @@ def mark_as_uncompressed(ds):
     else:
         ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRBigEndian
 
+
+# ---------------------------------------------------------------------
 
 def overlay_tag_group_from_index(overlay):
     """ Convert an overlay index 0..15 into a DICOM tag group
@@ -75,6 +86,8 @@ def overlay_bit_position(ds, overlay):
             return overlay_bit
     return 0
 
+
+# ---------------------------------------------------------------------
 
 def remove_overlays_in_high_bits(ds):
     """ Mask off the high-bits of all the pixel values
@@ -141,6 +154,8 @@ def remove_overlays_in_high_bits(ds):
     # No need to handle 2's complement Pixel Representation.
     return
 
+
+# ---------------------------------------------------------------------
 
 def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
     """
@@ -286,30 +301,114 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
     return
 
 
+# ---------------------------------------------------------------------
+
+def redact_DicomRect_rectangles(ds, dicomrect_list):
+    """ Split the list by frame/overlay and call redact_rectangles.
+    """
+    for dr in dicomrect_list:
+        print(dr)
+    frameoverlay_list = [(dr.F(), dr.O()) for dr in dicomrect_list]
+    frameoverlay_set = set(frameoverlay_list) # to get unique values
+    for (frame,overlay) in frameoverlay_set:
+        rect_list = [ (dr.L(), dr.T(), 1+dr.R()-dr.L(), 1+dr.B()-dr.T())
+            for dr in dicomrect_list if dr.F() == frame and dr.O() == overlay]
+        #print('calling redact_rectangles(%d, %d) with %s' % (frame,overlay,rect_list))
+        redact_rectangles(ds, frame=frame, overlay=overlay, rect_list=rect_list)
+
+
+# ---------------------------------------------------------------------
+
+def read_DicomRect_list_from_csv(csv_filename, filename=None, frame=-1, overlay=-1):
+    """ Read left,top,right,bottom from CSV and turn into rectangle list.
+    Ignores coordinates which are all negative -1,-1,-1,-1.
+    Can filter by filename, frame, overlay if desired.
+    Returns a list of DicomRect objects, or [].
+    """
+    rect_list = []
+    with open(csv_filename) as csv_fd:
+        csv_reader = csv.DictReader(csv_fd)
+        for row in csv_reader:
+            if filename and 'filename' in row and filename != row['filename']:
+                continue
+            if row['left'] < 0:
+                continue
+            if frame and 'frame' in row and frame != row['frame']:
+                continue
+            if overlay and 'overlay' in row and overlay != row['overlay']:
+                continue
+            rect_list.append( DicomRect(left=row['left'], top=row['top'],
+                right=row['right'], bottom=row['bottom'],
+                frame=row['frame'], overlay=row['overlay']) )
+    return rect_list
+
+
+# ---------------------------------------------------------------------
+
+def read_DicomRect_list_from_database(db_filename=None, filename=None, frame=-1, overlay=-1):
+    """ Read left,top,right,bottom from CSV and turn into rectangle list.
+    Ignores coordinates which are all negative -1,-1,-1,-1.
+    Can filter by filename, frame, overlay if desired.
+    Returns a list of DicomRect objects, or [].
+    """
+    #database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
+    if db_filename:
+        DicomRectDB.db_path = db_filename
+    db = DicomRectDB()
+    rect_list = db.query_rects(filename, frame=frame, overlay=overlay)
+    return rect_list
+
+
+# ---------------------------------------------------------------------
+
 if __name__ == '__main__':
-    if len(sys.argv)>1:
-        filename = sys.argv[1]
 
-    ds = pydicom.dcmread(filename)
-    remove_overlays_in_high_bits(ds)
-    ds.save_as(filename + ".nooverlays.dcm")
+    parser = argparse.ArgumentParser(description='Redact DICOM')
+    parser.add_argument('-v', '--verbose', action="store_true", help='Verbose')
+    parser.add_argument('--db', dest='db', action="store", help='database path to read rectangles')
+    parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles')
+    parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM path to be redacted', default=None)
+    parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
+    args = parser.parse_args()
 
-    ds = pydicom.dcmread(filename)
+    rect_list = []
+    if args.db:
+        rect_list += read_DicomRect_list_from_database(db_filename = args.db, filename = args.dicom)
+    if args.csv:
+        rect_list += read_DicomRect_list_from_csv(csv_filename = args.csv, filename = args.dicom)
+
+    if args.dicom and rect_list:
+        infile = args.dicom
+        outfile = os.path.basename(infile) + ".redacted.dcm"
+        ds = pydicom.dcmread(infile)
+        redact_DicomRect_rectangles(ds, rect_list)
+        ds.save_as(outfile)
+        sys.exit(0)
+
+    if args.dicom and args.remove_high_bit_overlays:
+        infile = args.dicom
+        outfile = os.path.basename(infile) + ".nooverlays.dcm"
+        ds = pydicom.dcmread(infile)
+        remove_overlays_in_high_bits(ds)
+        ds.save_as(outfile)
+        sys.exit(0)
+
+    #ds = pydicom.dcmread(filename)
     #redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(10,10, 20,10)])
     #redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(20,20, 20,10)])
-    redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(200,200, 20,10)])
-    redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(220,220, 20,10)])
-    ds.save_as(filename + ".redactedframes.dcm")
+    #redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(200,200, 20,10)])
+    #redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(220,220, 20,10)])
+    #ds.save_as(filename + ".redactedframes.dcm")
 
-    ds = pydicom.dcmread(filename)
-    redact_rectangles(ds, overlay=0, frame=0, rect_list=[(10,10, 20,20), (30,30, 20,10)])
-    redact_rectangles(ds, overlay=1, frame=0, rect_list=[(10,10, 20,20), (40,40, 20,10)])
-    redact_rectangles(ds, overlay=2, frame=0, rect_list=[(10,10, 20,20), (50,50, 20,10)])
-    redact_rectangles(ds, overlay=3, frame=0, rect_list=[(10,10, 20,20), (60,60, 20,10)])
-    redact_rectangles(ds, overlay=4, frame=0, rect_list=[(10,10, 20,20), (70,70, 20,10)])
-    redact_rectangles(ds, overlay=5, frame=0, rect_list=[(10,10, 20,20), (80,80, 20,10)])
-    redact_rectangles(ds, overlay=6, frame=0, rect_list=[(10,10, 20,20), (90,90, 20,10)])
-    redact_rectangles(ds, overlay=7, frame=0, rect_list=[(10,10, 20,20), (100,100, 20,10)])
-    redact_rectangles(ds, overlay=8, frame=0, rect_list=[(10,10, 20,20), (110,110, 20,10)])
-    redact_rectangles(ds, overlay=9, frame=0, rect_list=[(10,10, 20,20), (120,120, 20,10)])
-    ds.save_as(filename + ".redactedoverlays.dcm")
+    #ds = pydicom.dcmread(filename)
+    #redact_rectangles(ds, overlay=0, frame=0, rect_list=[(10,10, 20,20), (30,30, 20,10)])
+    #redact_rectangles(ds, overlay=1, frame=0, rect_list=[(10,10, 20,20), (40,40, 20,10)])
+    #redact_rectangles(ds, overlay=2, frame=0, rect_list=[(10,10, 20,20), (50,50, 20,10)])
+    #redact_rectangles(ds, overlay=3, frame=0, rect_list=[(10,10, 20,20), (60,60, 20,10)])
+    #redact_rectangles(ds, overlay=4, frame=0, rect_list=[(10,10, 20,20), (70,70, 20,10)])
+    #redact_rectangles(ds, overlay=5, frame=0, rect_list=[(10,10, 20,20), (80,80, 20,10)])
+    #redact_rectangles(ds, overlay=6, frame=0, rect_list=[(10,10, 20,20), (90,90, 20,10)])
+    #redact_rectangles(ds, overlay=7, frame=0, rect_list=[(10,10, 20,20), (100,100, 20,10)])
+    #redact_rectangles(ds, overlay=8, frame=0, rect_list=[(10,10, 20,20), (110,110, 20,10)])
+    #redact_rectangles(ds, overlay=9, frame=0, rect_list=[(10,10, 20,20), (120,120, 20,10)])
+    #ds.save_as(filename + ".redactedoverlays.dcm")
