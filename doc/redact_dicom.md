@@ -34,3 +34,31 @@ may increase. Some other redaction tools have the ability to preserve
 most of a lossy-JPEG-compressed image except for the redacted blocks,
 but those tools do not handle overlays at all. Compression, and lossy
 compression support can of course be added to this tool later.
+
+## Usage:
+
+```
+  -v, --verbose         Verbose
+  --db DB               database path to read rectangles
+  --csv CSV             CSV path to read rectangles
+  --dicom DICOM         DICOM path to be redacted
+  --remove-high-bit-overlays
+                        remove overlays in high-bits of image pixels
+  -r [RECTS ...], --rect [RECTS ...]
+                        rectangles x0,y0,x1,y1 or x0,y0,+w,+h; ...
+```
+
+Use `--db` to read rectangles from a database, e.g. from `dcmaudit`,
+or `--csv` to read rectangles from a CSV file, e.g. from `pydicom_images`,
+or specify the rectangles directly with `--rect`. In all cases
+specify `--dicom` to find only that path in the database/CSV.
+
+The `--rect` option can have multiple rectangle arguments after it
+(if it's specified last on the command line) or you can specify multiple
+rectangles in a single argument by separating them with a semicolon.
+The format is either `x0,y0,x1,y1` (left,top,right,bottom) or
+`x0,y0,+w,+h` (left,top and width,height). Brackets around the whole
+set are optional. Example: `(10,10,20,20);(30,30,+10,+10)`
+
+If you only want to remove high-bit overlays (not redact rectangles),
+then only use the `--remove-high-bit-overlays` and `--dicom` options.
