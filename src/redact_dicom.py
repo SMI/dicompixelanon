@@ -343,17 +343,19 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
                 continue
             # Ignore entries which don't have a valid rectangle
             # (these will be OCR summaries for the whole frame)
-            if row['left'] < 0:
+            (row_left, row_top, row_right, row_bottom) = (int(row['left']), int(row['top']), int(row['right']), int(row['bottom']))
+            (row_frame, row_overlay) = (int(row.get('frame', -1)), int(row.get('overlay', -1)))
+            if row_left < 0:
                 continue
             # If a frame has been given then ignore any other frames
-            if (frame != -1) and ('frame' in row) and (frame != row['frame']):
+            if (frame != -1) and (frame != row_frame):
                 continue
             # If an overlay has been given then ignore any other overlays
-            if (overlay != -1) and ('overlay' in row) and (overlay != row['overlay']):
+            if (overlay != -1) and (overlay != row_overlay):
                 continue
-            dicomrect = DicomRect(left=row['left'], top=row['top'],
-                right=row['right'], bottom=row['bottom'],
-                frame=row['frame'], overlay=row['overlay'])
+            dicomrect = DicomRect(left=row_left, top=row_top,
+                right=row_right, bottom=row_bottom,
+                frame=row_frame, overlay=row_overlay)
             if row['filename'] in dicom_rectlist:
                 dicom_rectlist[row['filename']].append( dicomrect )
             else:
@@ -494,8 +496,8 @@ if __name__ == '__main__':
 
     # Redact 
     for infilename in rect_list_map.keys():
-        rect_list = rect_list_map[filename]
+        rect_list = rect_list_map[infilename]
         outfilename = create_output_filename(infilename)
-        ds = pydicom.dcmread(infile)
+        ds = pydicom.dcmread(infilename)
         redact_DicomRect_rectangles(ds, rect_list)
         ds.save_as(outfilename)
