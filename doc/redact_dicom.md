@@ -50,8 +50,26 @@ compression support can of course be added to this tool later.
 
 Use `--db` to read rectangles from a database, e.g. from `dcmaudit`,
 or `--csv` to read rectangles from a CSV file, e.g. from `pydicom_images`,
-or specify the rectangles directly with `--rect`. In all cases
-specify `--dicom` to find only that path in the database/CSV.
+or specify the rectangles directly with `--rect`. In all cases you can
+specify `--dicom` to find only that path in the database/CSV. If reading
+from a CSV and no DICOM has been specified then all filenames listed in
+the CSV will be redacted.
+
+The CSV file is expected to have (at least) these columns, in any order:
+```
+filename,frame,overlay,left,top,right,bottom
+```
+Other columns in the CSV file are ignored.
+
+The database is currently in sqlite format, with a table called
+`DicomRects` having columns with the same names as for CSV files above.
+Other columns and tables in the database are ignored.
+
+The output filename will be the input filename plus `.redacted.dcm`
+and will be written to the same directory as the input, unless that is
+not writable in which case it will be the current directory.
+
+## Rectangles
 
 The `--rect` option can have multiple rectangle arguments after it
 (if it's specified last on the command line) or you can specify multiple
@@ -60,5 +78,9 @@ The format is either `x0,y0,x1,y1` (left,top,right,bottom) or
 `x0,y0,+w,+h` (left,top and width,height). Brackets around the whole
 set are optional. Example: `(10,10,20,20);(30,30,+10,+10)`
 
+## Removing only the high-bit overlays
+
 If you only want to remove high-bit overlays (not redact rectangles),
 then only use the `--remove-high-bit-overlays` and `--dicom` options.
+This may be useful when you've already asked CTP to remove the overlay
+tags and just want to clear out the high bits of the pixel data.
