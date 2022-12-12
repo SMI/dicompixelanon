@@ -10,6 +10,7 @@
 #     if you want to use image coordinates you'll need to subtract
 #     the overlay origin coordinate.
 
+import csv
 import argparse
 import logging
 import numpy as np
@@ -158,8 +159,11 @@ def remove_overlays_in_high_bits(ds):
 # ---------------------------------------------------------------------
 
 def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
+    """ Redact a list of rectangles (x0,y0,w,h) from the given overlay
+    which is stored in the high bits of the image data, by setting the
+    enclosed bits to zero.
     """
-    """
+
     # bits_allocated is the physical space used, 1 or a multiple of 8.
     # bits_stored is the number of meaningful bits within those allocated.
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
@@ -201,9 +205,10 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
 
 
 def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
-    """ Redact a list of rectangles from a specific image frame
+    """ Redact a list of rectangles (x0,y0,w,h) from a specific image frame,
     counting from zero.
     """
+
     samples = ds['SamplesPerPixel'].value if 'SamplesPerPixel' in ds else -1
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
     num_frames = ds['NumberOfFrames'].value if 'NumberOfFrames' in ds else 1
@@ -242,6 +247,7 @@ def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
     """ Redact a list of rectangles from a specific frame of an overlay.
     Frame and overlay count from zero.
     """
+
     redacted_colour = 0
 
     overlay_group_num = overlay_tag_group_from_index(overlay)
@@ -278,27 +284,26 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 
     if not rect_list:
         logger.debug('no rectangles to redact')
-        return
+        return None
 
     if not 'PixelData' in ds:
         logger.error('no pixel data present')
-        return
+        return None
 
     if overlay == -1:
         return redact_rectangles_from_image_frame(ds, frame, rect_list)
 
     if overlay < 0 or overlay > 15:
         logger.error('invalid overlay requested %d' % overlay)
-        return
+        return None
 
     if overlay_bit_position(ds, overlay) > 0:
         if frame > 0:
             logger.error('cannot specify an overlay frame %d when overlay %d is in image high bits' % (frame, overlay))
-            return
+            return None
         return redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list)
     else:
         return redact_rectangles_from_overlay_frame(ds, frame, overlay, rect_list)
-    return
 
 
 # ---------------------------------------------------------------------
@@ -319,28 +324,41 @@ def redact_DicomRect_rectangles(ds, dicomrect_list):
 
 # ---------------------------------------------------------------------
 
-def read_DicomRect_list_from_csv(csv_filename, filename=None, frame=-1, overlay=-1):
+def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overlay=-1):
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
     Can filter by filename, frame, overlay if desired.
-    Returns a list of DicomRect objects, or [].
+    Returns a map of filenames, where each filename entry is
+    a list of DicomRect objects, or [].
+    If you asked for an explicit filename it will be the only entry in the map.
+    e.g.
+    mapping['filename1'] = [ DicomRect(..), DicomRect(..) ]
     """
-    rect_list = []
+    dicom_rectlist = {}
     with open(csv_filename) as csv_fd:
         csv_reader = csv.DictReader(csv_fd)
         for row in csv_reader:
-            if filename and 'filename' in row and filename != row['filename']:
+            # If a filename has been given then ignore any other files
+            if filename and ('filename' in row) and (filename != row['filename']):
                 continue
+            # Ignore entries which don't have a valid rectangle
+            # (these will be OCR summaries for the whole frame)
             if row['left'] < 0:
                 continue
-            if frame and 'frame' in row and frame != row['frame']:
+            # If a frame has been given then ignore any other frames
+            if (frame != -1) and ('frame' in row) and (frame != row['frame']):
                 continue
-            if overlay and 'overlay' in row and overlay != row['overlay']:
+            # If an overlay has been given then ignore any other overlays
+            if (overlay != -1) and ('overlay' in row) and (overlay != row['overlay']):
                 continue
-            rect_list.append( DicomRect(left=row['left'], top=row['top'],
+            dicomrect = DicomRect(left=row['left'], top=row['top'],
                 right=row['right'], bottom=row['bottom'],
-                frame=row['frame'], overlay=row['overlay']) )
-    return rect_list
+                frame=row['frame'], overlay=row['overlay'])
+            if row['filename'] in dicom_rectlist:
+                dicom_rectlist[row['filename']].append( dicomrect )
+            else:
+                dicom_rectlist[row['filename']] = [ dicomrect ]
+    return dicom_rectlist
 
 
 # ---------------------------------------------------------------------
@@ -399,6 +417,30 @@ def decode_rect_list_string(rect_str):
 
 # ---------------------------------------------------------------------
 
+def is_directory_writable(dirname):
+    """ Test if a directory is writable by trying to write a file
+    """
+    tmpfile = os.path.join(dirname, 'tmp.XXX')
+    try:
+        with open(tmpfile, 'w') as fd:
+            pass
+        os.remove(tmpfile)
+        return True
+    except:
+        return False
+
+
+def create_output_filename(infilename):
+    """ Output filename is same as infilename but
+    with .dcm extension removed and .redacted.dcm added,
+    and in current directory if the original directory is read-only
+    """
+    dirname = os.path.dirname(infilename)
+    if not is_directory_writable(dirname):
+        dirname = '.'
+    return os.path.join(dirname, os.path.basename(infilename).replace('.dcm', '') + '.redacted.dcm')
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Redact DICOM')
@@ -407,27 +449,19 @@ if __name__ == '__main__':
     parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles')
     parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM path to be redacted', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
-    parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h; ...')
+    parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
     args = parser.parse_args()
 
-    rect_list = []
-    if args.db:
-        rect_list += read_DicomRect_list_from_database(db_filename = args.db, filename = args.dicom)
-    if args.csv:
-        rect_list += read_DicomRect_list_from_csv(csv_filename = args.csv, filename = args.dicom)
-    if args.rects:
-        for rect_str in args.rects:
-            rect_list += decode_rect_list_string(rect_str)
+    # Will be a map from filename to a list of DicomRect
+    rect_list_map = {}
+    if args.dicom:
+        rect_list_map[args.dicom] = []
 
-    if args.dicom and rect_list:
-        infile = args.dicom
-        outfile = os.path.basename(infile) + ".redacted.dcm"
-        ds = pydicom.dcmread(infile)
-        redact_DicomRect_rectangles(ds, rect_list)
-        ds.save_as(outfile)
-        sys.exit(0)
-
+    # If we only want to remove the high bit overlays
     if args.dicom and args.remove_high_bit_overlays:
+        if args.rects:
+            logger.error('Sorry, cannot redact rectangles at the same time as removing high bit overlays (yet)')
+            sys.exit(2)
         infile = args.dicom
         outfile = os.path.basename(infile) + ".nooverlays.dcm"
         ds = pydicom.dcmread(infile)
@@ -435,22 +469,33 @@ if __name__ == '__main__':
         ds.save_as(outfile)
         sys.exit(0)
 
-    #ds = pydicom.dcmread(filename)
-    #redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(10,10, 20,10)])
-    #redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(20,20, 20,10)])
-    #redact_rectangles(ds, frame=0, overlay=-1, rect_list=[(200,200, 20,10)])
-    #redact_rectangles(ds, frame=1, overlay=-1, rect_list=[(220,220, 20,10)])
-    #ds.save_as(filename + ".redactedframes.dcm")
+    # If given a list of rectangles explicitly then it must be for a given filename
+    if args.rects:
+        if not args.dicom:
+            logger.error('Must specify a DICOM file to go with the rectangles')
+            sys.exit(1)
+        for rect_str in args.rects:
+            rect_list_map[args.dicom] += decode_rect_list_string(rect_str)
 
-    #ds = pydicom.dcmread(filename)
-    #redact_rectangles(ds, overlay=0, frame=0, rect_list=[(10,10, 20,20), (30,30, 20,10)])
-    #redact_rectangles(ds, overlay=1, frame=0, rect_list=[(10,10, 20,20), (40,40, 20,10)])
-    #redact_rectangles(ds, overlay=2, frame=0, rect_list=[(10,10, 20,20), (50,50, 20,10)])
-    #redact_rectangles(ds, overlay=3, frame=0, rect_list=[(10,10, 20,20), (60,60, 20,10)])
-    #redact_rectangles(ds, overlay=4, frame=0, rect_list=[(10,10, 20,20), (70,70, 20,10)])
-    #redact_rectangles(ds, overlay=5, frame=0, rect_list=[(10,10, 20,20), (80,80, 20,10)])
-    #redact_rectangles(ds, overlay=6, frame=0, rect_list=[(10,10, 20,20), (90,90, 20,10)])
-    #redact_rectangles(ds, overlay=7, frame=0, rect_list=[(10,10, 20,20), (100,100, 20,10)])
-    #redact_rectangles(ds, overlay=8, frame=0, rect_list=[(10,10, 20,20), (110,110, 20,10)])
-    #redact_rectangles(ds, overlay=9, frame=0, rect_list=[(10,10, 20,20), (120,120, 20,10)])
-    #ds.save_as(filename + ".redactedoverlays.dcm")
+    # If given a database then we need a filename to search for
+    if args.db:
+        if not args.dicom:
+            logger.error('Must specify a DICOM file to find in the database')
+            sys.exit(1)
+        rect_list_map[args.dicom] += read_DicomRect_list_from_database(db_filename = args.db, filename = args.dicom)
+
+    # If given a CSV file then we can process every DICOM in the file
+    # or just the single filename provided
+    if args.csv:
+        if args.dicom:
+            rect_list_map = read_DicomRect_listmap_from_csv(csv_filename = args.csv, filename = args.dicom)
+        else:
+            rect_list_map = read_DicomRect_listmap_from_csv(csv_filename = args.csv)
+
+    # Redact 
+    for infilename in rect_list_map.keys():
+        rect_list = rect_list_map[filename]
+        outfilename = create_output_filename(infilename)
+        ds = pydicom.dcmread(infile)
+        redact_DicomRect_rectangles(ds, rect_list)
+        ds.save_as(outfilename)
