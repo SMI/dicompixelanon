@@ -6,26 +6,32 @@
 # could OCR many files at once in which case we would have to generate output filenames.
 # XXX need to implement an allowlist for safe words found by OCR, e.g. "AP ERECT"
 
+# Options
 input="$1"
 output="$2"
 
+# Configuration
+ocr_tool="easyocr"
+
 export PATH=${PATH}:. # temporary for testing from current directory
 
-csv=tmp.$$
+# Temporary files
+tmpdir="/tmp/dicom_pixel_anon.$$"
+mkdir -p "${tmpdir}"
+csv="${tmpdir}/rects.csv"
+dbdir="${tmpdir}"
 
 # exit straight away if any commands fail
 set -e
 
-# Cannot redact the input file directly so copy it first
-cp "$input" "$output"
-
 # Get a list of all rectangles
-pydicom_images.py --no-overlays --csv --rects --ocr easyocr $input > $csv
+#pydicom_images.py --no-overlays --csv --rects --ocr easyocr $input > $csv
+pydicom_images.py --csv --rects --ocr "${ocr_tool}" "${input}"  >  "${csv}"
 
 # Convert the CSV into the database (not yet implemented into the previous step)
-dicomrect_csv_to_db.py --csv $csv
+dicomrect_csv_to_db.py --csv "${csv}" --db "${dbdir}"
 
 # Redact by reading the database
-redact_dicom.py --db --dicom $output
+redact_dicom.py --db "${dbdir}" --dicom "${input}" --output "${output}"
 
-rm -f $csv
+rm -fr "${tmpdir}"
