@@ -365,15 +365,15 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
 
 # ---------------------------------------------------------------------
 
-def read_DicomRect_list_from_database(db_filename=None, filename=None, frame=-1, overlay=-1):
+def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, overlay=-1):
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
     Can filter by filename, frame, overlay if desired.
     Returns a list of DicomRect objects, or [].
     """
     #database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
-    if db_filename:
-        DicomRectDB.db_path = db_filename
+    if db_dir:
+        DicomRectDB.db_path = db_dir
     db = DicomRectDB()
     rect_list = db.query_rects(filename, frame=frame, overlay=overlay)
     return rect_list
@@ -432,24 +432,35 @@ def is_directory_writable(dirname):
         return False
 
 
-def create_output_filename(infilename):
-    """ Output filename is same as infilename but
-    with .dcm extension removed and .redacted.dcm added,
-    and in current directory if the original directory is read-only
+def create_output_filename(infilename, outfilename = None):
+    """ Return a suitable output filename given an input filename
+    and an optional output file name or directory.
+    If outfilename is specified (and is not a directory) then use it.
+    If outfilename is specified and is a directory then use
+    that directory.
+    If outfilename is not specified then use the the same directory
+    as the input unless it's read-only in which case use current dir.
+    Output filename (if not specified) will be the infilename but
+    with .dcm extension removed and .redacted.dcm added.
     """
+    infile = os.path.basename(infilename)
+    if outfilename:
+        if is_directory_writable(outfilename):
+            return os.path.join(outfilename, infile.replace('.dcm', '') + '.redacted.dcm')
     dirname = os.path.dirname(infilename)
     if not is_directory_writable(dirname):
         dirname = '.'
-    return os.path.join(dirname, os.path.basename(infilename).replace('.dcm', '') + '.redacted.dcm')
+    return os.path.join(dirname, infile.replace('.dcm', '') + '.redacted.dcm')
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Redact DICOM')
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose')
-    parser.add_argument('--db', dest='db', action="store", help='database path to read rectangles')
-    parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles')
-    parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM path to be redacted', default=None)
+    parser.add_argument('--db', dest='db', action="store", help='database directory to read rectangles (needs --dicom)')
+    parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
+    parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM filename to be redacted', default=None)
+    parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
     parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
     args = parser.parse_args()
@@ -484,7 +495,7 @@ if __name__ == '__main__':
         if not args.dicom:
             logger.error('Must specify a DICOM file to find in the database')
             sys.exit(1)
-        rect_list_map[args.dicom] += read_DicomRect_list_from_database(db_filename = args.db, filename = args.dicom)
+        rect_list_map[args.dicom] += read_DicomRect_list_from_database(db_dir = args.db, filename = args.dicom)
 
     # If given a CSV file then we can process every DICOM in the file
     # or just the single filename provided
@@ -497,7 +508,7 @@ if __name__ == '__main__':
     # Redact 
     for infilename in rect_list_map.keys():
         rect_list = rect_list_map[infilename]
-        outfilename = create_output_filename(infilename)
+        outfilename = create_output_filename(infilename, args.output)
         ds = pydicom.dcmread(infilename)
         redact_DicomRect_rectangles(ds, rect_list)
         ds.save_as(outfilename)
