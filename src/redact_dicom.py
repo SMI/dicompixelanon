@@ -447,6 +447,8 @@ def create_output_filename(infilename, outfilename = None):
     if outfilename:
         if is_directory_writable(outfilename):
             return os.path.join(outfilename, infile.replace('.dcm', '') + '.redacted.dcm')
+        else:
+            return outfilename
     dirname = os.path.dirname(infilename)
     if not is_directory_writable(dirname):
         dirname = '.'
