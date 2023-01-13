@@ -1,6 +1,6 @@
-# Redact DICOM images
+# Redact regions in DICOM images
 
-The `redact_dicom.py` tool can redact (blank out) rectangular regions
+The `dicom_redact.py` tool can redact (blank out) rectangular regions
 from images in DICOM files. Unlike most redaction software, it can
 target specific image frames, or overlays, or frames of overlays, and
 it doesn't require overlays to be burned onto the main image.

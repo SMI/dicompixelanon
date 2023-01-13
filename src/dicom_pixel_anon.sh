@@ -32,6 +32,6 @@ pydicom_images.py --csv --rects --ocr "${ocr_tool}" "${input}"  >  "${csv}"
 dicomrect_csv_to_db.py --csv "${csv}" --db "${dbdir}"
 
 # Redact by reading the database
-redact_dicom.py --db "${dbdir}" --dicom "${input}" --output "${output}"
+dicom_redact.py --db "${dbdir}" --dicom "${input}" --output "${output}"
 
 rm -fr "${tmpdir}"
