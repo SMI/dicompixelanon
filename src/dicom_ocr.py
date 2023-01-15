@@ -197,6 +197,7 @@ if __name__ == "__main__":
     parser.add_argument('--pii', action='store', help='Check OCR output for PII using "spacy" or "flair" or "stanford" or "stanza" (add ,model if needed)', default=None)
     parser.add_argument('--rects', action="store_true", help='Output each OCR rectangle separately with coordinates', default=False)
     parser.add_argument('--no-overlays', action="store_true", help='Do not process any DICOM overlays', default=False)
+    parser.add_argument('--review', action="store_true", help='Ignore database and perform OCR again', default=False)
     parser.add_argument('files', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
@@ -255,7 +256,17 @@ if __name__ == "__main__":
 
     # Process files
     for file in args.files:
+        # If already in database then ignore
+        if db_writer and not args.review:
+            if db_writer.query_rects(file):
+                break
+        # Find full path if given relative to PACS_ROOT
         file = find_file(file)
+        # Test database again with full pathname
+        if db_writer and not args.review:
+            if db_writer.query_rects(file):
+                break
+        # Run the OCR
         process_dicom(file, ocr_engine = ocr_engine, nlp_engine = nlp_engine,
             output_rects = args.rects, ignore_overlays = args.no_overlays,
             csv_writer = csv_writer, db_writer = db_writer)
