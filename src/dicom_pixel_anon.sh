@@ -24,12 +24,10 @@ dbdir="${tmpdir}"
 # exit straight away if any commands fail
 set -e
 
-# Get a list of all rectangles
+# Get a list of all rectangles into the database
 #pydicom_images.py --no-overlays --csv --rects --ocr easyocr $input > $csv
-pydicom_images.py --csv --rects --ocr "${ocr_tool}" "${input}"  >  "${csv}"
-
-# Convert the CSV into the database (not yet implemented into the previous step)
-dicomrect_csv_to_db.py --csv "${csv}" --db "${dbdir}"
+#pydicom_images.py --csv --rects --ocr "${ocr_tool}" "${input}"  >  "${csv}"
+dicom_ocr.py --db "${dbdir}" --review --rects "${input}"
 
 # Redact by reading the database
 dicom_redact.py --db "${dbdir}" --dicom "${input}" --output "${output}"
