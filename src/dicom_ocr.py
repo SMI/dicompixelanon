@@ -15,7 +15,7 @@ from ocrengine import OCR
 from nerengine import NER
 from dicomimage import DicomImage
 from dicomrectdb import DicomRectDB
-from rect import Rect
+from rect import Rect, DicomRect
 
 
 # Reporting functions
@@ -96,9 +96,10 @@ def process_image(img, filename = None,
             if item['conf'] > OCR.confidence_threshold:
                 ocr_text += item['text'] + ' '
                 is_sensitive = check_for_pii(nlp_engine, item['text'])
-                ocr_rectlist.append( (item['rect'], item['text']) )
+                ocr_rectlist.append( (item['rect'], item['text'], is_sensitive) )
         # Now append the whole string with a null rectangle
-        ocr_rectlist.append( (Rect(), ocr_text, check_for_pii(ocr_text)) )
+        is_sensitive = check_for_pii(nlp_engine, ocr_text)
+        ocr_rectlist.append( (Rect(), ocr_text, is_sensitive) )
     else:
         ocr_text = ocr_engine.image_to_text(img)
         is_sensitive = check_for_pii(nlp_engine, item['text'])
