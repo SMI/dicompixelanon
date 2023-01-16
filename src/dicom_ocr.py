@@ -259,13 +259,13 @@ if __name__ == "__main__":
         # If already in database then ignore
         if db_writer and not args.review:
             if db_writer.query_rects(file):
-                break
+                continue
         # Find full path if given relative to PACS_ROOT
         file = find_file(file)
         # Test database again with full pathname
         if db_writer and not args.review:
             if db_writer.query_rects(file):
-                break
+                continue
         # Run the OCR
         process_dicom(file, ocr_engine = ocr_engine, nlp_engine = nlp_engine,
             output_rects = args.rects, ignore_overlays = args.no_overlays,
