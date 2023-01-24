@@ -95,7 +95,7 @@ and copy it to `$SMI_ROOT/data/tessdata`
 
 ## flair
 
-Download the file `pytorch_model.bin` from https://huggingface.co/flair/ner-english, copy it to `$SMI_ROOT/data/flair/models/ner-english/` and make a symlink from `4f4cdab26f24cb98b732b389e6cebc646c36f54cfd6e0b7d3b90b25656e4262f`
+Download the file `pytorch_model.bin` from https://huggingface.co/flair/ner-english, copy it to `$SMI_ROOT/data/flair/models/ner-english/` and make a symlink from `4f4cdab26f24cb98b732b389e6cebc646c36f54cfd6e0b7d3b90b25656e4262f` or `4f4cdab26f24cb98b732b389e6cebc646c36f54cfd6e0b7d3b90b25656e4262f.8baa8ae8795f4df80b28e7f7b61d788ecbb057d1dc85aacb316f1bd02837a4a4`
 
 ## stanford
 
