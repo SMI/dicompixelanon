@@ -39,9 +39,10 @@ compression support can of course be added to this tool later.
 
 ```
   -v, --verbose         Verbose
-  --db DB               database path to read rectangles
-  --csv CSV             CSV path to read rectangles
+  --db DB               database directory to read rectangles (needs --dicom)
+  --csv CSV             CSV path to read rectangles (redacts all files in csv if --dicom not used)
   --dicom DICOM         DICOM path to be redacted
+  -o OUTPUT, --output O Output DICOM dir or filename (created automatically if not specified)
   --remove-high-bit-overlays
                         remove overlays in high-bits of image pixels
   -r [RECTS ...], --rect [RECTS ...]
@@ -61,13 +62,17 @@ filename,frame,overlay,left,top,right,bottom
 ```
 Other columns in the CSV file are ignored.
 
-The database is currently in sqlite format, with a table called
-`DicomRects` having columns with the same names as for CSV files above.
+The database directory is typically `$SMI_ROOT/data/dicompixelanon` and the
+filename is `dcmaudit.sqlite.db` as it is currently in sqlite format.
+The database has a table called `DicomRects` having columns with
+the same names as for CSV files above.
 Other columns and tables in the database are ignored.
 
-The output filename will be the input filename plus `.redacted.dcm`
-and will be written to the same directory as the input, unless that is
-not writable in which case it will be the current directory.
+The output filename can be specified for a single input file.
+If not specified then the output filename is the same as the input
+filename but with `.dcm` removed and `.redacted.dcm` appended.
+If that directory is not writable then the current directory is used.
+The `--output` option can also refer to a directory.
 
 ## Rectangles
 

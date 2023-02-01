@@ -7,6 +7,7 @@ Contents:
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 * [dicom_ocr](doc/dicom_ocr.md) - run OCR on the images and overlays in one or more DICOM files
 * [dicom_redact](doc/dicom_redact.md) - redact regions from DICOM images
+* [dicom_pixel_anon](doc/dicom_pixel_anon.md) - run OCR and redact regions from DICOM images
 * [review_SR_report](doc/review_SR_report.md) - view DICOM Structured Reports, review possible PII from IsIdentifiable report
 
 Summary of procedure:
