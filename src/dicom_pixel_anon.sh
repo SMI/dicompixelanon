@@ -1,35 +1,53 @@
 #!/bin/bash
 # Run OCR on a DICOM file, save the rectangles to a database, then
 # produce a redacted DICOM file by redacting the rectangles from the database.
-# Usage: input.dcm output.dcm
-# XXX the startup time for pydicom_images is long so it would be better if we
-# could OCR many files at once in which case we would have to generate output filenames.
+# Usage: -o output input...
 # XXX need to implement an allowlist for safe words found by OCR, e.g. "AP ERECT"
 
 # Options
-input="$1"
-output="$2"
-
-# Configuration
+output=""
+dbdir=""
+options="o:D:"
+usage="usage: $0 [-D db dir] -o output  input..."
+# Configuration, choose which OCR algorithm
 ocr_tool="easyocr"
 
-export PATH=${PATH}:. # temporary for testing from current directory
+while getopts "$options" var; do
+    case $var in
+        o) output="$OPTARG";;
+        D) dbdir="$OPTARG";;
+        ?) echo "$usage"; exit 1;;
+	esac
+done
+shift $(($OPTIND - 1))
+if [ "$output" == "" ]; then
+	echo "$usage - the -o option is mandatory" >&2
+	exit 1
+fi
+
+# Temporary! PATH for testing from current directory
+export PATH=${PATH}:.
 
 # Temporary files
 tmpdir="/tmp/dicom_pixel_anon.$$"
 mkdir -p "${tmpdir}"
 csv="${tmpdir}/rects.csv"
-dbdir="${tmpdir}"
+if [ "$dbdir" == "" ]; then
+    dbdir="${tmpdir}"
+fi
 
 # exit straight away if any commands fail
 set -e
 
 # Get a list of all rectangles into the database
-#pydicom_images.py --no-overlays --csv --rects --ocr easyocr $input > $csv
-#pydicom_images.py --csv --rects --ocr "${ocr_tool}" "${input}"  >  "${csv}"
-dicom_ocr.py --db "${dbdir}" --review --rects "${input}"
+echo "Running OCR on $@"
+dicom_ocr.py --db "${dbdir}" --review --rects "$@"
 
 # Redact by reading the database
-dicom_redact.py --db "${dbdir}" --dicom "${input}" --output "${output}"
+for input in "$@"; do
+	echo "Redacting $input"
+    dicom_redact.py --db "${dbdir}" --dicom "${input}" --output "${output}"
+done
 
 rm -fr "${tmpdir}"
+exit 0
