@@ -26,7 +26,6 @@ except:
     dbEnabled = False
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 # Need examples of:
 #  high-bit overlays (and multiple of them)
@@ -472,6 +471,9 @@ if __name__ == '__main__':
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
     parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
     args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
     # Will be a map from filename to a list of DicomRect
     rect_list_map = {}
