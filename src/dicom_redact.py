@@ -109,7 +109,7 @@ def remove_overlays_in_high_bits(ds):
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
 
     # Calculate bit mask to keep only the bits in use not the overlays
-    bit_mask = np.uint16( (1<<bits_stored)-1 )
+    bit_mask = np.array((1<<bits_stored)-1).astype(np.uint16)
 
     # This code calculates a bit mask from the actual overlays in use.
     # It is not used.
@@ -174,7 +174,7 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
 
     # Calculate mask to remove only the bit used by this particular overlay
-    bit_mask = np.uint16( 0xffff ^ ( 1 << overlay_bit) )
+    bit_mask = np.array(0xffff ^ ( 1 << overlay_bit)).astype(np.uint16)
 
     # Can only handle greyscale or palette images
     # XXX would an overlay every be present in an RGB image? Doesn't make sense?
@@ -218,7 +218,7 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
 
     # Calculate mask to set pixel to black without breaking high bit overlays
-    bit_mask = np.uint16( 0xffff << bits_stored )
+    bit_mask = np.array(0xffff << bits_stored).astype(np.uint16)
 
     if frame >= num_frames:
         logger.error('cannot redact frame %d, max is %d' % (frame, num_frames-1))
