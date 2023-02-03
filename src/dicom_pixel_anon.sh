@@ -7,8 +7,9 @@
 # Options
 output=""
 dbdir=""
+prog=$(basename $0)
 options="o:D:"
-usage="usage: $0 [-D db dir] -o output  input..."
+usage="usage: $prog [-D db dir] -o output  input..."
 # Configuration, choose which OCR algorithm
 ocr_tool="easyocr"
 
@@ -28,26 +29,29 @@ fi
 # Temporary! PATH for testing from current directory
 export PATH=${PATH}:.
 
-# Temporary files
-tmpdir="/tmp/dicom_pixel_anon.$$"
-mkdir -p "${tmpdir}"
-csv="${tmpdir}/rects.csv"
+# Temporary directory for database if needed
 if [ "$dbdir" == "" ]; then
-    dbdir="${tmpdir}"
+	tmpdir="/tmp/dicom_pixel_anon.$$"
+	mkdir -p "${tmpdir}"
+	dbdir="${tmpdir}"
 fi
 
 # exit straight away if any commands fail
 set -e
 
 # Get a list of all rectangles into the database
-echo "Running OCR on $@"
+echo "$(date) ${prog} Running OCR on $@"
 dicom_ocr.py --db "${dbdir}" --review --rects "$@"
 
 # Redact by reading the database
 for input in "$@"; do
-	echo "Redacting $input"
+	echo "$(date) ${prog} Redacting $input"
     dicom_redact.py --db "${dbdir}" --dicom "${input}" --output "${output}"
 done
 
-rm -fr "${tmpdir}"
+# Tidy up if necessary
+if [ "${tmpdir}" != "" ]; then
+	rm -fr "${tmpdir}"
+fi
+
 exit 0
