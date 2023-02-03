@@ -316,14 +316,11 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 def redact_DicomRect_rectangles(ds, dicomrect_list):
     """ Split the list by frame/overlay and call redact_rectangles.
     """
-    for dr in dicomrect_list:
-        print(dr)
     frameoverlay_list = [(dr.F(), dr.O()) for dr in dicomrect_list]
     frameoverlay_set = set(frameoverlay_list) # to get unique values
     for (frame,overlay) in frameoverlay_set:
         rect_list = [ (dr.L(), dr.T(), 1+dr.R()-dr.L(), 1+dr.B()-dr.T())
             for dr in dicomrect_list if dr.F() == frame and dr.O() == overlay]
-        #print('calling redact_rectangles(%d, %d) with %s' % (frame,overlay,rect_list))
         redact_rectangles(ds, frame=frame, overlay=overlay, rect_list=rect_list)
 
 
@@ -394,7 +391,6 @@ def decode_rect_list_string(rect_str):
      separated by ; with optional brackets for clarity
     eg. (10,10,30,30,0,-1);10,10,+20,+20
     """
-    print(rect_str)
     rect_list = []
     rect_str = rect_str.replace('(', '')
     rect_str = rect_str.replace(')', '')
@@ -502,6 +498,9 @@ if __name__ == '__main__':
 
     # If given a database then we need a filename to search for
     if args.db:
+        if not dbEnabled:
+            logger.error('Database support is not available')
+            sys.exit(1)
         if not args.dicom:
             logger.error('Must specify a DICOM file to find in the database')
             sys.exit(1)
