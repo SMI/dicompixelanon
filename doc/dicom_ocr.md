@@ -30,6 +30,12 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
 * database filename: will be dcmaudit.sqlite
 * default directory: $SMI_ROOT/data/dicompixelanon
 
+This program can be run on a CPU but it is much faster with a GPU.
+To run on a CPU you should install the CPU version of PyTorch
+(for `pip` use `--extra-index-url https://download.pytorch.org/whl/cpu`).
+When run on a GPU it is configured to use a maximum of 40% of available
+GPU memory so that two processes can be run in parallel.
+
 ## Example
 
 ```
