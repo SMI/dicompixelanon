@@ -879,6 +879,7 @@ if __name__=='__main__':
     parser.add_argument('-d', '--debug', action="store_true", help='debug')
     parser.add_argument('-q', '--quiet', action="store_true", help='quiet')
     parser.add_argument('--dump-database', action="store_true", help='show database content')
+    parser.add_argument('--db', action="store", help='database directory')
     parser.add_argument('--review', action="store_true", help='review files already marked as done')
     parser.add_argument('-i', dest='infiles', nargs='*', default=[]) # can use: -i *.txt
     args = parser.parse_args()
@@ -892,7 +893,11 @@ if __name__=='__main__':
     if not os.getenv('SMI_ROOT'):
         logging.error('$SMI_ROOT must be set, so we can write into data/dicompixelanon directory')
         exit(1)
-    database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
+
+    if args.db:
+        database_path = args.db
+    else:
+        database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
     DicomRectDB.db_path = database_path
 
     if args.dump_database:

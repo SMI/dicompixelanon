@@ -25,7 +25,8 @@ because after that it needs python 3.7 and Pillow 8. Ensure you are
 installing into a python3 environment.
 
 Ensure the `SMI_ROOT` variable is set so that the database can be
-written to `$SMI_ROOT/data/dicompixelanon/`
+written to `$SMI_ROOT/data/dicompixelanon/` This directory can be
+overridden with the `--db` option.
 
 If necessary ensure the `TESSDATA_PREFIX` variable is set so that
 Tesseract can find `tessdata/eng.traineddata`, for example
@@ -41,12 +42,13 @@ https://github.com/second-state/OCR-tesseract-on-Centos7/raw/main/tesseract.tar.
 Files to be redacted are specified on the command line:
 
 ```
-usage: dcmaudit.py [-h] [-d] [-q] [--dump-database] [--review]
+usage: dcmaudit.py [-h] [-d] [-q] [--db dir] [--dump-database] [--review]
                    [-i [INFILES [INFILES ...]]]
 optional arguments:
   -h, --help            show this help message and exit
   -d, --debug           debug
   -q, --quiet           quiet
+  --db directory        database directory
   --dump-database       show database content in JSON format
   --review              review files already marked as done
   -i [INFILES [INFILES ...]]
