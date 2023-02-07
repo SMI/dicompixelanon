@@ -260,12 +260,14 @@ if __name__ == "__main__":
         # If already in database then ignore
         if db_writer and not args.review:
             if db_writer.query_rects(file):
+                debug("ignore (already in db) %s" % file)
                 continue
         # Find full path if given relative to PACS_ROOT
         file = find_file(file)
         # Test database again with full pathname
         if db_writer and not args.review:
             if db_writer.query_rects(file):
+                debug("ignore (already in db) %s" % file)
                 continue
         # Run the OCR
         process_dicom(file, ocr_engine = ocr_engine, nlp_engine = nlp_engine,
