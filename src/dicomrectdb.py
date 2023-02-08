@@ -154,7 +154,7 @@ class DicomRectDB():
         """ Return a list of filenames which have rectangles in the database.
         """
         rc = []
-        for row in self.db(self.db.DicomRects).select('filename'):
+        for row in self.db(self.db.DicomRects).select('filename', distinct=True):
             rc.append(row['filename'])
         return rc
 
@@ -162,7 +162,7 @@ class DicomRectDB():
         """ Return a list of filenames which have tags in the database.
         """
         rc = []
-        for row in self.db(self.db.DicomTags).select('filename'):
+        for row in self.db(self.db.DicomTags).select('filename', distinct=True):
             rc.append(row['filename'])
         return rc
 
