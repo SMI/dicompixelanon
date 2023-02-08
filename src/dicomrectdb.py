@@ -150,6 +150,22 @@ class DicomRectDB():
             first = False
         print(']\n}')
 
+    def query_rect_filenames(self):
+        """ Return a list of filenames which have rectangles in the database.
+        """
+        rc = []
+        for row in self.db(self.db.DicomRects).select('filename'):
+            rc.append(row['filename'])
+        return rc
+
+    def query_tag_filenames(self):
+        """ Return a list of filenames which have tags in the database.
+        """
+        rc = []
+        for row in self.db(self.db.DicomTags).select('filename'):
+            rc.append(row['filename'])
+        return rc
+
     def query_rects(self, filename, frame = -1, overlay = -1):
         """ Return a list of DicomRect objects for the given filename
         by reading from the database.
