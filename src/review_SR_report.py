@@ -312,19 +312,23 @@ def run_gui(gui_window):
                 filepath = find_path_given_filename(word, values['Files'])
                 good_list.append((word,filepath))
                 write_csv(good_list_filename, [(word,filepath)])
+                write_db_false_positive(word, filepath)
                 gui_window['Mark as False Positive'].update(button_color=default_button_colour)
             if event == 'Mark as PII':
                 word = gui_label_to_word(values['Word'])
                 filepath = find_path_given_filename(word, values['Files'])
                 bad_list.append((word,filepath))
                 write_csv(bad_list_filename, [(word,filepath)])
+                write_db_PII(word, filepath)
                 gui_window['Mark as PII'].update(button_color=default_button_colour)
             if event == 'Reviewed':
                 word = gui_label_to_word(values['Word'])
                 filepath = find_path_given_filename(word, values['Files'])
                 other_list.append((word,filepath))
                 write_csv(other_list_filename, [(word,filepath)])
+                write_db_reviewed(word, filepath)
                 gui_window['Reviewed'].update(button_color=default_button_colour)
+                gui_window['Files'].update(set_to_index= 1 + find_index_of_path_given_filename(word, values['Files']))
             logging.debug('event: %s' % event)
             logging.debug('values: %s' % values)
     except Exception as e:
