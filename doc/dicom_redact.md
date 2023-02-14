@@ -89,3 +89,17 @@ If you only want to remove high-bit overlays (not redact rectangles),
 then only use the `--remove-high-bit-overlays` and `--dicom` options.
 This may be useful when you've already asked CTP to remove the overlay
 tags and just want to clear out the high bits of the pixel data.
+
+## Troubleshooting
+
+Use the `-v` option for more information on what is happening.
+
+If the OCR is finding rectangles but the output image is not redacted
+then check if the DICOM is colour (RGB photometric) or if the DICOM has
+multiple image frames. If so then then choice of array slice might be
+incorrect in the function `redact_rectangles_from_image_frame`.
+
+If the output is corrupt or the DICOM tags are misrepresenting the content
+then check the code in `dicom_redact.py` especially the function
+`mark_as_uncompressed`. There may be other tags that need to be altered,
+besides the Transfer Syntax.
