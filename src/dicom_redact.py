@@ -197,7 +197,7 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
 
     for rect in rect_list:
         x0, y0, w, h = rect
-        if w < 1 or h < 1:
+        if x0 < 0 or y0 < 0 or w < 1 or h < 1:
             continue
         x1 = x0 + w
         y1 = y0 + h
@@ -237,7 +237,7 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
         x0, y0, w, h = rect
         x1 = x0 + w
         y1 = y0 + h
-        if w < 1 or h < 1:
+        if x0 < 0 or y0 < 0 or w < 1 or h < 1:
             continue
         if pixel_data.ndim == 2:
             pixel_data[y0:y1, x0:x1] &= bit_mask_arr
@@ -270,7 +270,7 @@ def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
         x0, y0, w, h = rect
         x1 = x0 + w
         y1 = y0 + h
-        if w < 1 or h < 1:
+        if x0 < 0 or y0 < 0 or w < 1 or h < 1:
             continue
         if pixel_data.ndim == 2:
             pixel_data[y0:y1, x0:x1] = redacted_colour
