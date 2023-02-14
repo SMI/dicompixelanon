@@ -126,7 +126,7 @@ class DicomImage:
         """
         return {
             "Modality": self.ds.get('Modality', 'NoModality'),
-            "ImageType": json.dumps(self.get_tag_imagetype(), default=list),
+            "ImageType": json.dumps(self.get_tag_imagetype_list(), default=list),
             "Rows": int(self.ds.get('Rows', 0)),
             "Columns": int(self.ds.get('Columns', 0)),
             "ManufacturerModelName": self.get_tag_manufacturer_model(),
