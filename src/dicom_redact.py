@@ -241,10 +241,16 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
         y1 = y0 + h
         if pixel_data.ndim == 2:
             pixel_data[y0:y1, x0:x1] &= bit_mask_arr
+        elif pixel_data.ndim == 3 and (samples == 3 or photometric == 'RGB'):
+            # XXX assumes the colour channel is the last element
+            pixel_data[y0:y1, x0:x1, :] &= bit_mask_arr
         elif pixel_data.ndim == 3:
+            # XXX assumes the frame channel is the first element
             pixel_data[frame, y0:y1, x0:x1] &= bit_mask_arr
         elif pixel_data.ndim == 4:
-            pixel_data[frame, :, y0:y1, x0:x1] &= bit_mask_arr
+            # XXX assumes the frame channel is the first element
+            # XXX assumes the colour channel is the last element
+            pixel_data[frame, y0:y1, x0:x1, :] &= bit_mask_arr
 
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
