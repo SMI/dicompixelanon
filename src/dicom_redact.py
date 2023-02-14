@@ -235,10 +235,10 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
 
     for rect in rect_list:
         x0, y0, w, h = rect
-        x1 = x0 + w
-        y1 = y0 + h
         if x0 < 0 or y0 < 0 or w < 1 or h < 1:
             continue
+        x1 = x0 + w
+        y1 = y0 + h
         if pixel_data.ndim == 2:
             pixel_data[y0:y1, x0:x1] &= bit_mask_arr
         elif pixel_data.ndim == 3:
