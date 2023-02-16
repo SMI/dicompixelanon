@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 from pydal import DAL, Field
-from rect import Rect, DicomRect, add_Rect_to_list
+from rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
 
 
 class DicomRectDB():
@@ -34,6 +34,10 @@ class DicomRectDB():
             Field('top', type='integer'), Field('bottom', type='integer'),
             Field('left', type='integer'), Field('right', type='integer'),
             Field('frame', type='integer'), Field('overlay', type='integer'),
+            Field('ocrengine', type='integer'),    # one of the ocrengine enums
+            Field('ocrtext'),                      # text extracted by OCR
+            Field('nerengine', type='integer'),    # one of the nerengine enums
+            Field('nerpii', type='integer'),       # -1 (unknown), 0 (false), 1 (true)
             Field('last_modified', type='datetime'),
             Field('last_modified_by'))
         self.db.define_table('DicomTags', Field('filename', unique=True),
@@ -61,13 +65,26 @@ class DicomRectDB():
         return('<DicomRectDB(%s)>' % DicomRectDB.db_path)
 
     def add_rect(self, filename, dicomrect):
+        """ Add a rectangle to the database, must be given a subclass of Rect,
+        which can be Rect, DicomRect, or DicomRectText.
+        """
         t, b, l, r = dicomrect.get_rect()
-        frame = dicomrect.F()
-        overlay = dicomrect.O()
+        # If the argument is a DicomRect or subclass, get the frame,overlay
+        frame = dicomrect.F() if hasattr(dicomrect, 'F') else -1
+        overlay = dicomrect.O() if hasattr(dicomrect, 'O') else -1
+        # If the argument is a DicomRectText, get the ocr text
+        # This single-line statement doesn't work
+        #ocrengine, ocrtext, nerengine, nerpii = dicomrect.text_tuple() if hasattr(dicomrect, 'text_tuple') else -1, '', -1, -1
+        if hasattr(dicomrect, 'text_tuple'):
+            ocrengine, ocrtext, nerengine, nerpii = dicomrect.text_tuple()
+        else:
+            ocrengine, ocrtext, nerengine, nerpii = -1, '', -1, -1
         lastmod = datetime.datetime.now()
         self.db.DicomRects.insert(filename=filename,
             top = t, bottom = b, left = l, right = r,
             frame = frame, overlay = overlay,
+            ocrengine = ocrengine, ocrtext = ocrtext,
+            nerengine = nerengine, nerpii = nerpii,
             last_modified = lastmod, last_modified_by = self.username)
         self.db.commit()
         return
@@ -226,4 +243,7 @@ if __name__ == '__main__':
     if len(sys.argv)>1:
         DicomRectDB.set_db_path(sys.argv[1])
     db = DicomRectDB()
+    db.add_rect('fakerect', Rect(1,2,3,4))
+    db.add_rect('fakedicomrect', DicomRect(1,2,3,4,5,6))
+    db.add_rect('fakedicomrecttext', DicomRectText(1,2,3,4,5,6, 10,'Fake Text',1,1))
     db.query_all()
