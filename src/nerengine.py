@@ -43,7 +43,10 @@ except:
 
 
 class NER():
-    """ A class which wraps several NLP engines for NER
+    """ A class which wraps several NLP engines for NER.
+    It identifies named entities in text and assigns one of four
+    classes: PER, LOC, ORG, MISC (but not all NER engines return
+    all of those classes).
     """
 
     @staticmethod
@@ -100,20 +103,24 @@ class NER():
 
     def __init__(self, engine, model = None):
         self._engine_name = 'Undefined'
+        self._engine_enum = 0
         self.engine_model = 'undefined'
         self.engine_version = '0.0'
+
         if engine == 'spacy':
             if 'spacy' not in sys.modules:
                 logging.error('spacy requested but not available')
                 return
+            self._engine_enum = 10
             # Default model is trf for spacy v3, or lg for spacy v2
             if not model:
-                for trymodel in ['en_core_web_trf',
+                for ii, trymodel in enumerate(['en_core_web_trf',
                     'en_core_web_lg',
                     'en_core_web_md',
-                    'en_core_web_sm']:
+                    'en_core_web_sm']):
                     if find_spec(trymodel):
                         model = trymodel
+                        self._engine_enum = 10 + ii
                         break
             self._engine_name = engine
             self.engine_model = model
@@ -121,10 +128,12 @@ class NER():
             #self.engine_data_dir = os.path.join(os.environ.get('SMI_ROOT'), 'data', 'spacy_'+self.engine_version) # not needed yet
             logging.debug('Loading %s version %s with %s' % (self._engine_name, self.engine_version, self.engine_model))
             self.nlp = spacy.load(model)
+
         elif engine == 'flair':
             if 'flair' not in sys.modules:
                 logging.error('flair requested but not available')
                 return
+            self._engine_enum = 20
             # default model is 'ner' but can use 'ner', 'ner-fast', 'ner-large', 'ner-ontonotes', etc.
             if not model:
                 model = 'ner'
@@ -145,11 +154,13 @@ class NER():
             flair.cache_root = Path(self.engine_data_dir)
             logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, self.engine_model, self.engine_data_dir))
             self.tagger = SequenceTagger.load(model)
+
         elif engine == 'stanford':
             if 'stanford_ner' not in sys.modules:
                 logging.error('stanford_ner requested but not available')
                 return
             self._engine_name = engine
+            self._engine_enum = 30
             self.engine_model = model
             self.engine_version = stanford_ner.__version__
             self.engine_data_dir = None
@@ -167,11 +178,13 @@ class NER():
                 logging.error('stanford_ner requested but no data directory found')
                 return
             logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, self.engine_model, self.engine_data_dir))
+
         elif engine == 'stanza':
             if 'stanza' not in sys.modules:
                 logging.error('stanza requested but not available')
                 return
             self._engine_name = engine
+            self._engine_enum = 40
             self.engine_model = model
             self.engine_version = stanza.__version__
             self.engine_data_dir = None
@@ -189,6 +202,7 @@ class NER():
                 processors='tokenize,ner',
                 download_method=None,
                 dir=self.engine_data_dir)
+
         else:
             logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza)' % engine)
             return
@@ -202,7 +216,15 @@ class NER():
         return self.engine_model != 'undefined'
 
     def engine_name(self):
+        """ Returns the name (only) of the engine used to perform NER, e.g. "flair"
+        """
         return self._engine_name
+
+    def engine_enum(self):
+        """ Returns an integer representing the NER engine, and possibly the
+        language model used by that engine, e.g. 10 = SpaCy with TRF, 11 = SpaCy with LG.
+        """
+        return self._engine_enum
 
     def detect(self, text):
         """ Detect PII in the text and return a list of entites,
