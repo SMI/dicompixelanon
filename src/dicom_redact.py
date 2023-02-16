@@ -17,7 +17,7 @@ import numpy as np
 import os
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
-from rect import DicomRect
+from rect import DicomRect, DicomRectText
 import sys
 try:
     from dicomrectdb import DicomRectDB
@@ -324,6 +324,30 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 
 
 # ---------------------------------------------------------------------
+def rect_in_allowlist(rect):
+    """ Return True if the text contained in the rectangle is safe
+    and doesn't need to be redacted. By default, return False, unless
+    the text is on a known allowlist.
+    """
+    if hasattr(rect, 'text_tuple'):
+        ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
+    else:
+        ocrtext = ''
+    if ocrtext in ['PA ERECT']:
+        return True
+    return False
+
+def filter_rect_list(rect_list):
+    """ Filter the list to remove all items which are "safe"
+    based on an allow-list. The list should be a list of DicomRectText objects
+    so we can test the ocrtext but if it's not (or the text is empty) then
+    it's assumed that it's not safe so is kept in the list.
+    """
+    rect_list[:] = [rect for rect in rect_list if not rect_in_allowlist(rect)]
+    return rect_list
+
+
+# ---------------------------------------------------------------------
 
 def redact_DicomRect_rectangles(ds, dicomrect_list):
     """ Split the list by frame/overlay and call redact_rectangles.
@@ -333,6 +357,7 @@ def redact_DicomRect_rectangles(ds, dicomrect_list):
     for (frame,overlay) in frameoverlay_set:
         rect_list = [ (dr.L(), dr.T(), 1+dr.R()-dr.L(), 1+dr.B()-dr.T())
             for dr in dicomrect_list if dr.F() == frame and dr.O() == overlay]
+        rect_list = filter_rect_list(rect_list)
         redact_rectangles(ds, frame=frame, overlay=overlay, rect_list=rect_list)
 
 
