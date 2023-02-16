@@ -87,8 +87,33 @@ class DicomRect(Rect):
 
 # ---------------------------------------------------------------------
 
+class DicomRectText(DicomRect):
+    """ As a DicomRect but also holds details of any text found within,
+    including the text, the source of the text, and whether it's PII.
+    Right now ocrengine (enum), ocrtext (str), nerengine (enum), nerpii (enum)
+    are all considered together so returned as a tuple from text_tuple().
+    """
+    def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1):
+        super().__init__(top, bottom, left, right, frame, overlay)
+        self.ocrengine, self.ocrtext = ocrengine, ocr_text
+        self.nerengine, self.nerpii  = nerengine, nerpii
+
+    def __repr__(self):
+        return '<DicomRectText frame=%d overlay=%d %d,%d->%d,%d %d="%s" %d=%d>' % (self.frame, self.overlay, self.left, self.top, self.right, self.bottom,
+            self.ocrengine, self.ocrtext, self.nerengine, self.nerpii)
+
+    def text_tuple(self):
+        """ Returns a tuple (ocrengine, ocrtext, nerengine, nerpii)
+        """
+        return self.ocrengine, self.ocrtext, self.nerengine, self.nerpii
+
+
+# ---------------------------------------------------------------------
+
 def add_Rect_to_list(rectlist, addrect):
     """ Extend the given list of rectangles with the given rectangle.
+    Handles overlaps to ensure that the list does not contain any
+    rectangles which would lie inside a larger rectangle.
     Works with Rect or DicomRect objects.
     """
     # If this one is larger we need to remove ALL smaller rects from the existing list
