@@ -65,6 +65,6 @@ if __name__ == '__main__':
     parser.add_argument('--db', dest='db', action="store", help='output database directory')
     args = parser.parse_args()
     if args.db:
-        DicomRectDB.db_path = args.db
+        DicomRectDB.set_db_path(args.db)
 
     read_csv(args.csv)

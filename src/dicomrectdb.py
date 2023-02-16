@@ -18,10 +18,16 @@ class DicomRectDB():
     # Set the value using DicomRectDB.db_path = 'dir/'
     db_path = ''
 
+    def set_db_path(path):
+        """ Set the class-static path to the database directory.
+        Note that this affects all instances of this class.
+        """
+        DicomRectDB.db_path = path
+
     def __init__(self):
         # default to current directory if given path doesn't exist
         if DicomRectDB.db_path and not os.path.isdir(DicomRectDB.db_path):
-            logging.error('Database path does not exist: %s' % DicomRectDB.db_path)
+            logging.warning('Database path does not exist: %s (will use current directory)' % DicomRectDB.db_path)
             DicomRectDB.db_path = ''
         self.db=DAL('sqlite://dcmaudit.sqlite.db', folder = DicomRectDB.db_path) # debug=True
         self.db.define_table('DicomRects', Field('filename'),
@@ -218,6 +224,6 @@ class DicomRectDB():
 
 if __name__ == '__main__':
     if len(sys.argv)>1:
-        DicomRectDB.db_path = sys.argv[1]
+        DicomRectDB.set_db_path(sys.argv[1])
     db = DicomRectDB()
     db.query_all()

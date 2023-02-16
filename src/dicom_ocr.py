@@ -252,7 +252,7 @@ if __name__ == "__main__":
     db_writer = None
     if args.db:
         if args.db not in ['', None, '-', 'default']:
-            DicomRectDB.db_path = args.db
+            DicomRectDB.set_db_path(args.db)
             db_writer = DicomRectDB()
 
     # Process files

@@ -387,7 +387,7 @@ def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, over
     """
     #database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
     if db_dir:
-        DicomRectDB.db_path = db_dir
+        DicomRectDB.set_db_path(db_dir)
     db = DicomRectDB()
     rect_list = db.query_rects(filename, frame=frame, overlay=overlay)
     return rect_list

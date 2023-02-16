@@ -898,7 +898,7 @@ if __name__=='__main__':
         database_path = args.db
     else:
         database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
-    DicomRectDB.db_path = database_path
+    DicomRectDB.set_db_path(database_path)
 
     if args.dump_database:
         db = DicomRectDB()

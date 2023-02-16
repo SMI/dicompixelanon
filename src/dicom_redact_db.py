@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # set database path
     if len(sys.argv)>1:
-        DicomRectDB.db_path = sys.argv[1]
+        DicomRectDB.set_db_path(sys.argv[1])
 
     db = DicomRectDB()
 
