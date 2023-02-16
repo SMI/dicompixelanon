@@ -84,7 +84,9 @@ def process_image(img, filename = None,
     """
     assert(ocr_engine)
     ocr_engine_name = ocr_engine.engine_name() if ocr_engine else 'NOOCR'
+    ocr_engine_enum = ocr_engine.engine_enum() if ocr_engine else -1
     nlp_engine_name = nlp_engine.engine_name() if nlp_engine else 'NONLP'
+    nlp_engine_enum = nlp_engine.engine_enum() if nlp_engine else -1
 
     # Run OCR
     debug('OCR(%s,%s) %s (%d,%d)' % (ocr_engine_name, nlp_engine_name, filename, frame, overlay))
@@ -122,9 +124,11 @@ def process_image(img, filename = None,
     # Output to database
     if db_writer:
         for rect,text,is_sensitive in ocr_rectlist:
-            dicomrect = DicomRect(top = rect.T(), bottom = rect.B(),
+            dicomrect = DicomRectText(top = rect.T(), bottom = rect.B(),
                 left = rect.L(), right = rect.R(),
-                frame = frame, overlay = overlay)
+                frame = frame, overlay = overlay,
+                ocrengine = ocr_engine_enum, ocrtext = text,
+                nerengine = nlp_engine_enum, nerpii = is_sensitive)
             db_writer.add_rect(filename, dicomrect)
 
     return
