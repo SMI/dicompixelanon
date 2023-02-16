@@ -79,12 +79,21 @@ class OCR:
         return '<OCR engine=%s %s>' % (self.engine, self.ocr_text)
 
     def engine_name(self):
+        """ Return a string indicating which OCR engine is used.
+        """
         if self.engine == OCR.TesseractEngine:
             return "tesseract"
         elif self.engine == OCR.EasyOCREngine:
             return "easyocr"
+        elif self.engine == OCR.Keras:
+            return "keras"
         else:
             raise RuntimeError('unsupported OCR engine')
+
+    def engine_enum(self):
+        """ Return an integer indicating which OCR engine is used.
+        """
+        return self.engine
 
     def image_to_data(self, img):
         """ Run OCR on an image, which must be a numpy array.
