@@ -157,21 +157,23 @@ class DicomRectDB():
         Sorts by last_modified so most recent is at the end.
         Output is in JSON format, { "rects":[], "tags":[] }
         """
-        print('{"rects":[')
+        rc = '{"rects":[\n'
         first = True
         for row in self.db(self.db.DicomRects).select(orderby = self.db.DicomRects.last_modified):
-            print('%s%s' % (('' if first else ','), row.as_json()))
+            rc += '%s%s\n' % (('' if first else ','), row.as_json())
             first = False
-        print('],"tags":[')
+        rc += '],"tags":[\n'
         first = True
         for row in self.db(self.db.DicomTags).select(orderby = self.db.DicomTags.last_modified):
             imagetype = row['ImageType']
             if imagetype:
                 # handle old-format databases where string was Python not JSON
                 row['ImageType'] = json.loads(imagetype.replace("'", '"'))
-            print('%s%s' % (('' if first else ','), row.as_json()))
+            rc += '%s%s\n' % (('' if first else ','), row.as_json())
             first = False
-        print(']\n}')
+        rc += ']\n}\n'
+        print(rc)
+        return rc
 
     def query_rect_filenames(self):
         """ Return a list of filenames which have rectangles in the database.
