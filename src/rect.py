@@ -95,7 +95,7 @@ class DicomRectText(DicomRect):
     """
     def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1):
         super().__init__(top, bottom, left, right, frame, overlay)
-        self.ocrengine, self.ocrtext = ocrengine, ocr_text
+        self.ocrengine, self.ocrtext = ocrengine, ocrtext
         self.nerengine, self.nerpii  = nerengine, nerpii
 
     def __repr__(self):
