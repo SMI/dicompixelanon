@@ -25,6 +25,10 @@ class DicomRectDB():
         DicomRectDB.db_path = path
 
     def __init__(self):
+        """ Construct a DicomRectDB in the path set by set_db_path()
+        with the filename dcmaudit.sqlite.db, and open a connection to this
+        database which will be kept open (not exclusively) while this object exists.
+        """
         # default to current directory if given path doesn't exist
         if DicomRectDB.db_path and not os.path.isdir(DicomRectDB.db_path):
             logging.warning('Database path does not exist: %s (will use current directory)' % DicomRectDB.db_path)
@@ -89,7 +93,10 @@ class DicomRectDB():
         self.db.commit()
         return
 
-    def add_tag(self, filename, mark, comment = None):
+    def add_tag(self, filename, mark : bool, comment = None):
+        """ Add a tag to a file in the database, being True or False,
+        with an optional comment.
+        """
         # XXX need to select to get any existing value of comment if not specified in this call
         lastmod = datetime.datetime.now()
         self.db.DicomTags.insert(filename=filename,
@@ -98,6 +105,9 @@ class DicomRectDB():
         self.db.commit()
 
     def toggle_tag(self, filename):
+        """ Toggle the tag for a given file in the database.
+        Preserves the comment but updates the last_modified time and user.
+        """
         row = self.db(self.db.DicomTags.filename == filename).select()
         if row:
             tag_val = row[0].mark
