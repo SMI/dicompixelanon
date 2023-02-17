@@ -37,11 +37,11 @@ class DicomRectDB():
         self.db.define_table('DicomRects', Field('filename'),
             Field('top', type='integer'), Field('bottom', type='integer'),
             Field('left', type='integer'), Field('right', type='integer'),
-            Field('frame', type='integer'), Field('overlay', type='integer'),
-            Field('ocrengine', type='integer'),    # one of the ocrengine enums
-            Field('ocrtext'),                      # text extracted by OCR
-            Field('nerengine', type='integer'),    # one of the nerengine enums
-            Field('nerpii', type='integer'),       # -1 (unknown), 0 (false), 1 (true)
+            Field('frame', type='integer', default=-1), Field('overlay', type='integer', default=-1),
+            Field('ocrengine', type='integer', default=-1),    # one of the ocrengine enums
+            Field('ocrtext'),                                  # text extracted by OCR
+            Field('nerengine', type='integer', default=-1),    # one of the nerengine enums
+            Field('nerpii', type='integer', default=-1),       # -1 (unknown), 0 (false), 1 (true)
             Field('last_modified', type='datetime'),
             Field('last_modified_by'))
         self.db.define_table('DicomTags', Field('filename', unique=True),
