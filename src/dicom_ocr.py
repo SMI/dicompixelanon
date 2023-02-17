@@ -15,7 +15,7 @@ from ocrengine import OCR
 from nerengine import NER
 from dicomimage import DicomImage
 from dicomrectdb import DicomRectDB
-from rect import Rect, DicomRect
+from rect import Rect, DicomRect, DicomRectText
 import torchmem
 
 
