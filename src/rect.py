@@ -166,6 +166,34 @@ def add_Rect_to_list(rectlist, addrect):
 
 # ---------------------------------------------------------------------
 
+def rect_exclusive_list(rectlist, width, height):
+    """ Return a set of rectangles which covers the area 0,0,width,height
+    that is not covered by any rectangle in rectlist, so the equivalent of
+    filling all the rectangles in rectlist and then negating that.
+    """
+    # Start with a rectangle which is full size
+    newlist = [ Rect(0, height-1, 0, width-1) ]
+    for inner_rect in rectlist:
+        new2list = []
+        for newrect in newlist:
+            intersection = newrect.intersect_rect(inner_rect)
+            if intersection.is_valid():
+                # Replace newrect with four surrounding rect
+                nl,nt,nr,nb = newrect.ltrb()
+                l,t,r,b = intersection.ltrb()
+                # XXX need to check dimensions to ensure a valid rectangle before adding to list
+                # XXX check we're not off-by-one with any of these coordinates
+                new2list.append(Rect(min(t,nt), t, min(l,nl), max(r,nr))) # T,B,L,R
+                new2list.append(Rect(t,b, min(l,nl), l))
+                new2list.append(Rect(t,b, r, max(r,nr)))
+                new2list.append(Rect(b, max(b,nb), min(l,nl), max(r,nr)))
+            else:
+                new2list.append(newrect)
+        newlist = new2list
+    return newlist
+
+# ---------------------------------------------------------------------
+
 def test_rect():
     r = Rect(1, 11, 2, 12) # T,B,L,R
     assert r.ltrb() == (2, 1, 12, 11)
@@ -178,9 +206,11 @@ def test_rect():
     assert(d.contains(5,5) == True)
     assert(d.contains(5,5, 8, 8) == False)
     assert(d.contains(5,5, 9, 10) == True)
+    # Check rectangle contained within a larger one
     assert(r.contains_rect(d) == False)
     assert(d.contains_rect(d2) == True)
     assert(d2.contains_rect(d) == False)
+    # One rect contained in another is not added to list
     list1 = []
     list2 = []
     add_Rect_to_list(list1, r)
@@ -193,3 +223,52 @@ def test_rect():
     print(list2)
     assert(len(list1) == 2)
     assert(len(list2) == 2)
+    # Intersection should be same whichever way performed
+    r1 = Rect(10,30,10,40) # T,B,L,R
+    r2 = Rect(20,40,15,20)
+    r_i = r1.intersect_rect(r2)
+    assert(r_i.get_rect() == (20,30,15,20))
+    r_i = r2.intersect_rect(r1)
+    assert(r_i.get_rect() == (20,30,15,20))
+    # Two separate rect do not intersect
+    assert(r1.intersect_rect(Rect(100,100,101,101)).is_valid() == False)
+    # An aligned rect does not intersect
+    assert(r1.intersect_rect(Rect(30,40,10,40)).is_valid() == False)
+    # Test a real US
+    #42,452,943,732
+    #238,37,786,448
+    r3 = Rect(left=42,right=943,top=452,bottom=732)
+    r4 = Rect(left=238,right=786,top=37,bottom=348)
+    r5 = r3.intersect_rect(r4)
+    assert(r5.is_valid() == False)
+    list3 = []
+    add_Rect_to_list(list3, r3)
+    add_Rect_to_list(list3, r4)
+    r_e_list = rect_exclusive_list(list3, 1024, 1024)
+    expected = [
+        Rect(left=0,top=0, right=1023,bottom=37),
+        Rect(left=0,top=37, right=238,bottom=348),
+        Rect(left=786,top=37, right=1023,bottom=348),
+        Rect(left=0,top=348, right=1023,bottom=452),
+        Rect(left=0,top=452, right=42,bottom=732),
+        Rect(left=943,top=452, right=1023,bottom=732),
+        Rect(left=0,top=732, right=1023,bottom=1023)
+        ]
+    assert(r_e_list == expected)
+    # Plot for visual verification
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+    fig, ax = plt.subplots()
+    # Need a line to resize the plot area?
+    ax.plot([0, 100],[0, 1000])
+    # Plot the two rectangles
+    l,t,w,h = r3.ltwh()
+    ax.add_patch(Rectangle((l,t), w,h, facecolor='red', edgecolor='white'))
+    l,t,w,h = r4.ltwh()
+    ax.add_patch(Rectangle((l,t), w,h, facecolor='green', edgecolor='white'))
+    # Plot outside the red/green rectangles in default blue
+    for r in r_e_list:
+        l,t,w,h = r.ltwh()
+        ax.add_patch(Rectangle((l,t), w,h))
+    plt.show()
+
