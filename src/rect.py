@@ -147,14 +147,14 @@ def add_Rect_to_list(rectlist, addrect):
     for rect in rectlist:
         # If a larger rectangle already exists then ignore this one
         if rect.contains_rect(addrect):
-            continue
+            return
     rectlist.append(addrect)
 
 
 # ---------------------------------------------------------------------
 
 def test_rect():
-    r = Rect(1, 11, 2, 12)
+    r = Rect(1, 11, 2, 12) # T,B,L,R
     assert r.ltrb() == (2, 1, 12, 11)
     d = DicomRect(3, 33, 4, 44, 9, 10)
     assert d.F() == 9
