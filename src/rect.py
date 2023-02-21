@@ -18,6 +18,12 @@ class Rect:
     def __repr__(self):
         return '<Rect %d,%d->%d,%d>' % (self.left, self.top, self.right, self.bottom)
 
+    def __eq__(self, other):
+        return (self.T() == other.T() and
+            self.B() == other.B() and
+            self.L() == other.L() and
+            self.R() == other.R())
+
     def set_rect(self, t, b, l, r):
         self.top, self.bottom, self.left, self.right = t, b, l, r
 
@@ -74,6 +80,12 @@ class DicomRect(Rect):
     def __repr__(self):
         return '<DicomRect frame=%d overlay=%d %d,%d->%d,%d>' % (self.frame, self.overlay, self.left, self.top, self.right, self.bottom)
 
+    def __eq__(self, other):
+        # XXX does not check that other isinstance(DicomRect)
+        return (super().__eq__(other) and
+            self.F() == other.F() and
+            self.O() == other.O())
+
     def F(self):
         return self.frame
 
@@ -107,6 +119,10 @@ class DicomRectText(DicomRect):
     def __repr__(self):
         return '<DicomRectText frame=%d overlay=%d %d,%d->%d,%d %d="%s" %d=%d>' % (self.frame, self.overlay, self.left, self.top, self.right, self.bottom,
             self.ocrengine, self.ocrtext, self.nerengine, self.nerpii)
+
+    def __eq__(self, other):
+        otherengine, othertext, otherner, otherpii = other.text_tuple()
+        return (super().__eq__(other) and self.ocrtext == othertext)
 
     def text_tuple(self):
         """ Returns a tuple (ocrengine, ocrtext, nerengine, nerpii)
