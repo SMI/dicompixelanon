@@ -24,6 +24,12 @@ class Rect:
     def get_rect(self):
         return self.top, self.bottom, self.left, self.right
 
+    def is_valid(self):
+        if (self.top < 0 or self.bottom <= self.top or
+            self.left < 0 or self.right <= self.left):
+            return False
+        return True
+
     def ltrb(self):
         return (self.left, self.top, self.right, self.bottom)
 
