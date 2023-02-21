@@ -63,6 +63,19 @@ class Rect:
         t,b,l,r = other_rect.get_rect()
         return self.contains(l, t) and self.contains(r, b)
 
+    def intersect_rect(self, other_rect):
+        """ Return a Rect which is the intersection of this rect with another.
+        If no intersection then a null Rect is returned.
+        """
+        left = max(self.L(), other_rect.L())
+        right = min(self.R(), other_rect.R())
+        top = max(self.T(), other_rect.T())
+        bottom = min(self.B(), other_rect.B())
+        if left < right and top < bottom:
+            return Rect(top = top, bottom = top + (bottom-top), left = left, right = left + (right-left))
+        else:
+            return Rect()
+
 
 # ---------------------------------------------------------------------
 
