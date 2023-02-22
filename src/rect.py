@@ -154,6 +154,9 @@ def add_Rect_to_list(rectlist, addrect):
     rectangles which would lie inside a larger rectangle.
     Works with Rect or DicomRect objects.
     """
+    # If new rectangle is empty then do nothing
+    if not addrect.is_valid():
+        return
     # If this one is larger we need to remove ALL smaller rects from the existing list
     rectlist[:] = [
         rect for rect in rectlist if
