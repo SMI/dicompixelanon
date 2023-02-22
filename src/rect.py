@@ -86,8 +86,11 @@ class DicomRect(Rect):
     Overlay = -1 means frame is a standard frame.
     Overlay >= 0 means frame is within that overlay.
     """
-    def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1):
-        super().__init__(top, bottom, left, right)
+    def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, arect = None):
+        if arect:
+            super().__init__(arect.T(), arect.B(), arect.L(), arect.R())
+        elif top != None:
+            super().__init__(top, bottom, left, right)
         self.frame, self.overlay = frame, overlay
 
     def __repr__(self):
