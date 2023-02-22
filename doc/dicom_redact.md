@@ -11,12 +11,13 @@ DICOM tags to determine which rectangles to redact. Both have limitations
 on which image frames can be redacted, and how well the DICOM tags match
 those in the configuration file.
 
-This tool can redact rectangles in three ways:
+This tool can redact rectangles in four ways:
 * from a list specified on the command line
 * from a list provided in a CSV file, for example the output from
  `pydicom_images.py` running OCR on DICOM files
 * from a list stored in a database, for example the output from
  `dcmaudio.py` with manually marked-up DICOM files
+* from a set of regions defined in an UltraSound DICOM
 
 It should be noted that all of these tools can be used standalone or
 in conjunction with other tools, for example you can use CTP and/or
@@ -45,6 +46,8 @@ compression support can of course be added to this tool later.
   -o OUTPUT, --output O Output DICOM dir or filename (created automatically if not specified)
   --remove-high-bit-overlays
                         remove overlays in high-bits of image pixels
+  --remove-ultrasound-regions
+                        remove around the stored ultrasound regions
   -r [RECTS ...], --rect [RECTS ...]
                         rectangles x0,y0,x1,y1 or x0,y0,+w,+h; ...
 ```
@@ -55,6 +58,11 @@ or specify the rectangles directly with `--rect`. In all cases you can
 specify `--dicom` to find only that path in the database/CSV. If reading
 from a CSV and no DICOM has been specified then all filenames listed in
 the CSV will be redacted.
+
+If the image is an UltraSound and has a set of regions defined within
+its metadata ("SequenceOfUltrasoundRegions") then the `--remove-ultrasound-regions`
+option will redact all of the areas outside of those regions (the regions
+are assumed to be defining the useful parts of the image).
 
 The CSV file is expected to have (at least) these columns, in any order:
 ```
