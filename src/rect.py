@@ -176,9 +176,16 @@ def rect_exclusive_list(rectlist, width, height):
     """ Return a set of rectangles which covers the area 0,0,width,height
     that is not covered by any rectangle in rectlist, so the equivalent of
     filling all the rectangles in rectlist and then negating that.
+    NOTE: if rectlist is empty then return an empty list, not a full frame.
+    XXX need to take frame,overlay arguments and pass to DicomRect constructor.
     """
+    # If not given anything to negate then return empty, not full frame rect.
+    if not rectlist:
+        return []
+    # Create all new list elements from same type as existing
+    RectType = type(rectlist[0])
     # Start with a rectangle which is full size
-    newlist = [ Rect(0, height-1, 0, width-1) ]
+    newlist = [ RectType(0, height-1, 0, width-1) ]
     for inner_rect in rectlist:
         new2list = []
         for newrect in newlist:
@@ -187,15 +194,15 @@ def rect_exclusive_list(rectlist, width, height):
                 # Replace newrect with four surrounding rect
                 nl,nt,nr,nb = newrect.ltrb()
                 l,t,r,b = intersection.ltrb()
-                # XXX need to check dimensions to ensure a valid rectangle before adding to list
                 # XXX check we're not off-by-one with any of these coordinates
-                new2list.append(Rect(min(t,nt), t, min(l,nl), max(r,nr))) # T,B,L,R
-                new2list.append(Rect(t,b, min(l,nl), l))
-                new2list.append(Rect(t,b, r, max(r,nr)))
-                new2list.append(Rect(b, max(b,nb), min(l,nl), max(r,nr)))
+                add_Rect_to_list(new2list, RectType(min(t,nt), t, min(l,nl), max(r,nr))) # T,B,L,R
+                add_Rect_to_list(new2list, RectType(t,b, min(l,nl), l))
+                add_Rect_to_list(new2list, RectType(t,b, r, max(r,nr)))
+                add_Rect_to_list(new2list, RectType(b, max(b,nb), min(l,nl), max(r,nr)))
             else:
-                new2list.append(newrect)
+                add_Rect_to_list(new2list, newrect)
         newlist = new2list
+    # XXX should really coalesce all adjoining rectangles for efficiency
     return newlist
 
 # ---------------------------------------------------------------------
