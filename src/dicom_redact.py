@@ -4,6 +4,8 @@
 #  * can redact rectangles from any of the image frames or overlay frames
 
 # TODO: change all errors to raise exceptions
+# TODO: read ocrtext from CSV files (like is already done from database)
+# TODO: implement proper allowlist, read from config file or database
 # NOTE:
 #   overlays may be smaller than their images. Rectangle coordinates
 #     are within the overlay, not relative to the original image, so
@@ -45,6 +47,25 @@ elem_OverlayRows = 0x0010
 elem_OverlayCols = 0x0011
 elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
+
+# Define the exact words (case-sensitive) which are allowed
+# so their rectangles will not be redacted.
+ocr_allow_list = [
+    'AP', 'PA', 'ERECT', 'STANDING', 'RIGHT', 'LEFT',
+    'Erect', 'Supine',
+    'PORTABLE SUPINE',
+    'AP ERECT MOBILE',
+    'MOBILE AP ERECT',
+    'PORTABLE AP ERECT',
+    'PA ERECT', 'AP ERECT',
+    'L AP ERECT', 'R AP ERECT',
+    'AP SEMI ERECT', 'AP SEMI-ERECT',
+    'WT BEARING', 'WT: BEARING', 'WT; BEARING', 'WEIGHT BEARING', 'Wt Bearing', 'WEIGHT-BEARING', 'Weight Bearing', 'Weight bearing', 'WEIGHTBEARING',
+    'H BEAM', 'MOBILE',
+    'HBL', 'L HBL', 'R HBL',
+    'RED DOT', 'RED DOT L', 'RED DOT R', 'red dot', 'Red Dot', 'R Red Dot', 'R red dot', 'L Red Dot', 'L red dot',
+    'RESUS',
+]
 
 
 # ---------------------------------------------------------------------
@@ -337,11 +358,12 @@ def rect_in_allowlist(rect):
     and doesn't need to be redacted. By default, return False, unless
     the text is on a known allowlist.
     """
+    # If the rect is a DicomRectText object it has a text_tuple method
     if hasattr(rect, 'text_tuple'):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    if ocrtext in ['PA ERECT']:
+    if ocrtext in ocr_allow_list:
         return True
     return False
 
@@ -392,6 +414,7 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
             # (these will be OCR summaries for the whole frame)
             (row_left, row_top, row_right, row_bottom) = (int(row['left']), int(row['top']), int(row['right']), int(row['bottom']))
             (row_frame, row_overlay) = (int(row.get('frame', -1)), int(row.get('overlay', -1)))
+            # XXX read ocrtext as well, if present in CSV, and construct a DicomRectText object
             if row_left < 0:
                 continue
             # If a frame has been given then ignore any other frames
