@@ -105,7 +105,7 @@ def process_image(img, filename = None,
         ocr_rectlist.append( (Rect(), ocr_text, is_sensitive) )
     else:
         ocr_text = ocr_engine.image_to_text(img)
-        is_sensitive = check_for_pii(nlp_engine, item['text'])
+        is_sensitive = check_for_pii(nlp_engine, ocr_text)
         ocr_rectlist.append( (Rect(), ocr_text, is_sensitive) )
 
     # Output in CSV format
