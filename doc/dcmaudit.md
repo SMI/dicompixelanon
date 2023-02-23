@@ -96,7 +96,7 @@ p - move to Previous frame (or Previous overlay frame)
 f - Fast-forward to next overlay (skip rest of current overlay frames)
 N - mark the current image as 'done' in the database then move to the Next image
 Esc - move to next image, do not mark current image as done
- N.B. there is no P to move to previous image (yet, sorry)
+P - move to the previous image, do not mark current image as done
 i - Display some DICOM tag information
 o - Display the result of running OCR on the image
 r - redact the image within the rectangle and store this rectangle in the database
