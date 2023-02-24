@@ -25,6 +25,7 @@ Utilities:
 * `random_combinations_files.py` - convert the output from `random_combinations.py` into a set of filenames
 * `pydicom_images.py` - extract all the image frames, overlays, overlay frames as PNG format from a DICOM file, optionally run through OCR to get text, optionally run that through NER to get PII
 * dbrects.sh - display the rectangles in the database (simple sqlite3 wrapper)
+* dbtext.sh - display the OCR text in the database (simple sqlite3 wrapper)
 * dbtags.sh - display the tagged DICOM files in the database (simple sqlite3 wrapper)
 * dicom_pixel_anon.sh - anonymise a DICOM by running OCR and redacting all rectangles
 
