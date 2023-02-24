@@ -16,6 +16,7 @@ Summary of procedure:
 
 Utilities:
 * `dcmaudit.py` - interactive GUI to mark rectangles for redaction in DICOM image frames and overlays
+* `dicom_redact_db.py` - redact every file in the database which has rectangles
 * `extract_all.py` - extract as JSON every document from every image modality in MongoDB
 * `extract_BIA.py` - extract all the DICOM tags relevant to annotations, overlays, frames from every document from every image modality in MongoDB
 * `summary.py` - report a count of the unique values in each column of the CSV
@@ -24,10 +25,10 @@ Utilities:
 * `random_combinations.py` - read a CSV file and output a randomly-selected set of lines for each of every combination of values in a given set of columns
 * `random_combinations_files.py` - convert the output from `random_combinations.py` into a set of filenames
 * `pydicom_images.py` - extract all the image frames, overlays, overlay frames as PNG format from a DICOM file, optionally run through OCR to get text, optionally run that through NER to get PII
-* dbrects.sh - display the rectangles in the database (simple sqlite3 wrapper)
-* dbtext.sh - display the OCR text in the database (simple sqlite3 wrapper)
-* dbtags.sh - display the tagged DICOM files in the database (simple sqlite3 wrapper)
-* dicom_pixel_anon.sh - anonymise a DICOM by running OCR and redacting all rectangles
+* `dbrects.sh` - display the rectangles in the database (simple sqlite3 wrapper)
+* `dbtext.sh` - display the OCR text in the database (simple sqlite3 wrapper)
+* `dbtags.sh` - display the tagged DICOM files in the database (simple sqlite3 wrapper)
+* `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
 
 # Sample data
 
