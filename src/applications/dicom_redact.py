@@ -5,7 +5,7 @@
 
 # TODO: change all errors to raise exceptions
 # TODO: read ocrtext from CSV files (like is already done from database)
-# TODO: implement proper allowlist, read from config file or database
+# TODO: use allowlist from database?
 # NOTE:
 #   overlays may be smaller than their images. Rectangle coordinates
 #     are within the overlay, not relative to the original image, so
@@ -17,6 +17,7 @@ import argparse
 import logging
 import numpy as np
 import os
+import re
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
@@ -353,19 +354,51 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 
 
 # ---------------------------------------------------------------------
+# Functions to implement an allow-list for letting through rectangles
+# whose text exactly matches a pattern.
+
+# XXX global
+ocr_allow_list_regex = []
+
+def load_allowlist(filename = None):
+    global ocr_allow_list_regex
+    if not filename:
+        filename = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon", "ocr_whitelist_regex.txt")
+        if not os.path.isfile(filename):
+            filename = '../../data/ocr_whitelist_regex.txt'
+    ocr_allow_list_regex = []
+    with open(filename) as fd:
+        ocr_allow_list_regex = [re.compile(line.strip()) for line in fd.readlines()]
+    return ocr_allow_list_regex
+
+def test_load_allowlist():
+    load_allowlist()
+    assert(len(ocr_allow_list_regex))
+    
+
 def rect_in_allowlist(rect):
     """ Return True if the text contained in the rectangle is safe
     and doesn't need to be redacted. By default, return False, unless
     the text is on a known allowlist.
     """
+    
     # If the rect is a DicomRectText object it has a text_tuple method
     if hasattr(rect, 'text_tuple'):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    if ocrtext in ocr_allow_list:
-        return True
+    for pattern in ocr_allow_list_regex:
+        if pattern.fullmatch(ocrtext):
+            return True
     return False
+
+def test_rect_in_allowlist():
+    load_allowlist()
+    assert(rect_in_allowlist(DicomRectText(ocrtext='ERECT')))
+    assert(rect_in_allowlist(DicomRectText(ocrtext='AP ERECT')))
+    assert(rect_in_allowlist(DicomRectText(ocrtext='PA ERECT')))
+    assert(not rect_in_allowlist(DicomRectText(ocrtext='NOT ERECT')))
+    
 
 def filter_rect_list(rect_list):
     """ Filter the list to remove all items which are "safe"
@@ -376,6 +409,14 @@ def filter_rect_list(rect_list):
     rect_list[:] = [rect for rect in rect_list if not rect_in_allowlist(rect)]
     return rect_list
 
+def test_filter_rect_list():
+    rect1 = DicomRectText(ocrtext = 'ERECT')
+    rect2 = DicomRectText(ocrtext = 'NOT ERECT')
+    rect3 = DicomRectText(ocrtext = 'AP ERECT')
+    rect_list = [rect1, rect2, rect3]
+    filtered_rect_list = filter_rect_list(rect_list)
+    assert(len(filtered_rect_list) == 1) # one bad rect remains
+    assert(filtered_rect_list[0].text_tuple()[1] == 'NOT ERECT')
 
 # ---------------------------------------------------------------------
 
