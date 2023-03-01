@@ -362,18 +362,24 @@ ocr_allow_list_regex = []
 
 def load_allowlist(filename = None):
     global ocr_allow_list_regex
+    # Do not reload
+    if len(ocr_allow_list_regex):
+        return ocr_allow_list_regex
+    # Find in $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
+    # or relative to this script in the repo for testing
     if not filename:
         filename = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon", "ocr_whitelist_regex.txt")
         if not os.path.isfile(filename):
             filename = '../../data/ocr_whitelist_regex.txt'
     ocr_allow_list_regex = []
+    # Pre-compile all the regex patterns
     with open(filename) as fd:
         ocr_allow_list_regex = [re.compile(line.strip()) for line in fd.readlines()]
     return ocr_allow_list_regex
 
 def test_load_allowlist():
-    load_allowlist()
-    assert(len(ocr_allow_list_regex))
+    allowlist = load_allowlist()
+    assert(len(allowlist))
     
 
 def rect_in_allowlist(rect):
@@ -381,19 +387,18 @@ def rect_in_allowlist(rect):
     and doesn't need to be redacted. By default, return False, unless
     the text is on a known allowlist.
     """
-    
+    allowlist = load_allowlist()
     # If the rect is a DicomRectText object it has a text_tuple method
     if hasattr(rect, 'text_tuple'):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    for pattern in ocr_allow_list_regex:
+    for pattern in allowlist:
         if pattern.fullmatch(ocrtext):
             return True
     return False
 
 def test_rect_in_allowlist():
-    load_allowlist()
     assert(rect_in_allowlist(DicomRectText(ocrtext='ERECT')))
     assert(rect_in_allowlist(DicomRectText(ocrtext='AP ERECT')))
     assert(rect_in_allowlist(DicomRectText(ocrtext='PA ERECT')))
