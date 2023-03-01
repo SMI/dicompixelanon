@@ -150,49 +150,7 @@ usage: pydicom_images.py [-v] [-x] [-i] [-f FORMAT] files...
 
 ## Database schema
 
-The database is held in `dcmaudit.sqlite.db` but despite sqlite being a 
-single-file format it creates two other files with names like:
-```
-952e4562cd3ebdf5205ee934be4b20f9_DicomRects.table
-952e4562cd3ebdf5205ee934be4b20f9_DicomTags.table
-```
-These files are simply table descriptions created by the python database layer and can be ignored. (If you delete them they will be recreated)
-
-You can examine the file using:
-```
-% sqlite3 dcmaudit.sqlite.db
-sqlite> select * from DicomTags;
-```
-
-The tables are defined as below.
-Rectangles are defined by top, bottom, left, right, and the number of the overlay frame if applicable.  There can be many rectangles defined for any one file.
-The DicomTags table holds a mark (if an image has been tagged for closer inspection) or a comment. It will only hold the other DICOM tags (modality, etc) once the image has been marked as fully inspected (to save space).
-
-```
-CREATE TABLE "DicomRects"(
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "filename" CHAR(512),  -- NB. not UNIQUE
-    "top" INTEGER,
-    "bottom" INTEGER,
-    "left" INTEGER,
-    "right" INTEGER,
-    "frame" INTEGER,
-    "overlay" INTEGER
-);
-
-CREATE TABLE "DicomTags"(
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "filename" CHAR(512) UNIQUE,
-    "mark" CHAR(1),       -- actually boolean
-    "comment" CHAR(512),
-    "modality" CHAR(512),
-    "imagetype" CHAR(512),
-    "manufacturermodelname" CHAR(512),
-    "burnedinannotation" CHAR(512),
-    "rows" CHAR(512),
-    "columns" CHAR(512)
-);
-```
+See the `dicomrectdb.md` document.
 
 ## Future work
 

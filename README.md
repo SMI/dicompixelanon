@@ -8,6 +8,7 @@ Contents:
 * [dicom_redact](doc/dicom_redact.md) - redact regions from DICOM images
 * [dicom_pixel_anon](doc/dicom_pixel_anon.md) - run OCR and redact regions from DICOM images
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
+* [dicom rect db](doc/dicomrectdb.md) - the database about DICOM files which have been examined
 
 Utilities:
 * `dcmaudit.py` - interactive GUI to mark rectangles for redaction in DICOM image frames and overlays
@@ -89,7 +90,7 @@ Optional Python requirements
 OS packages
 
 * python3-tk (for dcmaudit), this will install tk8.6 and libtk8.6
-* tesseract (optional)
+* tesseract-ocr (optional)
 
 # Installation notes
 

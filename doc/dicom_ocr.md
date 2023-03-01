@@ -65,4 +65,4 @@ filename,frame,overlay,imagetype,manufacturer,burnedinannotation,ocr_engine,left
 
 ## Output Database
 
-See the documentation of the `DicomRects` table in the [dcmaudit](dcmaudit.md) document.
+See the documentation of the `DicomRects` table in the [dicomrectdb](dicomrectdb.md) document.
