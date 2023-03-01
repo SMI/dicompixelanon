@@ -33,11 +33,11 @@ import tkinter.messagebox
 import tkinter.simpledialog
 from tkinter.ttk import Progressbar
 import pytesseract
-from filelist import FileList
-from dicomrectdb import DicomRectDB
-from rect import Rect, DicomRect, add_Rect_to_list
-from ocrengine import OCR
-from dicomimage import DicomImage
+from DicomPixelAnon.filelist import FileList
+from DicomPixelAnon.dicomrectdb import DicomRectDB
+from DicomPixelAnon.rect import Rect, DicomRect, add_Rect_to_list
+from DicomPixelAnon.ocrengine import OCR
+from DicomPixelAnon.dicomimage import DicomImage
 
 
 # =====================================================================

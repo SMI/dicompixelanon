@@ -19,10 +19,10 @@ import os
 import pydicom
 import sys
 from PIL import Image
-from ocrengine import OCR
-from nerengine import NER
-from dicomimage import DicomImage
-from rect import Rect
+from DicomPixelAnon.ocrengine import OCR
+from DicomPixelAnon.nerengine import NER
+from DicomPixelAnon.dicomimage import DicomImage
+from DicomPixelAnon.rect import Rect
 
 
 # Reporting functions

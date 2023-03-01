@@ -1,3 +1,8 @@
+""" The FileList class maintains a simple list of filenames
+allowing you to step forwards and backwards through the list.
+It was intended to do more than this, but it's quite simple right now.
+"""
+
 import glob
 import os
 

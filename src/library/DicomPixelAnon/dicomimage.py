@@ -1,3 +1,7 @@
+""" The DicomImage class encapsulated a DICOM file and allows access
+to all of the image frames and overlay frames within, as numpy arrays.
+"""
+
 import json
 import logging
 import pydicom

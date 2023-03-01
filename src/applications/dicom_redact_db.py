@@ -6,7 +6,7 @@
 import logging
 import os
 import sys
-from dicomrectdb import DicomRectDB
+from DicomPixelAnon.dicomrectdb import DicomRectDB
 
 destdir = '/beegfs-hdruk/extract/v12/PACS/projects/abrooks_test5'
 

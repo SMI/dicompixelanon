@@ -1,0 +1,14 @@
+pydicom
+pylibjpeg
+pylibjpeg_libjpeg
+pydal
+pymongo
+Pillow
+pytesseract==0.3.8
+numpy
+opencv_python_headless
+easyocr
+spacy
+flair
+stanza
+matplotlib

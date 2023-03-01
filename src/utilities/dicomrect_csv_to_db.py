@@ -5,8 +5,8 @@
 
 import argparse
 import csv
-from rect import DicomRect
-from dicomrectdb import DicomRectDB
+from DicomPixelAnon.rect import DicomRect
+from DicomPixelAnon.dicomrectdb import DicomRectDB
 
 
 def add_to_db(filename, frame=-1, overlay=-1, top=-1, bottom=-1, left=-1, right=-1):
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Add rect to database')
     parser.add_argument('-v', '--verbose', action="store_true", help='verbose')
     parser.add_argument('-d', '--debug', action="store_true", help='debug')
-    parser.add_argument('-c', '--csv', dest='csv', action="store", help='input CSV file having filename,left,right,top,bottom,frame,overlay')
+    parser.add_argument('-c', '--csv', dest='csv', action="store", help='input CSV file having filename,left,right,top,bottom,frame,overlay', required=True)
     parser.add_argument('--db', dest='db', action="store", help='output database directory')
     args = parser.parse_args()
     if args.db:

@@ -19,10 +19,10 @@ import numpy as np
 import os
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
-from rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
+from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 import sys
 try:
-    from dicomrectdb import DicomRectDB
+    from DicomPixelAnon.dicomrectdb import DicomRectDB
     dbEnabled = True
 except:
     dbEnabled = False

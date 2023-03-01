@@ -1,3 +1,7 @@
+""" A utility to import torch for PyTorch,
+which limits the amount of memory used, thus allowing
+multiple processes to run concurrently.
+"""
 # Limit the amount of memory used by a PyTorch process.
 # This prevents the cache from growing into all available memory,
 # thus allowing multiple processes to run in parallel.

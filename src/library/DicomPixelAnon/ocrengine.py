@@ -1,3 +1,7 @@
+""" The OCR class encapsulates a variety of OCR engines
+allowing OCR to be run on images as numpy arrays and
+returning either a string or a list of text rectangles.
+"""
 # OCR class
 #   Can be initialised with 'tesseract' or 'easyocr'
 #   Looks in $SMI_ROOT/data/tessdata and $SMI_ROOT/data/easyocr
@@ -22,7 +26,7 @@ try:
     import pytesseract
 except:
     logging.warning('OCR: tesseract module not available')
-from rect import Rect
+from DicomPixelAnon.rect import Rect
 import cv2
 
 

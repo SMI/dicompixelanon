@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+""" A wrapper around the Stanford NER engine, used by the NER class.
+"""
 # Code taken from https://github.com/philipperemy/Stanford-NER-Python
 # and modified to work as a module not a standalone program.
 

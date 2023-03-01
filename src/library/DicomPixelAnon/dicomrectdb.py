@@ -1,3 +1,6 @@
+""" The DicomRectDB maintains a database of DicomRect and DicomRectText objects.
+"""
+
 import datetime
 import getpass # for getuser
 import json
@@ -5,7 +8,7 @@ import logging
 import os
 import sys
 from pydal import DAL, Field
-from rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
+from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
 
 
 class DicomRectDB():

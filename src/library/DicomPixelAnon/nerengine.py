@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+""" The NER class encapsulates a variety of different NLP engines
+allowing NER to be run on text to find possible PII.
+"""
 # NB export HF_HUB_OFFLINE=1  if using flair inside safe haven.
 # SpaCy models can be installed from pip or as wheels.
 # Flair models have to be downloaded and cached manually,
