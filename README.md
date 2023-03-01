@@ -112,7 +112,7 @@ https://pydicom.github.io/pydicom/stable/old/image_data_handlers.html#supported-
 PyTesseract must be pinned to version 0.3.8 if you are stuck with Python 3.6 (as found in CentOS-7).
 See also tesseract below.
 
-# Stanford NER
+## Stanford NER
 
 Stanford NER (the original CoreNLP, not Stanza) requires Java 1.8. It can be made to work with Java 9 and Java 10 but will not work with Java 11 because a dependency has been removed from the JRE.
 
