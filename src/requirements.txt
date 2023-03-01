@@ -1,12 +1,12 @@
 pydicom
 pylibjpeg
-pylibjpeg-libjpeg
+pylibjpeg_libjpeg
 pydal
 pymongo
 Pillow
 pytesseract==0.3.8
 numpy
-opencv-python-headless
+opencv_python_headless
 easyocr
 spacy
 flair
