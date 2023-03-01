@@ -16,12 +16,24 @@ This tool can redact rectangles in four ways:
 * from a list provided in a CSV file, for example the output from
  `pydicom_images.py` running OCR on DICOM files
 * from a list stored in a database, for example the output from
- `dcmaudio.py` with manually marked-up DICOM files
-* from a set of regions defined in an UltraSound DICOM
+ `dcmaudit.py` with manually marked-up DICOM files, or from `dicom_ocr.py`
+* from a set of regions defined in the metadata of an UltraSound DICOM
 
 It should be noted that all of these tools can be used standalone or
 in conjunction with other tools, for example you can use CTP and/or
 pydicom-deid as well.
+
+## Preserving non-PII text
+
+The purpose of redaction is to remove PII, but some text rectangles
+may contain no PII and in fact may be worth keeping, so this tool
+has an allow-list to preserve specific fragments of text. The allow-
+list is currently a set of regular expressions which is read from a
+text file in `$SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt`
+If the text in a rectangle exactly matches the regex then the
+rectangle is not redacted.
+
+## High-bit overlays
 
 This tool also has the ability to remove any overlays which are
 embedded in the high-bits of the image pixels. The normal CTP anonymisation
@@ -29,7 +41,9 @@ process can remove overlays but it only removes the 60xx group of DICOM
 tags which in most cases is sufficient, but it doesn't remove high-bit
 overlays. This tool can do that job to fully clean a DICOM file.
 
-NOTE! The utility has to decompress the image (if compressed), but it
+## NOTE!
+
+The utility has to decompress the image (if compressed), but it
 does not (yet) recompress the image again afterwards, so the file size
 may increase. Some other redaction tools have the ability to preserve
 most of a lossy-JPEG-compressed image except for the redacted blocks,

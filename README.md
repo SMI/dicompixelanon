@@ -4,15 +4,10 @@ Anonymisation of text burned into the pixels of DICOM images.
 
 Contents:
 * [dcmaudit](doc/dcmaudit.md) - view DICOM images, annotate regions to redact
-* [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 * [dicom_ocr](doc/dicom_ocr.md) - run OCR on the images and overlays in one or more DICOM files
 * [dicom_redact](doc/dicom_redact.md) - redact regions from DICOM images
 * [dicom_pixel_anon](doc/dicom_pixel_anon.md) - run OCR and redact regions from DICOM images
-
-Summary of procedure:
-* extract all the potentially useful information from MongoDB and store in CSV files (quicker than querying MongoDB every time)
-* extract a random sample of DICOM filenames from the CSV files, eg. 20 for every combination of modality + ImageType + Manufacturer
-* use pydicom_images to view the DICOMs and visually inspect for PII in the pixels
+* [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 
 Utilities:
 * `dcmaudit.py` - interactive GUI to mark rectangles for redaction in DICOM image frames and overlays
@@ -29,6 +24,20 @@ Utilities:
 * `dbtext.sh` - display the OCR text in the database (simple sqlite3 wrapper)
 * `dbtags.sh` - display the tagged DICOM files in the database (simple sqlite3 wrapper)
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
+
+# Usage
+
+* Create a Python virtual environment and activate it
+* Create a config file directory `$SMI_ROOT/data` (you can set `$SMI_ROOT` anywhere)
+* Install all of the Python requirements (see below)
+* Copy `data/ocr_whitelist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt` if required for dicom_redact
+* Build the DicomPixelAnon library, see the instructions in the `src/library` directory
+* Install the DicomPixelAnon wheel into the virtual environment
+* Now you can run the applications:
+  - dcmaudit, if you want to view a DICOM file and manually curate a database of rectangles
+  - dicom_ocr, if you want to run OCR on a DICOM file and store the results in a database
+  - dicom_redact, if you want to redact the DICOM file based on the rectangles in the database
+  - dicom_pixel_anon, to run both ocr and redact together
 
 # Sample data
 
@@ -65,8 +74,13 @@ https://pydicom.github.io/pydicom/stable/old/image_data_handlers.html#supported-
 * numpy
 * opencv-python-headless
 * Pillow
-* pytorch CPU version (if no GPU available)
+* pytorch CPU version (if no GPU available), see the pytorch website
 * other dependencies of the above
+
+OS packages
+
+* python3-tk (for dcmaudit), this will install tk8.6 and libtk8.6
+* tesseract (optional)
 
 # Installation notes
 
