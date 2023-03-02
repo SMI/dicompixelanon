@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# redundant HTML data
+data/radiology_glossary/raw/
