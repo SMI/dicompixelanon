@@ -127,11 +127,12 @@ class NER():
                         self._engine_enum = 10 + ii
                         break
             self._engine_name = engine
-            self.engine_model = model
             self.engine_version = spacy.__version__
             #self.engine_data_dir = os.path.join(os.environ.get('SMI_ROOT'), 'data', 'spacy_'+self.engine_version) # not needed yet
-            logging.debug('Loading %s version %s with %s' % (self._engine_name, self.engine_version, self.engine_model))
+            logging.debug('Loading %s version %s with %s' % (self._engine_name, self.engine_version, model))
             self.nlp = spacy.load(model)
+            # Mark this object as valid by updating value of model
+            self.engine_model = model
 
         elif engine == 'flair':
             if 'flair' not in sys.modules:
@@ -142,7 +143,6 @@ class NER():
             if not model:
                 model = 'ner'
             self._engine_name = engine
-            self.engine_model = model
             self.engine_version = flair.__version__
             self.engine_data_dir = None
             flair_path_list = [ os.getenv('FLAIR_CACHE_ROOT', '.flair'),
@@ -156,8 +156,10 @@ class NER():
                 logging.error('flair requested but no data directory found')
                 return
             flair.cache_root = Path(self.engine_data_dir)
-            logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, self.engine_model, self.engine_data_dir))
+            logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, model, self.engine_data_dir))
             self.tagger = SequenceTagger.load(model)
+            # Mark this object as valid by updating value of model
+            self.engine_model = model
 
         elif engine == 'stanford':
             if 'stanford_ner' not in sys.modules:
@@ -165,7 +167,6 @@ class NER():
                 return
             self._engine_name = engine
             self._engine_enum = 30
-            self.engine_model = model
             self.engine_version = stanford_ner.__version__
             self.engine_data_dir = None
             # '../../Stanford-NER-Python/stanford-ner/'
@@ -181,6 +182,8 @@ class NER():
             if not self.engine_data_dir:
                 logging.error('stanford_ner requested but no data directory found')
                 return
+            # Mark this object as valid by updating value of model
+            self.engine_model = model
             logging.debug('Loading %s version %s with %s from %s' % (self._engine_name, self.engine_version, self.engine_model, self.engine_data_dir))
 
         elif engine == 'stanza':
@@ -189,7 +192,6 @@ class NER():
                 return
             self._engine_name = engine
             self._engine_enum = 40
-            self.engine_model = model
             self.engine_version = stanza.__version__
             self.engine_data_dir = None
             stanza_path_list = [ os.getenv('STANZA_DATA_ROOT', '.stanford_ner'),
@@ -206,6 +208,8 @@ class NER():
                 processors='tokenize,ner',
                 download_method=None,
                 dir=self.engine_data_dir)
+            # Mark this object as valid by updating value of model
+            self.engine_model = model
 
         elif engine == 'ocr_whitelist':
             # Default is $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
@@ -223,15 +227,17 @@ class NER():
             if not self.engine_data_dir:
                 logging.error('ocr_whitelist requested but no data directory found')
                 return
-            if not self.engine_model:
-                self.engine_model = 'ocr_whitelist_regex.txt'
-            ocr_whitelist_file = os.path.join(self.engine_data_dir, self.engine_model)
+            if not model:
+                model = 'ocr_whitelist_regex.txt'
+            ocr_whitelist_file = os.path.join(self.engine_data_dir, model)
             if not os.path.isfile(ocr_whitelist_file):
                 logging.error('ocr_whitelist requested but no data file found (%s)' % ocr_whitelist_file)
                 return
             self.ocr_allowlist_regex_list = []
             with open(ocr_whitelist_file) as fd:
                 self.ocr_allowlist_regex_list = [re.compile(line.strip()) for line in fd.readlines()]
+            # Mark this object as valid by updating value of model
+            self.engine_model = model
 
         else:
             logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza/ocr_whitelist)' % engine)
