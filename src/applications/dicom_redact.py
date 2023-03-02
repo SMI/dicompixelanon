@@ -21,6 +21,7 @@ import re
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
+from DicomPixelAnon.nerengine import NER
 import sys
 try:
     from DicomPixelAnon.dicomrectdb import DicomRectDB
@@ -49,31 +50,16 @@ elem_OverlayCols = 0x0011
 elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
 
-# Define the exact words (case-sensitive) which are allowed
-# so their rectangles will not be redacted.
-ocr_allow_list = [
-    'AP', 'PA', 'ERECT', 'STANDING', 'RIGHT', 'LEFT',
-    'Erect', 'Supine',
-    'PORTABLE SUPINE',
-    'AP ERECT MOBILE',
-    'MOBILE AP ERECT',
-    'PORTABLE AP ERECT',
-    'PA ERECT', 'AP ERECT',
-    'L AP ERECT', 'R AP ERECT',
-    'AP SEMI ERECT', 'AP SEMI-ERECT',
-    'WT BEARING', 'WT: BEARING', 'WT; BEARING', 'WEIGHT BEARING', 'Wt Bearing', 'WEIGHT-BEARING', 'Weight Bearing', 'Weight bearing', 'WEIGHTBEARING',
-    'H BEAM', 'MOBILE',
-    'HBL', 'L HBL', 'R HBL',
-    'RED DOT', 'RED DOT L', 'RED DOT R', 'red dot', 'Red Dot', 'R Red Dot', 'R red dot', 'L Red Dot', 'L red dot',
-    'RESUS',
-]
-
 
 # ---------------------------------------------------------------------
 
 def mark_as_uncompressed(ds):
-    """ Call this after you've uncompressed the PixelData
-    and written it back into the dataset using tobytes()
+    """ Mark a DICOM file as containing uncompressed image data.
+    Call this after you've uncompressed the PixelData
+    and written it back into the dataset using tobytes().
+    It only changes the TransferSyntaxUID, to either
+    ExplicitVRLittleEndian or ExplicitVRBigEndian as appropriate.
+    XXX not sure about this.
     """
     if sys.byteorder == 'little':
         ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
@@ -85,7 +71,7 @@ def mark_as_uncompressed(ds):
 
 def overlay_tag_group_from_index(overlay):
     """ Convert an overlay index 0..15 into a DICOM tag group
-    They start at 0x6000 and go up in twos.
+    They start at 0x6000 and go up in twos, e.g. 0=0x6000, 1=0x6002.
     """
     return 0x6000 + 2 * overlay
 
@@ -357,29 +343,17 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 # Functions to implement an allow-list for letting through rectangles
 # whose text exactly matches a pattern.
 
-# XXX global
-ocr_allow_list_regex = []
-
 def load_allowlist(filename = None):
-    global ocr_allow_list_regex
-    # Do not reload
-    if len(ocr_allow_list_regex):
-        return ocr_allow_list_regex
-    # Find in $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
-    # or relative to this script in the repo for testing
-    if not filename:
-        filename = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon", "ocr_whitelist_regex.txt")
-        if not os.path.isfile(filename):
-            filename = '../../data/ocr_whitelist_regex.txt'
-    ocr_allow_list_regex = []
-    # Pre-compile all the regex patterns
-    with open(filename) as fd:
-        ocr_allow_list_regex = [re.compile(line.strip()) for line in fd.readlines()]
-    return ocr_allow_list_regex
+    global ocr_allowlist
+    try:
+        return ocr_allowlist
+    except:
+        ocr_allowlist = NER('ocr_whitelist')
+    return ocr_allowlist
 
 def test_load_allowlist():
     allowlist = load_allowlist()
-    assert(len(allowlist))
+    assert(allowlist)
     
 
 def rect_in_allowlist(rect):
@@ -393,16 +367,15 @@ def rect_in_allowlist(rect):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    for pattern in allowlist:
-        if pattern.fullmatch(ocrtext):
-            return True
+    if allowlist.detect(ocrtext) == []:
+        return True
     return False
 
 def test_rect_in_allowlist():
     assert(rect_in_allowlist(DicomRectText(ocrtext='ERECT')))
     assert(rect_in_allowlist(DicomRectText(ocrtext='AP ERECT')))
     assert(rect_in_allowlist(DicomRectText(ocrtext='PA ERECT')))
-    assert(not rect_in_allowlist(DicomRectText(ocrtext='NOT ERECT')))
+    assert(not rect_in_allowlist(DicomRectText(ocrtext='NOT ERECT', top=0)))
     
 
 def filter_rect_list(rect_list):
