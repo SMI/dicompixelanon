@@ -49,31 +49,16 @@ elem_OverlayCols = 0x0011
 elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
 
-# Define the exact words (case-sensitive) which are allowed
-# so their rectangles will not be redacted.
-ocr_allow_list = [
-    'AP', 'PA', 'ERECT', 'STANDING', 'RIGHT', 'LEFT',
-    'Erect', 'Supine',
-    'PORTABLE SUPINE',
-    'AP ERECT MOBILE',
-    'MOBILE AP ERECT',
-    'PORTABLE AP ERECT',
-    'PA ERECT', 'AP ERECT',
-    'L AP ERECT', 'R AP ERECT',
-    'AP SEMI ERECT', 'AP SEMI-ERECT',
-    'WT BEARING', 'WT: BEARING', 'WT; BEARING', 'WEIGHT BEARING', 'Wt Bearing', 'WEIGHT-BEARING', 'Weight Bearing', 'Weight bearing', 'WEIGHTBEARING',
-    'H BEAM', 'MOBILE',
-    'HBL', 'L HBL', 'R HBL',
-    'RED DOT', 'RED DOT L', 'RED DOT R', 'red dot', 'Red Dot', 'R Red Dot', 'R red dot', 'L Red Dot', 'L red dot',
-    'RESUS',
-]
-
 
 # ---------------------------------------------------------------------
 
 def mark_as_uncompressed(ds):
-    """ Call this after you've uncompressed the PixelData
-    and written it back into the dataset using tobytes()
+    """ Mark a DICOM file as containing uncompressed image data.
+    Call this after you've uncompressed the PixelData
+    and written it back into the dataset using tobytes().
+    It only changes the TransferSyntaxUID, to either
+    ExplicitVRLittleEndian or ExplicitVRBigEndian as appropriate.
+    XXX not sure about this.
     """
     if sys.byteorder == 'little':
         ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
@@ -85,7 +70,7 @@ def mark_as_uncompressed(ds):
 
 def overlay_tag_group_from_index(overlay):
     """ Convert an overlay index 0..15 into a DICOM tag group
-    They start at 0x6000 and go up in twos.
+    They start at 0x6000 and go up in twos, e.g. 0=0x6000, 1=0x6002.
     """
     return 0x6000 + 2 * overlay
 

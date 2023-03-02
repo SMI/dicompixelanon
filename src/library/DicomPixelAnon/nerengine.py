@@ -14,6 +14,7 @@ allowing NER to be run on text to find possible PII.
 
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from importlib.util import find_spec
@@ -206,8 +207,34 @@ class NER():
                 download_method=None,
                 dir=self.engine_data_dir)
 
+        elif engine == 'ocr_whitelist':
+            # Default is $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
+            self._engine_name = engine
+            self._engine_enum = 50
+            self.engine_model = model
+            self.engine_version = '1.0.0' # XXX maybe timestamp of file?
+            self.engine_data_dir = None
+            ocr_whitelist_path_list = [ os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'dicompixelanon'),
+                '../../../data']
+            for whitelist_path in ocr_whitelist_path_list:
+                if os.path.isdir(whitelist_path):
+                    self.engine_data_dir = whitelist_path
+                    break
+            if not self.engine_data_dir:
+                logging.error('ocr_whitelist requested but no data directory found')
+                return
+            if not self.engine_model:
+                self.engine_model = 'ocr_whitelist_regex.txt'
+            ocr_whitelist_file = os.path.join(self.engine_data_dir, self.engine_model)
+            if not os.path.isfile(ocr_whitelist_file):
+                logging.error('ocr_whitelist requested but no data file found (%s)' % ocr_whitelist_file)
+                return
+            self.ocr_allowlist_regex_list = []
+            with open(ocr_whitelist_file) as fd:
+                self.ocr_allowlist_regex_list = [re.compile(line.strip()) for line in fd.readlines()]
+
         else:
-            logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza)' % engine)
+            logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza/ocr_whitelist)' % engine)
             return
 
     def __repr__(self):
@@ -261,6 +288,15 @@ class NER():
             entities_list = [ {'text':e.text, 'label':NER.stanford_entity_map(e.type)}
                 for e in entities if NER.stanza_entity_map(e.type) ]
             return entities_list
+        elif self._engine_name == 'ocr_whitelist':
+            # Return the whole string as a MISC entity if it's not in the allowlist
+            entities_list = [ {'text': text, 'label': 'MISC'} ]
+            for pattern in self.ocr_allowlist_regex_list:
+                # Use fullmatch to ensure whole string matches pattern
+                if pattern.fullmatch(text):
+                    entities_list = []
+                    break
+            return entities_list
         return []
 
 
@@ -278,6 +314,14 @@ def test_stanford():
     ner = NER('stanford')
     assert ner.isValid()
     assert ner.detect('Queen Elizabeth Hospital') == [{'label': 'LOC', 'text': 'Queen Elizabeth Hospital'}]
+
+def test_ocr_whitelist():
+    ner = NER('ocr_whitelist')
+    assert ner.isValid()
+    assert ner.detect('PA ERECT') == []
+    assert ner.detect('AP ERECT') == []
+    assert ner.detect('NOT ERECT') == [{'label': 'MISC', 'text': 'NOT ERECT'}]
+
 
 if __name__ == '__main__':
     persons = [
