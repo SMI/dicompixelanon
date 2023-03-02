@@ -25,6 +25,7 @@ Utilities:
 * `dbtext.sh` - display the OCR text in the database (simple sqlite3 wrapper)
 * `dbtags.sh` - display the tagged DICOM files in the database (simple sqlite3 wrapper)
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
+* `build_whitelist.py` - create list of regex rules for whitelisting OCR output, write to file
 
 # Usage
 
