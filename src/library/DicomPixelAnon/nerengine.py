@@ -219,6 +219,7 @@ class NER():
             self.engine_version = '1.0.0' # XXX maybe timestamp of file?
             self.engine_data_dir = None
             ocr_whitelist_path_list = [ os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'dicompixelanon'),
+                '../../data',
                 '../../../data']
             for whitelist_path in ocr_whitelist_path_list:
                 if os.path.isdir(whitelist_path):
