@@ -1,0 +1,2335 @@
+(2
+212
+Orthopantomographa
+(r
+KM
+IW
+(%
+1 :
+Rla
+R 8
+L 8
+JM
+113
+SAL
+~R
+1 5
+Ria
+21
+L_
+7)
+31
+12
+Rl
+R_
+KAB
+46
+38
+00
+R MC
+L8
+ELC
+5 2
+120
+RIa
+R 1 OF 2
+L *
+EW
+42
+20
+STAND Chest Landsc. Erect MED %
+RING
+R8
+R 54
+R 1 of 2
+R *
+PW
+L NG
+LITTLE
+L 2 OF 2
+L 1/2
+L)
+7 :
+63
+45
+32
+24
+16
+13
+VG
+STAND Chest Landsc. Erect MED -%
+R FB
+R 125
+PRONE
+L ZM
+L PWA
+L LDM
+L JM
+L 1 OF 2
+Ext-rot
+ERECTT
+CHECK
+8 8
+48
+39
+28
+19
+123
+11
+105
+(X
+STAND Chest Landsc Erect MED %
+R SM
+Rlal
+R JG
+R AE
+R 48
+R 2 OF 2
+R 27
+R?
+PRE ESWL
+Orthopantomographr
+Orthopantomograph
+L LP
+LI
+L CP
+L AE
+L 57
+L #
+KAF
+Iat
+HIAND
+HBL L
+FOR NG TUBE
+Cwj
+CLW
+71
+40
+36
+33
+15
+137
+1/3
+02
+(*
+(x
+STAND Chest Landsc_ Erect MED %
+Rts
+R RLF
+R R
+R Lp
+R LAB
+RED DOT L
+R CHR
+R 137
+R 130
+R 129
+R 122
+'R
+R #
+PCG R
+Medial
+L TA
+L SC
+L NS
+L LS
+L JG
+Li
+Lg
+L ELC
+L Eh
+L 9
+L 45
+L;
+KSB
+KS
+Ia
+?FB
+CAS. Abdo Supine %
+83
+70
+50
+44
+41
+30
+2 R
+27
+22
+17
+110
+10f2
+03
+WT. BEARING
+WI BEARING
+T12
+Stunding
+STAND Chest Landsc. Erect LGE %
+R ZM
+R SDS
+R RMO
+R Red Dot
+RPO
+R Mpi
+R LMC
+R LDM
+R KSB
+RIal
+RHBL
+R ELC
+RED DO
+R CP
+R CAB
+R AC
+R 9
+R 8 T
+R 50
+R 49
+R 36
+R 34
+R 1/2
+R 106
+* R
+R 
+PCG
+Operator: SW
+LW
+L SM
+L RMO
+L PW
+L PAM
+L N
+LMC
+L KSB
+L KH
+L Jr
+L JMN
+LJc
+L Iat
+L IAN
+L g
+LFFT
+L CHR
+L CA
+L BJt
+L BH
+L AS
+L AC
+L Ac
+L 48
+L 46
+L 39
+L 212
+L 1 of 2
+L 110
+* L
+KCM L
+JS
+J8
+Iw
+IN TRAY
+IN RESUS
+FOR NG
+DW
+Dumtnes
+DAP 
+CAS. AP Chest Landsc. %
+BCM
+8a
+89
+85
+72
+7.2
+62
+60
+58
+3 B
+37
+25
+23
+2 2
+1 of 2 L
+1 of 2 images
+136
+121
+12.0
+119
+112
+WEIGHT BFARING L
+VZ
+Upright
+Upertor
+TABLE Abdo Landscape %
+Supin
+STAND Facial Bones OM 30 %
+STAND Ctiest Laridsc. Erect MED %
+STAND Chest Laridsc. Erect MED -%
+STAND Chest Landsc_ Erect MED %f
+SML R
+SML
+Sk
+RY
+RTs
+Rtal
+R RM8
+R RM2
+R red dot
+R PWA
+R MH
+R MG
+R MCQ
+R MB
+R LS
+R LP
+R LH
+Rl9
+R KS
+R KB
+R JMF
+R JM
+R INDEX
+RIGHT 2 OF 2
+R IAN
+Ria]
+R HC
+R g
+R EW
+R ET
+R EC
+R DP
+R CM
+R CA
+R BQ
+R BCM
+R As
+R AB STANDING
+R AAH
+R 45
+R4
+R 39
+R 38
+R 30
+R 2 OF 3
+R 2 of 2
+R 2
+R 138
+R 136
+R 1/3
+R 118
+R 113
+R 111
+R 109
+R 104
+*R
+R}
+R &
+QD
+Q0
+POST
+Operator: LG
+Operator: JAC
+Operator: DK
+Operator: djw
+Operator: ak
+Operator
+O0
+M Rf
+MEDIAL
+Max bending to Right
+L X
+L ST
+L SH
+L SD
+L RED DOT
+L McQ
+L McO
+LMc
+LLI
+LLA
+L L
+L KW
+L KM
+L JR
+L JLR
+L JE
+L GR
+L EC
+L CM
+L-cc
+L B
+L AR
+L ap
+L AM
+L 50/L
+L50
+L 50
+L5
+L 49
+L 47
+L 4
+L 36
+L 35
+L 34
+L3
+L 2 of 2
+L 24
+L 2
+L 19
+L 146
+L 138
+L 136
+L 134
+L 12
+L 119
+L 112
+L 111
+L 1
+L 02
+L?
+L(
+L#
+KIM
+Ki
+Ke
+Kc
+kc
+JW
+Jr
+Jo
+JNDER TROLLEY
+Jd:d
+JC
+Iat R
+FLEX
+Ff
+Eta]
+El
+DAY 5
+Date
+DAP-
+CwJ
+cwJ
+CW
+Cw}
+Cuj
+Contrast Type
+CAS. Pelvis AP_ ~%f
+CAS. Pelvis AP _%
+CAS Knee Lat %
+CAS_ Knee AP %
+CAS. Hip AP %
+CAS. AP Chest Landsc_ %
+C6
+BF
+APP
+AP ERECTT
+AP ERECTI
+AP ERECT 1 OF 2
+APERECT
+Ak
+A CA
+93
+91
+88
+87
+8 63
+84
+8 ~
+79
+73
+(7
+6 8
+65
+6"
+55
+54
+5 ;
+4L
+47
+3 E
+3 83
+3 1
+3)
+2FB
+2 5
+23 4 5
+20f2 R
+2 0f 2
+1 OF 2 R
+1J
+15 MINS
+138
+12.9
+12.1
+120/DD
+118
+116
+111
+108
+106
+104
+103
+10
+1 
+08
+05
+04
+0 4
+0 2
+01
+0 0
+0 <
+Zp &p
+ZOz 0
+Znd image AP ERECT
+ZM
+ZIP ON CLOTHING
+[Z.I3.Q- [114.50.09] Ecliriburghi Foyal Irifirrriary
+ZC
+Zaar
+Z0.A]1.2012 [10.59.24] Edirburgh Royal Infirrriar}
+Z(
+Ym
+YJ
+Yaw
+YaM
+Y 22 8
+XV52mas 2 DAP 6 0 e(Qj
+Xuem
+X R
+XPi
+Xp.3S IiAs:5.40 DAP:3.29 2(2) IGycrriz
+X L
+X)i
+XF
+X7
+X2
+'x
+WXsdal
+WXp:;Ww 2WMM"ce;n
+WxpezWem MGuc
+WXpEIWeivi Misucmz
+WxpebWeivi MiGucmz
+Ww]d]02-01-7-0-8 edk1
+WW 0
+WV 52 mAs 2 DAP 8.00 e(o)
+Wumtnes
+Wu DEARING
+WuD
+WTZ BEARING
+WTL BEARING
+WT BEARRING
+WT BEARINO
+WT: BEARING K
+WT BEARING A
+[ WT BEARING 8
+WT; BEARING 3
+WT BEARING 1/3
+WT: BEARING 106
+WT, BEARING
+WT- BBEARING
+WTB
+Ws'
+W RA
+Wp B0 As" LB0i DAP:2.60 e(2) mGycm2
+Wn
+'Wlrist
+WLL BEARING
+WLD
+WITH GRID 120CMS
+WITH GRID
+Smith John 3026642306 Date of Birth: 20/06/1964   Age: 052 Acquired: 14/11/2016 13.50 Study Date: 14/11/2016
+WIL BEALRING
+WIGHT BEARING
+WhE BZARIING
+WH
+WFIGHT BFARING
+WFIGHT BEARING
+WEIGHTT BEARING
+WEIGHTDEARING
+WEIGHT_DEARING
+WEIGHT DEARING
+WEIGHT-BFARING
+WEIGHT BFARING
+Weight Bearir
+WEIGHT-BEARING R 47
+Weight Bearing R 2 of 2
+Weight Bearing 2 of 2
+WEIGHT BEARIN
+Weight Beari L
+WEIGHT AP BEARING
+WEIGHT
+Weigh  Bearing
+WEEIGHT BEARING
+WD9 @ 0100
+WD8@1936(95KVIZMAS)
+WD8 1640(95KVIZMAS)
+WD26 MOBILE
+wd 20 120Opm
+WD1 AT 1.1OPM PM ON 20.2.15
+W C D 8 8 0 8 8 8 0 8 8 8 8 L : 2 2 8 3 R 8 8 8 8 8 8 = 3 & 1 3 G 4
+Wa Wxa-W IVi Misucmz
+ward SA@ 21.15
+ward 5B @14.17
+WARD 23 AT 11,30 80 AT 2.5
+wagmt BEAMAs
+#Wa 7
+W3W @1515HRS
+W3W
+( W
+V R
+Vp62 mAs 2 DAP:4.90 a(1) rriGycm2
+Vo
+V MC'
+VINDOV 100 W 219
+Vid
+Vd R7 78
+V DL
+v8
+v4
+V 2
+#V 0R
+V 
+uvannau_OHLHO XHn?_
+USCLD
+U Rv
+upper rt &
+Upper lett 2
+upine Red dot
+UPINE 1/2
+upine
+Uperator ACI Gallowav Rova
+Uperator
+UNWILLING TO OPEN MOUTH MORE
+U N N 6 5
+UNDERWEAR ARTEFACT
+UNDER TROLLEY with grid
+UNDER TROLLEY L SUPINE
+under trolley 2 OF 2
+UNDER TROLLE L
+UNDER TROLL
+Ue
+UD
+U 1 0 # J0 0
+U0 R HBL 110 1
+TxwLEcwflear Irplart
+TWIN TWO
+TUU
+Tud
+TTURNED LATERAL
+T t o{ 0 & 8p 8p 8p 8p
+TT
+Ts /
+Ts '
+TROLLEY 2 OF 2
+trolley 1 of 2
+TROLLEY 1/2
+Trolley
+Tricxe Zri? IJWwVaw-0u
+T R
+t R
+T P
+To;L
+Tlc6 1gOffOIiEqorIiO
+TJo
+THROUGH TROLLEY
+THEATRE@1O:00
+T HBL
+T FnT
+Tf
+Tech: MGR Unit: SPEC_XH Exposure Mode: AutoKv KVp: 26 mAs: 7.2 Institution: Crosshouse Source: HOLOGIC  Inc Trident
+Tech: MGR Unit: SPEC_XH Exposure Mode: AutoKv KVp: 24 mAs: 7.1 Institution: Crosshouse Source: HOLOGIC  Inc Trident
+teceed
+TANGENTIONAL
+tangential view
+TAL
+TA L
+TABLE Abdo Supine %
+TABLE Abclo Supirie
+TABLE Abclo Supire
+T980 1/12 FUI
+T5
+? T
+(t
+T=
+SW
+s-valuel26
+s-Value994
+s-Value84
+s-Value411
+s-value376
+SURMNE PW/SHY
+SUR HD 1805HRS
+SUPTNE IN RESUS AT 1:35PM
+SUPPINE
+suppimee
+SUPINE SCBU 0940
+SUPINE R PORT IN RESUS 6.45PM
+SUPINE R IN TRAY
+SUPINE RESUS GRID
+SUPINE RED DOT
+SUPINE R 212
+SUPINE R 1/2
+Supine Port wd8
+SUPINE PORTABLE 85KV 2.8MAS
+SUPINE PORT
+SUPINE MOBILE ICU
+SUPINE MOB.
+Supine max bending to LT
+Supine L#
+Supine L #
+SUPINE IN NICU
+SUPINE ICU1@17:40
+Supine Female 62kv Imas 3.1Opm
+SUPINE C 0
+SUPINE 2 OF 2
+SUPINE 2/2
+SUPINE 1 OF 2 IN TRAY L
+supine 1 of 2 images
+SUPINE 1 OF 2
+SUPINE 1 of 2
+SUPINE @15;20
+SUPINE 1510HRS
+Superior slice 10 Lateral end
+SU
+style s PA
+STE: 18
+STE: 14
+STAND Swimmers Erect %
+STAND Stioukler AP Erect %
+STAND stioukler AP ect %
+STAND Shoulder AP Erect
+STAND RT Hip HBL %
+STAND LT Hlip HIBL
+StandING R  R
+STANDING KB
+STANDING BCM
+Standing 3 of 3
+Standing|
+Standing  [
+STANDINC
+STANDINc
+STANDINA
+STANDIN
+STAND FTT Hlip HBL ~%
+STAND Facial Bones OM Erect %
+STAND Elbow %
+STAND D. Spire Lat -%
+STAND Ctiest Larilsc;. Erect IIED -%
+STAND Ctiest Laridsc. Erect MVED -%
+STAND Ctiest Laridsc;. Erect MED -%
+STAND Ctiest Laridsc. Erect MED -%
+STAND Ctiest Laridsc. Erect LGE %
+STAND Ctiest Laricsc;. Erect MED -%
+STAND Ctiest Lariclsc;. Erect MED -%
+STAND Ctiest Lardsc. Erect MED %
+STAND Ctiest Landsc. Erect MED %
+STAND C. Spine LAT Trolley %
+STAND Clavicle AP Erect %
+STAND Chiest Landsc. Erect SMALL %
+STAND Chest Portrait Erect %
+STAND Chest Landsc Erect SMALL %f6
+STAND Chest Landsc. Erect LGE -%
+STAND Chest Landsc_ Erect IIED -%
+STAND Cfie;t Laricls;. Erect LGE %6
+STAND Cfiest Lariclsc;. Erect IIED
+STAID Clavicle
+STAA
+Ssw 13mX5 DAp-DD IVi Misucmz
+Ssmenl only
+SS AP ERECT R
+S Rv
+SRst R
+S RA
+S Ra
+spine morphometry assessmen
+Southern Gextier; (
+Sn 6 8
+SMINS-POSTCONTRAST
+smer
+sment only
+sMenl Orr
+SMALH
+SL
+SK/MI
+SK L
+SJG PA
+SJG/125
+SJG
+SITTING CP
+SI(st)/136
+sioolqo 1601 Sp907
+SIOIJLDER?
+SINGLE LEG STANDING
+SHUJLDER
+SHFPs
+SHDU
+SHCIJLDER
+sflq61gOffOIfisqorlO
+SFl   Gaioaye Rova
+Sex; Date of LMP
+Sex: Date of LMP
+SE STANDING
+SEM ERECT PORT
+Seessment
+sedestacion ap
+SCREEN ARTEFACT NOTED
+SCBU 60/1
+SCBU @ 11.3OHRS
+SCBU@02.30AM
+SAL STANDING
+Sal Ms
+SALIDFs
+Sali 5nh` MUA TI Autharisation . Provisional Diagnosis DCheck 1  CAr 45 wlll iuiy @perator TT € LLA Investigation Radiation Dose Required: lmT 0 > {/ cG)m Under   IR(ME) Regulations the clinical information   provided must   justify the examination requested or the request will be returned and the examination will not be carried out: Referrers Contact numberiPager: Signature Print Name: Date LLS Lead: John Smith Ratified - Bth Jan 0g Next revipw 8th Ian 10 2902502181 19/12/2010 WARDS, SMITH J Mobile Image Intensifier Upper Limb Lt FEM SURGICAL ACUTE WD ORKNE MR, JM SMITH
+SAL DFs
+S7
+S1 REX-71
+R ZG
+Ry M
+R WT BEARING 3
+R WLD
+R WIB
+R WH
+R Weighi Bearing
+R WB
+R VM
+R Vm
+RT SUPINE X-RAYED 09.20 MALE 60kV/ 1.OmAs
+RTq
+RT PA ERECT RSR
+RT HM LMH MT DW
+RT HBL X
+RTE LIH 100 2018-05-
+RTE LIH 100 2017-11-08 14:22
+RT AP ERECT IN ITU @1040HRS
+R TANDING
+RT 20
+RT 15
+R Supine on trolley
+R SUPINE Of 2
+Rs red dot
+R SR
+R SK
+R SEM
+R SE
+R sE
+R SCBU 19.50
+R SC
+RSc
+R SALIKAB
+RRYAB
+RR STANDING
+R RRYELC 2 OF 2 AP ERECT
+RR RED DOT
+R RR
+RR-mlo
+R RM9
+R RM?
+R RM
+R RING
+R RIINH HBL
+RRi
+R RESUS HBL
+R RESUS@1845
+R RED DOT MC
+R RED DOT 42
+R RED DOT
+R Red dot
+R REDD(
+R RECT
+R RECOVERY
+R RB
+R  R
+R PW
+RP' RP 01 RP 88 QP 8
+R PRE ESWL X 1
+R POST REDUCTION IN CUFF
+R Portable Supine IN TRAY
+R PORTABLE IN RESUS
+R PO_
+R Pco
+RPBREELE
+R PA y view
+R PAT
+R P
+R outlet
+ROTATION
+ROST-REDUCTION
+R Opereitor
+R Operaitor: FC;
+R OF 3
+Rof 3
+R OF 2
+Rocd 8 0 666660000" Ta" 3e Aes 1t
+R ob] ique
+R ns
+R Nou
+R No
+R no
+R NM
+R NIC
+R NIc
+R Nic
+R NG
+R ?NG
+R NA
+RMs/ RR 1 OF 2
+RMs] LP R ?RED DOT
+R MS
+R MPi
+R Mo
+R MM
+R MI
+R MEDIAL
+R McQ
+R MCIGR
+R MC DAP 200 erh)mGycmz kvpzmA2
+Rm C
+R M
+Rm
+Rls
+R LoM
+R Lo
+R LMc
+R Lk
+R LITTLE
+R LGB
+R LFICM
+Rld
+Rlb
+R LATERAL
+Rla]
+RL8
+R KW
+R kV 64 mAs 2.50 DAP 5.10 el:l)
+R KP
+RKo
+R KML
+R KM
+R Km
+R KIM
+R KAF
+R JW
+R JR
+R JN
+RJM(STU)ITK
+R Jmn
+R JL
+R JF
+R JE DW
+R JC
+R JAF
+R Ja
+RI R
+R Int-rot 5 OF 5
+R IN REC
+RING *
+RIN G
+RINDEX
+R IICUw
+Right Side Down
+RIGHT HBL RED DOT
+RIGHT Ey
+RIGHT AP ERECT 1/2
+RIGHT 2
+RIGHT 1HR 45MIN POST CONTRAST
+RIGHT 1/2
+RIGHI
+Ri 8
+Rh R
+R HM
+R HIP DOWN
+R Hf
+R Hc
+r hC
+R HBL STANDING SAL
+R HBL RED DOT
+R HBL RC/24
+R HBL NS DW
+R HBL 7
+R HBL 50
+R HBL 48
+R HBL 47
+R HBL 2 OF 2
+R HBL 1 OF 2
+R HBL 11000 0
+R HBL 02
+* R HBL
+R GR
+R GH
+R GE
+R Ge
+R GB
+RG
+Rg
+RFZ 536 kv 68 mAsS DAP9.80 el 1
+RFX 591OPF kv 60 mAs 28 Dap 80 e(1}
+RF WEIGHT BEARING
+R FRH
+R Ext-rot {
+REXT31OPE nuFumxs IFu va
+R EXT
+REXSTOPE AriUS JWe4
+REX S0 120001A34 30DAP26L 421
+REXOJOPE Fusomxs ix aSWeivi
+REX IQO Kv 33 rrixs2 50 DAP?.30 e(1)
+REX I17 85 rrixs3.20 DAP9.90 elt}
+REX I01 kv 10mAs0.80 DAP340 el
+REX 99 kv 120 mAs2.40 DAPI.46 el2-
+REX 97 kv 110 mAs1.40 DAP8.00 el-
+REX 97 110 TrAs3,.60 DAP2.24 e
+REX 108 tY 85 mAs1O DAP2.26 e(2)
+REX 106; KV 110 1xs2.?20 DAPg.T0 e(1)
+REX 105 kV 110 mAs2.2O DAPA 14 e{2)
+REX 104 kV 110 mAs1.80 DAPA.18 e(2)
+REX 102 110 Ixs2 DAPI.16
+R Ew STANDING
+RESUS CU 12.30pr
+RESUS AP ERECT 85/4@18OCM
+RESUS @7.45AM
+RESUS 3.35PM 24/04/12
+RESUS 2 of 2
+RESUS 2110
+RESUS@1735 L
+RESUS @ 14.05
+RESUS 13.20
+RESUS 12.50
+resus @12
+RESUS@11.45 Portable AP Erect
+RESUS @09.55HRS
+Resus@06:S5HRS 95Kvl2Mas
+RESUS 0050
+@RESUS
+RESUS @
+R ESUS
+RESAOPE FIUS pazWer
+R ERECTAP
+REPROCESSED
+RE  ox; Sii?; W:WWwQ!W-Ve
+Ren
+Relevant Clincal Detais:
+Relevant Clinca Details:
+REJMOPE KvSmx DaDT Weivi
+REISOPE AbrmusaRI
+RE IS5OPE Kv'SSmAt 1@0P1merd
+REI13OPE nu Fumxs I* aaWeivi
+RE I0M OPE nuFumxs I* WTT Weivi
+Referrers Signature:_ Print Name:
+REDIDOT
+RED DOTT
+RED DOT SE R
+RED DOT R 55
+RED DOt R
+red dot R
+RED DOT LH
+RED DOT L 01
+RED DOTL
+RED DOTI
+RED DOT HBL
+?RED DOT er
+red dot AP supine
+Red Dot 2 of 2
+? RED DOT
+? Red Dot
+? red dot
+RED DOJE
+RED DJO 
+RED
+RECT
+R ECSI
+RECOVERY@l5.5HRS
+R EC HBL
+REC/90/3.2/15.45
+R DW
+R DS
+Rd M
+R DIRECT 1640HRS Portable Supine
+R DFs/LMC RING
+R-DEC
+R DD/DM/(STSH/123
+R-DBC
+R DAs Qumtnes ano Gallowav Roval Int Operator
+Rda
+Rd]
+R CLWIPAT
+R CG
+R CD
+R-Cc
+RBZZOPE nubzmxs IFu v I Wei
+RBZOPE nuFumxs IFu vaer
+RBZOPE KvSmxs 0aDT6mer
+RB ZOPE ArimuIie2
+RBZOPE 7FiMUT
+RBZK0PE nurumxs I* WTT Weivi
+RBZJOPE Abrmurie
+RB ZJ0PE AriMuIi3 DA 1ZDe h
+RB Z60PE Rvdi Mxs W*I paoWeiv
+RBXI RuFv MxsIFu WXPIZuei
+RB WNJOPE AriUS DT  Weivi
+RB U Mucder DAPJMe@
+RB TI60PE AaMusRI DA Dei
+RB T B0PE Kvfomxs 1@D7' 1ZDe h)
+RBT B0PE AriMuIi3
+RBSWOPE Rvdi Mxs W*I DTT Weivi
+RBSROPE ArimuSAFIWZ "eo
+RBS2 MA1FDAPIMerh
+RB RZOPE ArimuSARI DA 1ZDerh
+RB RU1OPE AblmusaRI DPZe h
+RB  OPE Rvdi Mxs W*l pazWeiv
+RBMTIZOPE Kv57 mA: DaDD me@
+RBM1OPE Mxs Wel DaSW =
+RB M
+R BJt
+RB JIZOPE nubzmxs IFu vaz2ei
+RB JIoPE Rvdi Mxs W*I Da Weiv
+RB JIOPE AriUS
+RB IROPE nuFumxs IFu WZT Weivi
+RB  I@JOPE KvSmx dadaJme 
+RB  IJOPE KvSmx dadajme
+RB IJOPE Abrm DT | Wen
+RB IDSOPE nuFumxs I* WTT Weiv
+RB I780PE Kv'Fumxs 1EDD1.e
+RB I08 EsI Mus   DAPZSteq
+R BH
+RBh
+R BCM/JW
+RB *BOPE KvS7mxs 0adT6me
+RB BOPE AriUS
+RB #B0PE Rubimxs IE VzZ qeod
+RBAWJOPE Kv5i mAz 02DPJmem
+RBATOPE nuFumxs IFu vaaWeivi
+RB-AOH AaMusWRIWZTIA
+RBAHOPE nuFumxs I* vT L.dei
+RB A0PE A*mu 3DajDJeq
+RB477' OPE nurumxs I* aaWeivi
+RB 45 AriMut
+RB3BOPE Kmu DaZL
+RB 342 Muleari
+RB218 v;s m,42 DAP1 ere
+RB'1OPE EFiMuT
+RB 181OPE KvSmx DaDPZe 
+RB 1810HE Kv5i mAz DZDA  Qei
+R B
+Ratified 18th Jan 2010
+R AS
+Ra S
+R ARsIELC STANDING
+R ARING
+R AP ERECT PAT KSB
+R AP ERECT MOBILE ITU 95/3.2 01:05
+R AP ERECT KC(s)/BCM
+R AP Erect AAU 06.15HRS
+RAP ERECT
+R AP 42
+R ALK
+R AD
+R Ac
+R AB/LP
+R ABL
+R AB
+Ra]
+R]a
+R9
+R 8 4 1
+R 7dk IdzMye Wxpez.Iet) MGucmz
+R 7 5
+R 60
+R ~ = 57 2 2 2 C> < 1 7 6 2
+R 57
+'R 54
+R 53 DW
+R 50/46
+R 4 OF 4
+R 4 (d
+R 48 WEIGHT BEARING
+R 47
+R 46
+R 45 DEGREE APICAL OBLIQUE
+R 45/46
+R 42
+R 41
+R 4
+R 3 OF 3
+R3l
+R 374
+R 35
+R 32
+R 30/48
+R 3
+R @2OOHRS PORTABLE AP ERECT
+R 28
+R 26
+R 25 RED DOT
+R 24/NA RED DOT
+R 23
+R 2/3
+R 212
+R 21/2
+R 2 0f2
+R 20
+R 1 OF 3
+R 1 OF 2 FILMS
+R 1 OF 2 AP
+R 1OF2
+R 1of2
+R 16
+R 15/S
+R 15
+R 1 5
+R 144
+R 143
+R 142
+R 141
+R 140
+R 133
+R 129/105
+R 121 HBL
+R 120/RJM(st)
+R 120/123
+R 120
+R 119
+R 116
+R 115
+R 114
+R 112/123
+R 112
+R 106 HBL
+R 105
+R 102
+R 0
+~ R $ BJt 6 0 L 8 2 5 Q 6 W & Gv C 6 K 4
+ R
+R{
+R;
+R "
+R !
+Qut
+QUERY RED DOT
+Queen Elizabett_ Aftiniti Z _
+QUD
+Qs
+Qrv I?e M:vWX#ZW-le
+Q  Q
+Qperjtor Gaiowaye Rova
+Qi) 0a
+ . Qens
+Q1 K
+Q 134
+Q 0 8 0 8 0 8  8 8 G 6 c 8 8 2 8 8 8 8 0 8 3 = 3 a #7 Gi
+Q 0 06 € ) 6 L
+~q
+Q] 
+Q"
+Q _
+Q :
+PT CLOTHING ARTEFACT
+pSzmAs:1 (mGycmz
+Provisional Qiagnosis:
+PRONE follow through 11.20
+PRONE 4OMINS L NM
+Prone
+PRE ESWL T6299
+PRED DOT
+Pprtaelet
+POSTt-REDUCTION
+POST RX 2.1 T3651
+POST REDUCTIO RESUS
+POST-REDUCTION
+POST MIGT
+POST MICT
+POSt MICT
+POST MANIP
+POST ESWL T 5822 1.1
+POST ESWL 1.1 T6331
+POST CONTRAST 1OOMLS
+POST-CLIP
+POST BIOPSY
+POSITIONING AID
+PORUABBLE AP ERECT @4.55pm
+PORT. SUPINE
+PORT . SUPINE
+PORT ICU @ 1900
+PORTABLE THEATRE 54/4 1200 HRS
+PORTABLE SUPINE WD26 AT 9.3OAM ON 29.5.16
+PORTABLE SUPINE SITU @ 3.45 AM
+PORTABLE SUPINE ITU@6PM
+Portable supine in SCBU
+PORTABLE SUPINE IN NICU 00.20 HRS
+PORTABLE SUPINE FOR NG TUBE
+PORTABLE SUPINE @9:15PM
+PORTABLE SUPINE 74/1.6
+PORTABLE SEMI ERECT RESUS 19:25
+PORTABLE SEMI-ERECT 72/1.6
+PORTABLE RESUS 7AM
+PORTABLE PA BH
+PORTABLE OUINC
+PORTABLE, NNU, 11.6.13, 5.30AM, 56KVI1 .4MAS
+PORTABLE LZR@13.10 SUPINE
+PORTABLE L AP ERECT IN RESUS WITH GRID
+portable itu 9pm
+PORTABLE IN RESUS 2 OF 2
+PORTABLE IN ITU
+PORTABLE IN GS
+PORTABLE ICU. W. SUPINE 18.40 R
+PORTABLE EHALL
+PORTABLE AT 3AM
+PORTABLE AS AP ERECT L
+PORTABLE AP SUPINE (r
+PORTABLE AP SUPINE (4MAS 74KV) 10.4OAM
+PORTABLE AP SERECT 12.10PM
+PORTABLE AP SEMI ERECT RESUS @1915HRS
+portable ap semi-erect in resus
+PORTABLE AP SEMI ERECT FOR NG TUBE
+PORTABLE AP SEMI-ERECT 19-0Opm
+PORTABLE AP SEMI-ERECT 12.15PM 9OKVP 1.6MAS LS
+PORTABLE AP ERECT wd18 12.OOhr 3.11.13
+PORTABLE AP ERECT WARD 45 08.00 AM
+PORTABLE AP ERECT WARD 16 110KV/6MAS
+PORTABLE AP ERECT @W28 1410HRS NMcB
+PORTABLE AP ERECT W1O 12.45HRS
+PORTABLE AP ERECTT
+PORTABLE AP ERECT RESUS 22/05/16 00.50
+PORTABLE AP ERECT RESUS 17.50 PM
+PORTABLE AP ERECT RESUS@1.40AM
+portable ap erect J06.15am
+PORTABLE AP ERECT IP
+PORTABLE AP ERECT IN WARD 19 @22.40
+PORTABLE AP ERECT IN W29
+PORTABLE AP ERECT IN RESUS 1235
+PORTABLE AP ERECT IN ICU
+PORTABLE AP ERECT CCU @ 10.50AM
+PORTABLE AP ERECT 9Okvplzmas
+PORTABLE AP ERECT 95/2.5 @ 0920hrs
+PORTABLE AP ERECT @ 6.45 PM
+PORTABLE AP ERECT 5.50 AM
+PORTABLE AP ERECT 20.30
+PORTABLE AP ERECT 16.05pm
+PORTABLE A _ EKE6T
+PORTABLE 80KV 4MAS ICU
+PORTABLE 70/1.6 SUPINE
+PORTABLE 1 of 2
+PORTABLE 1220HRS
+PORTABLE @11.30am AP ERECT
+portable 04 .OShrs
+PORTABL AP SUPIN 9AM
+portabl ap ere
+PORT 1055 3.2MAS 65KV
+PORT
+PORIABLE AP ERECT
+PORAABLE SEMI ERECT
+PLsIRR STANDING
+pL
+PeR
+PCG L
+PAT LP
+Patient Locati
+[PatientID]: 2019993286, [Access#]: AA13999633601, [Name]: SMITHJOHN; [BirthDate]: 19631220, [Gender]: F [Time]: 20110613 114549 [File]: 120110499912617 , [StudylD]: [Proc]: [Laterality]: U, [Dose]: 22 kV 12 sec [Physician]: Dr J Smith (Path); [Operator]: [Institution]: [Station]: FLEXITRONLABS
+[PatientID]: 1509993306, [Access#]: AA13199973301 , [Name]: Smith^John; [BirthDate]: 19790515, [Gender]: F, [Time]: 20120702 130909 [File]: I20120509991949, [StudylD] [Proc]: Specimen Image, [Laterality]: U, [Dose]: 22 kV / 9.9 sec [Physician]: Smith John (Cons); [Operator]: [Institution]: [Station]: FAXITRONXR
+Patient ID 1309996778 Study Description Institution Name Body Part HIP Patient Name : Smith John Accession No. : D105002208810 DAP : 65mGycm2
+[PatientID]: 0919993280, [Access#]: AA13199901501 _ [Name]: Smith^John, [BirthDate]: 19711109, [Gender]: F; [Time]: 20111808 145026 [File]: I20110999145115, [StudylD]: [Proc]: Specimen Image, [Laterality]: U, [Dose]: 26 kV 16 sec [Physician]: Surgical Out Patients, [Operator]: [Institution]: [Station]: FAXITRONXR
+PA SK
+P-A R
+(( PAM
+palm up
+PA L JLR
+PA L8
+PA ERECT L 49
+PA ERECTI
+PA ERECT 7
+PA ERECT 180CM 73/16
+PA ERECT'
+pad artefact:
+PA 90 MINS
+P-A 4L
+PA 45 FLEXION
+PA 2/2
+PA 1 OF 2
+PA 1/2
+P 8
+{p: 56 mAs: 1.30 Rex: 529 15.49.05 DAP-20 el )mGycm2
+p 38
+p'
+OzMXs | (mGycmz
+OWD
+OUUU
+OUU
+OSS-TABLE
+ORTHORALLXs 0'
+'ORTABLE SUPINE
+or diagnos
+OQOc6oy
+Operzitor- cliv
+Operior Duff fries Jld Ciallawa'  Rn
+Opereitor: CF
+Operator: TRT
+Operator: SwX
+Operator: SW}
+Operator: sp
+Operator: Smc
+Operator: SL
+Operator SK Dumfries and Galloway Royal Inf
+Operator: scc;
+Operator. SAL Durrriries arid Galloway Royal Inf
+Operator SAL Dumfries and Galloway Royal Ini
+Operator SAL Dumfries and Galloway Royal Inff
+Operator: SA
+Operator RSR Dumfries and Galloway Royal Inf
+Operator RR Dumfries and Galloway Royal Irg
+Operator RR Dumfries and Galloway Royal Inf
+Operator: PTT
+Operator: Pr;
+Operator: nij
+Operator: MT
+Operator: mt
+Operator Locum Durrriries arid] Gallloway Royal Inf
+Operator Locum Dumfries and Galloway Royal Inf
+Operator: kt
+Operator: KMS
+Operator: KJ
+Operator KB Durriiries zrid] Gzlloway Foyal Irii
+Operator KB Dumfries and Galloway Royal Inf_
+Operator JC; Dumfries and Galloway Royal Inri
+Operator Jc;_ Curfries and Galloway Royal Iri
+Operator: Jc;
+Operator: jc;
+Operator GT Durfries and Galloway Rgyal Irif
+Operator: GB
+Operator: FR
+Operator: fr
+operator: F3s
+Operator ELC Dumfries and Galloway Royal Inf
+Operator: EB
+Operator: dw
+Operator: DJVV
+Operator: CR AAR:
+Operator: clj
+Operator BCM Durrriries zirir) Gzilloway Royal Inf
+Operator BCM Durriiries and Galloway Royal Inf
+Operator BCM Dumfries and Galloway Royal Inf
+Operator BCII Dumfries and Galloway Royal Irif
+Operator AMP Dumfries and Galloway Royal Inf_
+operator: AMC
+Operator: Aivlc;
+Operator: 1c223
+Operator:
+operator:
+operator
+Operaitor Xc; Ciuriiries ad Giallgway Rgyal
+Operaitor: SVV
+Operaitor SHli Durrriries arid] Galloway Floyal
+Operaitor SAL Durrriries ziricl Gzilloway Royal Irri
+Operaitor: PTT
+Operaitor: NT
+Operaitor: LII
+Operaitor: jeic;
+Operaitor: JC
+Operaitor: $D
+Operaitor:
+Op 8p 8p 8p 8p
+OOu Midl
+Oos { 3 8 8 4 01 /
+ON TROLLEY
+ONE OF TWO
+one of two
+On 7
+Omm
+Ol
+oIll
+oGC Q @ 2
+O)e
+ODD
+OBLIQUE VIEW OF PARIETAL REGION
+@O9OOHRS
+@O955HRS
+O 83
+O7
+O1L A 0i 6i 6 6 6 0 8 8 8 0 R 6 0 8 8 0  3 5 6i N 6J < 0J 0 0 C0 0 C 0o 0 0i
+*o
+NW(st)123
+n WLD
+NWI122 L
+NT; BEARING
+NT BEARING
+NSIKM(ST)
+NS
+NRM
+nottor diag
+NON WT BEARING
+Nne
+N N € € |`
+NM(St)/HC
+NMNH
+NM
+NL
+ninoc
+Nih<
+Nic
+NHS ORKNEY X-RAY ULTRA TEL :01856 888232 FAX : Patient Details: Requesting CH' ConsultantIG
+NGsIRR
+?NG
+NG?
+NF/IZQH= KvSumas DT  Weivi
+Next review 01 Feb 2012
+NEUTRAL ROTATION
+NEUTRAL
+neutral
+NEURORADIOLO
+Needs 02
+ne Be
+  ne
+NAG
+n8
+N ' 0 + 2 0€ " 4 6 0 8 0 0 0 ~ 4 3 ~ 0 (0 6 6 N 2 4 0 41 0 8 8 | Ui ~ 0 ~ 6 0 0)
+Mxsz S enmigtcme
+Mxs DAP }WD erl)iGycmz
+Mxs DAp 470 ennmgtcmr
+Mxs DAP 3.60 2| Tgurcm
+Mu/
+MTsIAS L
+MTIML
+M R T
+Mrcrero6cc)
+Mpi
+MODIFIED AXIAL
+MOBILE WITH GRID
+MOBILE SUPINE ITU@1430
+MOBILE SUPINE 2 OF 2 L
+mobile itu
+MOBILE FOR NG
+MOBILE DIRECT
+MOBILE CCU SUPINE
+MOBILE AP ERECT Wd 10D @ 0625 hours
+MOBILE AP ERECT RESUS C Zam
+MOBILE AP ERECT RESUS 0500
+MOBILE AP ERECT R @01:15
+MOBILE AP ERECT 83KV 2.5MAS
+Mobile AP Erect 1545Hrs 85kV 2.SmAs 160cm
+MOBILE 90kVp SmAs 150cms FFD
+Mobile 52kV ImAs 100cm
+MOBILE 1/2 R
+MOBILE 1/2
+MOBILE@033Ohrs 
+MOBI
+Mlirist
+M Lf
+MJ
+MIL
+MIILK L
+MIeDD
+MIDD
+Mert
+(( McO
+MCINS
+MAX INSP. R
+MaN
+Male Supine kVp 62 mAs 1.25 0828 hrs
+mage tor spine morphometry
+M7 4
+m 6
+M3 M4 +18.5
+M,
+M 
+L Zm
+LZ HBL
+LY L
+LYa
+LY 1of 2
+LWIGT PA ERECT
+Lvt
+L VP
+LU R
+Lud
+LT WEIGHTBEARING RSR
+L TROLLEY
+L TLP
+LT HIP RAISED
+LT CAS. Abdo Supine %
+L Tat
+LT 48/8
+LT 06- Peg veW
+L SW
+L Supine portable SCBU
+L Supine on trolley 1 of 2
+L SUPINE 2 OF 2
+L SN
+L SMG)
+L SMG
+L SM cIKAF
+L SKIKB AP ERECT
+L SF
+L SEMI- SUPINE
+L SEM
+L SAL 2 OF 2
+L RR
+L RMZ
+L RM8
+L RM?
+L RK
+L Rf
+L Red dot
+L R
+Lp MAs 25,60 DAPS_ erz)mGycmz
+L PG
+L PAT
+L PAN
+L PA ERECT CLW
+L PA 2 OF 2 FILMS
+L PA 2 of 2
+L P
+L outlet
+LOU/KC RED DOT
+LOU
+L OM
+Lol
+L Oc
+L Ns
+L No
+L NM
+L NIC
+L ?NG
+L NCM
+L NC
+LMS
+L Mpi
+L MODIFIED AXIAL
+L MOBILE 212
+L MLD
+LMi
+L MH DW
+LMCIMTs
+L MC
+lmage for spine morphometry
+L Lw
+L LOU
+LL:LM
+L Lk
+L LJd
+L LH
+L Lh
+L LG
+L LAB
+LlA
+LL 2 OF 2
+L kV 55 mAs 2 DAP 1.50 e(1)
+L kV 52 mAs 2 DAP 9.00 e(o)
+LK/SAL 2 OF 2
+L KS
+LKo
+L Kh
+L KAF
+L KA
+LJu
+L JP
+L Jp
+LJ E
+L Jc
+L JA
+LI Y
+LITTLE L
+LINE POSITION
+L Hm
+LHILL
+L HC9
+L hC
+L HBL RED DOT
+L HBL 4 OF 4
+L HBL 34
+L HBL 2 of 2
+L HBL 12/1 REDDOT
+L FR
+L FORMBICC
+L FB?
+L FB
+L FA
+LEW
+L EW
+Lett
+leta
+Lelt
+L Ek
+L EH
+LefT 2 OF 2
+LefT 1 OF 2
+L Ec
+Lead; Smith John
+Le 0
+Le #
+L e
+L DW
+L DT
+L DAP: 1.50 e(1) RAD: FB
+L CW DAP: 1.03 e(2) RAD: CW
+L CS(ST)
+L CHF
+L CE
+L CC
+L-cC
+LCB
+L CAL
+L CAB
+L c
+L BF
+L BCM
+LATERAL
+L Aq L
+L APUPINE
+LAP SUPINE MOB
+L | AP SUPINE
+L AP SEMI ERECT MOBILE 95/2.5
+L AP ERECT PORTABLE IN RESUS Ak
+LAP ERECT 02
+L AP 12.10HRS
+L ~AP
+L AH
+L AB
+L AAHIJW
+L AAH
+La4
+L9
+L= 9
+L 8 T
+L7C 1OAM
+L 72 hours
+L 718
+L 7124 SUPINE
+L5 POST REDUCTION
+L 55
+L 54
+L 53
+L 52
+L 5
+L 49IAS
+L49
+L 48/46
+L46
+L 45147
+L 44
+L 41
+L 3 Of 3
+L3a
+L 38 PORTABLE AP ERECT
+L 38/45
+L 38145
+L 38
+L34
+L 3 & 3 6 + A 6 8 0 6 8 G 8 G & 6i 8  ; 8 6 2 0 8 8 0 J 8 6 NJ A +
+L 32
+L-30 0
+L 2 of 2 lateral
+L 2of2
+L * 2 OF 2
+{L28b
+L 28 AP ERECT
+L 28
+L 2/46
+= L 2 4 2 L
+L 23
+L 2/2
+L21 HBL
+L 21/50
+L21
+L 20f2
+L2
+l2
+L 1of2
+L 1 OF2
+L 1 f 2
+L 17/47
+L 17
+L 16
+L 15 Degrees Up
+(L 151
+L @1450HRS
+L 143
+L 138/111 HBL
+L 137
+L 134 HBL
+L 133
+L 130
+L 129
+L 126
+L 121/146
+L 121
+L 113
+L 109
+L 105
+L 104
+L 10
+L 0 | 4
+L 01:15hrs
+L 01
+L0
+L 0
+*L
+) L
+(L
+L,
+L"
+L {
+L `
+L  *
+kYRmA DAP8 MGycmz
+kY54mAs 2.50 DAP 9Q e(Qj
+kY52 mAs DAP 40 efl)
+kwpS8msz DAP 200 elh)mGycmz
+kwps3mAs:1 erh)mGycmz
+kwpjima2 DA+2AW2 )roycmz
+kwp.65MAs DAP-4 erh)mGycrz
+kwp:5mAs:10 DAP:1.97 erz)mGycmz
+Kvtv I E5WXJ:ae
+KvSi Ize WZI Q2p "JW- 
+KVS2mAs DAP 5 00 e(Q)
+kV S0 rrixs DAP 2.00 e(Qj
+kvp z
+kVp.w0 rrias:|.F0) DAP 5.70J 2(1) frGycrriz
+kvpszmAs:1 etu)mGycmz
+kVp.Sr IriAs:ZI) DAP:7.95 2(22) IriCycrriz
+kVp.?S mrias::|.90) DAP:8.20 =(:l) IriCiycrriz
+kVp:SB (iAs;Q DAP:4.00 e(1) mGycr2
+kvps8mA2 DAP 3_ erh)mGycmz
+kvpS6msz DAP 24 el)mGycmz
+kVp: S0 riAs: 79 Rex: 184 10.58.43 DAP - QJ.OJ0 e(Q) rGycr2
+kVp:S0) IriAs:12.10 DAP:8.49 2(2) IiGycrriz
+kVp:S0 IiAs.28.30j DAP:11.79 2(3) IriGycrriz_
+kvpjumai2 DAP $ Z0er))iGyeuz
+KvpJ8 Masz DAp Im eri)mGycmz
+KVp: J6MAs: 5.10 Rex: 380 5.06.42 DAP- mGycm2
+Kvp BW Mxs |
+Kvp bW Mes250 DAP:1.0 elh)mGycmz
+kVp BQ Irias.? DAP:11.41 2(2) IiGycrriz
+kVp.BO rIAs.3.20 DAP.3.41 e(2) rGycr2
+kVp bomAs:2 DAP:4.00 e(1) mGycm2
+kVp BO IriAs:50.0 DAP 2.857 e(3) IriCsycrriz
+kVp.94 TAs:7.0) DAP.6.84 e(2) rGycrriz
+kVp.8S Irias: |.90 DAP:9.30 e(1l) IriGycrriz
+kVp.8r) mAs.4.10 DAP 8.50 e(:l} mGycm2
+kVp.85 mxs: 1|.90 DAP:1.0j4 e(2) rGycrriz
+kVp.85 mAs: ]|CJ DAP.3.85 e(2) mGycrriz
+kVp: 85 mAs: 9.60 Rex: 230 14.41.44 DAP - 1.22 e(3} mGycm2
+kVp.8;5 mAs.5.10 DAP.9.30 el mGycm2
+kVp: 85 mAs: 3.60 Rex: 203 14.34.56 DAP- 4,.62 e(2} mGycm2
+kVp: 85 mAs: 20.80 Rex: 388 10.12.49 DAP - mGycm2
+kVp: 85 mAs: 12 Rex: 302 0.26.54 DAP 68 e(2} mGycm2
+kVp: 85 mAs: 10.80 Rex: 264 10.49.41 DAP - 8.86; e(2) rriGycrriz
+kVp.85 IAs:1.90 DAP:1.115 2(2) MGycm2
+kVp.85 IAs:1.90 DAP: 1.10 e(2) rGycrri2
+kVp.82 rriAsz DAP 3.60 eld [(Gvcrri?
+kVp.80) rriAs:4.10 DAP:1.95 e(2) rriCiycm?_
+kVp.80 rAs:15.70 DAP.2.04 e(3) IriGycmiz
+kVp.80 mAs.9.90 DAP:1.08 e(3) mGycm?
+kVp.80 mAs.6 DAP:7.60 e(2) mGycm?
+kVp.80 mAs.31.20 DAP.2.96 e(3) mGycrriz
+kVp.80 mAs.2.80 DAP.3.12 e(2) mGycrriz
+kVp.80 mAs.2.80 DAP:1.15 e(2) mGycm?
+kVp:80 mAs:1.90 DAP.2.0J2 e(2) rriGycm2
+kVp.80 mAs:1.90 DAP:1.72 e(2) mGycrriz
+kVp.80 mAs:1.60 DAP: 6; JO e(l) mGycm?
+kVp.80 mAs:15.70 DAP.2.23 e(3) mGycm?
+kVp.80 mAs:15.70 DAP:.2.22 e(3) mGycm?
+kVp:71 mAs4.10) DAP.2.46 e(2) mGycrri?
+kVp: 70 rAs: 5.10 Rex: 2273 4.46.15 DAP - 6.50 el:l) rriGyc;rriz
+kVp: 70 mAs: 5 Rex: 188 10.13.47 DAP - 28 e(2) mGycm2
+kVp:70 mAs.3.20 DAP:7.00 e(1 mGycm2
+Kvp: 70 mAs.3.20 DAP 6.50 e(1 mGycm2
+kVp: 70 mAs_ 10 Rex: 104 09.33.12 DAP 0g e(2} mGycm2
+kvp6zmAsz DAp Rm etu)mGycmz
+kvp6umAss DAP 4 60 ert)mGycmz
+kVp.65 rriAs.3.20 DAP:7.00 e(1_ rriGycrri?
+kVp65 mriAs.6.40) DAP: IriGyc;rriz
+kvp65MAsz DAP: mGycmz
+kVp.65 mAs.6.40 DAP 2.37 e(2) mGycm?
+kVp: 65 mAs: 4.10 Rex: 370 11.14.27 DAP - 8.60 e(1) mGycm?
+kVp: 65 mAs: 3.20 Rex: 133 10.:10.12 DAP - 9.40 el mGycm2
+kVp.65 mAs.3.20 DAP:8.00 e(1) mGycm?
+kVp.65 mAs.3.20 DAP:7.40 e(1) mGycniz
+kVp.65 mAs.3.20 DAP:4.30 e(1 mGycm?
+kVp.65 mAs.3.20 DAP 4.00 el- mGycm2
+kVp.65 mAs:3.20 DAP.3.10 e(1) mGycm?
+kVp.65 mAs.3.20 DAP 2.30 ef1} mGycm2
+kVp.65 mAs.2 DAP:5.10 e(1) mGycmz
+kVp.65 mAs.2 DAP.2.90 e(1 mGycm2
+kVp.64 mAs2 DAP:1.10 e(1 mGycm?
+kVp.64 mAs:1.50 DAP:5.60 e(1) mGycm?
+KVp.62mxs:1_ DAP:1.30J e(1) TriGycra
+kvp62mAs? DAR11 TMjureHIliz
+kVp: 62 mAs: 4 Rex: 22 09.30.04 DAP - 1.30 e(1) rGycrriz
+kVp:60 rrias:1.60 DAP 5.70 e(1) mGycrriz
+kVp.60 mAs: | .F;0) DAP:2.80 e(1 mGycrriz
+kVp.60 mAs:4.]J DAP:4.30 e(1) mGycrriz
+kVp:60 mAs.4 DAP: mGycm2
+kVp.60 mAs.4 DAP 5.70 e(1 mGycm2
+kVp.60 mAs.4 DAP:1.15 e(2) mGycmz
+kVp.60 mAs:4.10 DAP 9.10 e(1 mGycm2
+kVp.60 mAs:4.10 DAP:8.60 e(1 mGycm2
+kVp.60 mAs:4.10 DAP:8.50 e(1 mGycm2
+kVp: 60 mAs: 3.20 Rex: 373 16.00.30 DAP: 4.70 el-) jIGycarai?)
+kVp: 60 mAs: 3.20 Rex: 354 00.59.42 DAP- 6.10 e(1) mGycmz
+kVp: 60 mAs: 3.20 Rex: 331 16.13.14 DAP: mGycm?2
+kVp: 60 mAs: 3.20 Rex: 179 11.26.43 DAP - mGycm2
+kVp: 60 mAs: 3.20 Rex: 110 14.05.23 DAP - 5.30 e(1) mGycm?
+kVp.60 mAs.3.20 DAP 6.60 e(1) mGycm?
+kVp.60 mAs.3.20 DAP:4.20 e(1 mGycm?
+kVp: 60 mAs: 2 Rex: 190 4.35.09 DAP - 2.90 e(1 mGycm?
+kVp:60 mAs.2 DAP:4.90 e(1 mGycm2
+kVp.60 mAs.2 DAP:4.10 e(1) mGycm?
+kVp:60 mAs:2 DAP:2.60 e(1 mGycrriz
+kVp.60 mAs.2 DAP:1.70 e(1) mGycm?
+kVp.60 mAs.2 DAP:1.00 e(1 mGycm?
+kVp.60 mAs.2.50 DAP: mGycm2
+kVp.60 mAs.2.50 DAP:8.20 e(1 mGycm2
+kVp.60 mAs.2.50 DAP:5.30 e(1 mGycm2
+kVp.60 mAs.2.50 DAP 3.30 e(1 mGycm2
+kVp.60 mAs.2.50 DAP.2.20 e(1 mGycm2
+kVp.60 mAs:1.60 DAP:6.40 e(1) mGycm?
+kVp.60 mAs:1.60 DAP 5.10 e(1) mGycm?
+kVp.60 mAs:1.60 DAP:3.90 e(1) mGycm?
+kVp.60 mAs:1.50 DAP 3.40 e(1 mGycm2
+kVp.60 mAs:1.50 DAP 3.30 e(1 mGycm2
+kVp: 60imAs: 1.60 Rex: 264 (4.27.40 DAP - 1.60 e(1) mGycm2
+kVp.60 [iA5.4.10) DAP.8.ZQe( ) (IIGYEIi2
+kVp: 59 mAs: 1.60 Rex: 463 415.20.02 DAP - 2. 10 e(d) rGycri2
+kVp.58 mAs.2 DAP: mGycm2
+kVp.58 mAs.2 DAP 6.20 e(1 mGycm2
+kVp.58 mAs.2 DAP:4.50 e(1 mGycm2
+kVp.58 mAs.2 DAP:4.00 e(1 mGycm2
+kvp.58mAs2 DAP 3.60 e(1 mGycm2
+kVp.58 mAs.2 DAP 3.40 e(1 mGycm2
+kVp.58 mAs.2 DAP.3.10 e(1 mGycm2
+kVp:58 mAs.2 DAP:3.10 e(1) mGycm?
+kVp.58 mAs.2 DAP 3.00 e(1 mGycm2
+kVp.58 mAs.2 DAP.2.90 e(1 mGycm2
+kVp.58 mAs:1.20 DAP.2.30 e(1 mGycm2
+kVp.57 rriis:4.10 DAP:5.70) e(:l) mGycm2
+kVp.57 mAs:1.60 DAP.2.60 e(1 mGycm2
+KVp: 56 rrAs: 1.20 Rex 169 (5 DAp 70 mCyerz
+kVp.56 mAs.2 DAP:7.10 e(1) mGycmz
+kVp: 56 mAs: 1.60 Rex 135 09.49.53 DAP? J e(Qj rrlbycrriz
+kVp: 55 mAs: Rex: 657 09.59.45 DAPX OQ e(0) mGycm2
+kvp.55 [iAs: .20) DAP:7.S0J e(:l) TrGycrriz
+kVp:53 mAs:1.60 DAP 3.00 e(1) mGycmi2
+kVp.52 mAs:1 DAP:1.00 e(1 mGycm2
+kVp:50 mAs.2.50 DAP.2.60 e(1 mGycmz
+kVp.3S IriAs:ZO) DAP:B.8f; 2(2) IriGycrriz_
+kVp.3S IIAs:1.90 DAP:1.37 e(2) IGycrri2
+kvp.35 [riAs.6.40 DAF:1.81 erz)IGycli2
+KVp: 35Mxs: 12.30 Re; 442 09 36 DAp 68 erz mGycm2
+kVp: 35mAs: 13.60 Rex: 202 er2= mGycm2
+KVp: 120 rrias: %.20 Rex: 2OO 6*42452
+kVp:120 riAs:1.70 DAP:1.27 e(2) rGycriz
+kVp:120 rAs 0.70 DAP.3.30 e(1) IGycrriz
+kVp:120 rAs 0.60 DAP:4.50 e(1) mGycm2
+kVp: 120 MrAs: 2 Rex: 203 12.015.21 DAP - JJOJ &(1) rri(sycrri?
+kVp:120 mAs:{j.B0 DAP.4.80 e(1) TriCiycrriz
+KVp: 120 mAs: 80 Rex: 191 10.57.30 DAP= 6.50 er~ mGycm2
+kVp: 120 mAs 40 Rex: 244 40:01.14 DAP 60 e( mGycmz
+KVp: 120 mAs: 40 Rex: 232 2.06.08 DAP 5.80 el" mGycm2
+kVp- 120 mAs: 2.20 Rex: 212 3.04.29 DAP - 1.12 e(2) MGyciz
+kVp 120 mAs 2.20 Rex: 206 13.40.40 DAP= 8.30 e(1} mGycm2
+kVp: 120 mAs: 2.20 Rex: 176 09: 02 DAP- 8.80 el mGycrri?
+kVp:120 mAs:1 DAP:7.10 e(l) rGycr?
+kVp:120 mAs:1.90 DAP 6.60 e(1 mGycm2
+kVp:120 mAs:1.40 DAP:6.60 e(1 mGycm?
+kVp:120 mAs:1.30 DAP:6;.80 e(1) IiGycrriz
+kVp:120 mAs:1.30 DAP 5.50 e(1 mGycm2
+kVp:120 mAs: 1|.220) DAP 8.80 e(1) MGycrriz
+kVp:120 mAs.0.40 DAP.2.90 e(1 mGycm2
+kVp:120 mAs.0.30) DAP:S.I 2(1l) IriGycrriz
+kVp:120 mAs.0.30 DAP.2.20 e(1 mGycm2
+kVp:120 mAs.0.20 DAP:1.70 e(1 mGycm2
+kVp:120 IIAs:1.80 DAP:1.0j4 e(2) MGycm2
+kVp:120 IAs:0.S0 DAP:1.50 e(1) (iCycrriz
+kVp:1120 MAs:(.60) DAPAZ.BO e(1) MGycrriz
+kVo T;E; IIA5rFi 401 DAP:1.56 e(2) mGycm2
+kvfp.85 mAs.25.20 DAP:6.16 e(2) mGycm2
+kvdoboMsz DAPS_ erh)mGycmz
+kvdo8Maz DAP 2D0 elh)mGycmz
+kvdj8Mz DAp * 4m erh)mGycmz
+Kvb y: Mxs B0 DAP 5.73er3)mGycmz
+kvbbZMAS_ DAp 4 % eru)mGycmz
+kV 68 mAs 6.40 DAP 2.18 e{2}
+Kv 66 mAs 6.30 DAP 8.80 e{1=
+kV 64 rrAs 2.50 DAP 6.70 e(1)
+kV 64 rAs 2.50 DAP 6.50 e(1)
+kV 63 rAs 3.20 DAP 8.10 e(1)
+kv 60 mas AP=1.20 el1} mGy cri2
+kV 60 mAs 2.50 DAP 4.00 el1)
+kv 5mAs DAP 3 0 e(j
+kV 55 mAs 2 ~DAP 1.60 e(1)
+kV 554 rAs 2.50 DAP 7.QC e(Q)
+kv54 rrixs 3.20 DAP S.OIO el0)
+kv54 rrixs 2.60 DAP 60Q e0)
+kv54 mAs 2.50 DAP S.IO e(j
+kv54 mAs 2.50 DAP 00 eiQ)
+kV 53 rriAs 2.50 DAP 3.Q0) e(1)
+kV 53 rriAs 2.50 DAP 3.80 e(1)
+kV 53 rrAs 2.50 DAP 2.50 el(1)
+kV 52 TAs 2 DAP 22.80 e(1)
+kV 52 rIAs 2 DAP 7.Q0 e(0)
+kv 52 riAs 2 DAP 1.40 el:l)
+kV 52 riAs 1.60 DAP 1. 60 e(1)
+kV 52 rAs 3.20 DAP 4.60 el1)
+kV 52 rAs 3.20 DAP 4.30 el1
+kV 52 rAs 2 DAP 7.QQ) e(Q))
+kV 52 rAs 2 DAP 1.20 e(1)
+kV 52mrxs2 DAP 5.QQ e(Qj
+kV 52mrixs2 DAP 1.30efl)
+kv52 mAs DAP6.00
+kv52 mAs DAP 10 eft)
+kv52 mAs DAP 0Q efl)
+KV 52 mAs 2 DAP 1.20 el:l)
+KV 52 mAs 1.60 DAP 2.20 e/1)
+kV 50 mAs 2 DAP (.CC e(Q)
+kup 6bmx5 > Rex: 113 I61 >8 WxpROxueii miGucZ
+kto Dumx6
+KSB STANDING
+KSB/RMs/ICs AP ERECT
+KSBILMC
+KS2mx; DAP 6.0JQ e(Qj
+K RMa
+k R
+kps0messI0 DAp 4 6m erh)mGycmz
+Kp: mAs: 25.60 Rex: 194 14.3249DAP 13 e(3) mGycm?
+Kp 120mAs 0.40 DAP 2.90 e(1) mGycm?
+Kp:120mAs 0)40) DAP.2.30 e(1 mGycm2
+Kob SZMX
+KMS
+Km
+KLR
+K Lm
+KLBsIEW
+Kl
+K KAF
+KJ
+kiposmas DXP @U er)mGycm
+kip:120 mAs:2.30 DAP:1.54 e(2) mGycm2
+kip:120 mAs.0.80 DAP 5.30 e(1) mGycm2
+kip:120 mAs.0.70 DAP.4.80 e(1) mGycm2
+Kintne
+ki8on4y64 ONP iOsenmoyGiz
+Kh T
+KH
+kepZ0MAs 5 Niap~ H e )mOyeiz
+kepbzmrsz DAP 9DQ er)mGycmz
+kep:7umfs:12.0 Niap: 42MM "ereHIli?
+KEIR PATTERSON 1703050290
+KCM R
+KCM 0
+KCM
+KCIKAF
+KC DW
+KC
+KBIFH
+KAL
+K AH
+KAF Standing
+KAB SAL
+KAB/PAT
+KA
+K4
+k4
+(k
+K"
+J Zm
+JW 3
+Jverior [uff fries Bld Ciallawa'  Rn
+Juss , 
+Ju0 2 2 L () 2 I "> S 2 5
+JS R
+J Rr
+JPsIKAF
+JPMs
+Jperior GaiowayeRova
+Josh LITTLE 1009015214 15/6/16 DGRI
+Jor
+JOKwP 8.32 MAs DAP-8.80 e(1) rGycrriz
+John Smith 27v58.'11.54 148:1 Mi " /
+Joc
+ Jo
+jmliw
+JMIL
+JM ERECT
+JMCB
+JJS
+JG
+Jf Vo 00 € 0 Q 00 0 VVi 0
+JEIRH
+Jb
+jb
+@ J8
+J ' 8
+J5
+J 3
+J2
+~ J
+(J
+J<
+J (
+Izl o lutu
+IWIGCH
+Itx
+itx
+Is-value284
+Ist film 9pm
+Is
+Irn
+IR AP ERECT PORTABLE
+IP RESUS
+IP ERECT RESUS 2 of 2
+IOBILE
+Inzy
+IN WARD 10 10.35 HRS
+Investigation Required;
+INUEX
+Int-rot L 2 OF 3
+in traction
+INTIROT
+Intemal Rotation
+INS/QEUH GLASGOW
+INSP 1 OF 2
+IN RESUS @ 11.50 HRS PORTABLE AP ERECT
+in resus
+IN ICU
+IN GRID
+Inemal Rolaton
+Ine:
+INDEX R
+INDEX FINGER R
+Index
+IN CCEW @ 23.30 HD
+IM Che
+Image tor spine
+Image - spie morphomel
+Image SCine Mcn
+image only
+Image not for diag
+Image notffor diagno
+Image not fcr diagnosis
+Image not CtGlc
+Image notcr diagr
+Image noL
+Image hot tor diag
+Image for spine morphometry 25
+Image for spine morphomelry
+Image for spine
+IMAGE 2 OF 2
+image 1 of 2
+Imag
+IM 2 OF 2
+IM 1 OF 2
+ILSD
+Il RLF
+Il (H: 2
+I KAI
+IIV Infusion
+IInfection Risk Allergies
+II 1
+II 0 01
+I HBL
+IdWuso 0
+Id] Eeulil JUnder   IR(ME) Regulations the clinical information   provided must   justify the examination requested or the request will be returned and the examination will not be carried out.
+ID Check Di) /JT Operator 0p2/J1 Radiation Dose
+'I cx t
+ICU 95KV 2.5MAS 6.40PM CLW
+ICU2@@12.55 SUPINE
+ICU2 @12.30
+ICU2
+ICU1@1640
+ICU1 @ 11.30AM
+IBJT R
+IBCM
+Iax
+IAN
+ial
+Iage
+IA
+I9M
+I 2 8 1 8
+I2
+I1cm'
+I1
+^ (i0 | L
+/I
+I`
+I%
+@HUUn
+HS (ST) 116
+Horizontal Be RESUS
+HORIZONTAL BEAM LATERAL 0 0 0 0 0 0 0 09 Q ! 4 0 1 4 0 R
+HORIZONTAL BEAM LAT
+HORIZ BEAM
+HonsHe27828822 BurbFWA AoW 734/42/4926
+HMIJC
+HILD
+HI BEAM
+HF/Z Ztv I?'_
+HDU3@12:15PM
+HDU2@11:40
+Hdd
+HcO
+HBL X
+HBL R 02124
+HBL PWIARs
+HBL portable 112
+HBL DM2
+HBL 3 OF 3
+HBL 1of2
+HBL 1 OF 2
+HBL 0 0 0 0 0
+[ HBL
+H BEAM 212
+H BE
+HB61S0PE AriUS DT I*en
+H.B:
+HAl
+h 8 8 0 | 8 67
+H3
+H 2 1 8 3
+H: 0.40
+H: 0.00
+( H
+H /
+gUID 2
+GuEo
+GSILW
+Gr WT BEARING
+GRID IN TRAY
+GRID
+Grid
+Dete (JB.OJZ.ZO:I: [13.013::10] Ecliriburghi Foysil Irifirrrisiry__
+Deite (J2. 10J.2013 [16.39.53] Crosshouse
+Deite 28.03.2016 [17.26.38] Crosshouse
+Deite 09.03.20lb [2T50.n5] Crosshiouse
+DEGREES
+Decubitus
+D^ E7ECT
+day7
+Dats (J4.j9.ZOO [11342.53] Ecliriburghi Royal Irifirrriziry
+Dat? (J2.12.2010 [11.43.53] Ecliriburgri Royail Irifirrriziry)
+Datg 11 j3.ZOAQ [11948.0h4] Edinburghi Foyall Irifirrrizr}
+Date; U
+Date 4.08.20147 13.55.02
+Date 31.08.2014 [19.02.23] Crosshouse
+Date 31.01.2011 [22.35.05] Edinburgh Royal Infirmary_
+Date 30.12.2016 [13.05.52] Crosshouse
+Date 30.07.2017 [13.15  49] Crosshouse
+Date 2Z.09.2010 [15:11.57] Edinburgh Royal Infirmary
+Date 29.08.2017 11.38.33
+Date 29.07.2017 [12.02.54] Crosshouse
+Date 29.06.2016 [11.04.42] Crosshouse
+Date 29.05.2016 [16.36.32] Crosshouse
+Date 29,05.2011 [01.44.54] Edinburgh Royal Infirmary
+Date 29.03.2012 [12.44.40] Crosshouse LT HBL
+Date 29.01.2011 [20.48.53] Crosshouse
+Date 28.10.2016 [21.42.38] Crosshouse
+Date 28.08.2016 [08.41.40] Crosshouse
+Date 28.06.2017 [15.11.06] Crosshouse
+Date 28.01.2016 09.45.07
+Date 27.12.2010 [00.29.28] Edinburgh Royal Infirmary_
+Date 27.08.2017 [17.10.59] Crosshouse
+Date 27.014.,2011 [20.27.34] Ediriburgri Foyall Irifirrriairy_
+Date 27.01.2017 [23.21.24] Crosshouse
+Date 27.01.2017 [19.43.53] Crosshouse
+Date 26.11.2016 [12.51.14] tosshouse
+Date 26.02.2011 [03.56.29] Edinburgh Royal Infirmary
+Date 26.01.2017 [19.50.23] Crosshouse
+Date 25.09.2010 [1111.222:1s] Ecliriburghi Royail Irrfirrfiairy
+Date 25.05.2011 [15.31.52] Edinburgh Royal Infirmary
+Date 25.04.2017 [19.53.51] Crosshouse
+DAP: 1.80 e(1) F'AD: NH
+DAP: 1.569(2) RAD.&
+DAP: 1.50 e(1) RAD: v2l rriri
+DAP: 1.50 e(1) RAD: DW
+DAP: 1.40 e(1) RAD: Iw
+DAP: 1.22 e(2) RAD: gb
+DAP: 1.20 e(1) FAD: clri
+DAP 1.11 e(2} RAD: AM NH
+DAP=1.03 er3} mGy cm2
+DAP: 1.01 e(2) RAD: HM
+DAP 06 e(2) -RAD: JP
+DAP: 00 e(o) RAD: SBvv
+DAP: 00 e(0) RAD: sbw
+SMITH JOHN 2709993160 02/09/2016 DGRI FH
+Dale 28_ 2014 09.25.42
+Daite 19.09.2010 [19.07.51_ Edinburgh Royal Infirmary
+Cwj RED DOT
+CwJ ERECT
+cwJ ErECT
+cwj ERECT
+CWIKH
+CWIAD Hbl
+Cw] ERECT
+CW3IIW
+CW3
+Cw]
+cw]
+cw
+CUvcLe
+cuRSITER AIDEM 08 . 08 . 98 dr   dohRN
+Cuj GRiD
+CT/27
+ARTEFACT FROM NECKLACE
+ARTEFACT COLLAR FROM SHIR
+ARsIKH RED DOT
+ARs/AB
+ARMS PULLED DOWN
+arlc6 1gOfOtficorlO
+~aRetruto80vnosde
+AR BRECT
+AP WITH HORZ BEAM
+AP Weight Beziring kVp: 60 mAs 3.20 Rex: 164 15.49.55 DAP 4.20 er meycmz
+AP Weight Bearing Icm block under left foot
+AP Weight Bearinc
+AP SUPINFF
+AP-SUPINE MOBILE 85KV 12 SMAS
+AP SUPINE MOBILE 85/2.5 11.25HRS
+AP SIERECT IN ITU
+AP SEMI SUPINE MOBILE 18O5HRS
+AP SEMI ERECT PORT WD61 80KV 4mAs
+AP SEMI-ERECT PORT 2.15AM
+AP SEMI EREC PORT WD6O 75KV 2 SmAs
+AP RED DOT
+AP POST OP ERECT
+AP PORTABLE SEMI SUPINEL FOR NG TUBE
+AP PORTABLE SEMI ERECT @11.55PM
+AP PORTABLE ERECT IN WARD 26 20.05 SO
+AP  L 1 OF 2
+APl
+AP FRH ERECT R
+AP FOR PICC SUPINE PORTABLE
+AP ERFGT 14.45
+AP ERFCT
+AP ERELT
+AP ERECT R Lh
+AP ERECT RESUS 85KV 2.5MAS
+AP ERECT RESUS 1 OF 2
+AP ERECT PORT IN WARD 8
+AP Erect Portable wda32
+AP ERECT PORTABLE L 95/2
+AP ERECT PORTABLE IN W4 @ 4.2OAM
+AP ERECT PORTABLE CCU @ 1500HRS
+AP ERECTPORT @ 19:2Opm
+AP ERECTOsss
+ap erect on trolley
+AP ERECT OBILE
+ap erecto7.OOhrs
+AP ERECT MOBlLE
+AP ERECT MOBILE with grid
+AP ERECTL
+AP ERECT IN RESUS R ML
+AP ERECT IN ICU R ML
+AP ERECT IN HDU
+AP ERECT FOR NGT POSITION
+AP ERECT FOR NG 2OO5HRS
+AP ERECT AT 11.30 AM;
+AP ERECT Ac/JC/GD
+AP ERECT AB
+AP ERECT 85/3.2 MOBILE
+AP ERECT 81 2 OF 2
+AP ERECT 2 OF 2
+AP ERECT 1 of 2
+AP ERECT @1I7A5HRS
+AP ERECT 1/2 RI
+# AP ERECT
+AP best image possible
+AP 46121
+ANKL
+ANAESTHETIC ROOM #2

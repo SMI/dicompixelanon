@@ -128,5 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# redundant HTML data
+# redundant HTML data used for OCR whitelisting
 data/radiology_glossary/raw/
+# OCR whitelisting test results
+src/testing/test_files_ocr_whitelisting/test_results/

@@ -116,11 +116,9 @@ def numerical_regex():
     rex_rule = r"[rR][eE][xX]( |:|: )[0-9]{1,3}"
     regex_numerical_rules = [dap_rule, kv_rule, rex_rule]
     combos = list(itertools.permutations(regex_numerical_rules))  # combinations of the three
+    combo_separator = r"(:|.| |: )?"
     for combo in combos:
-        r = []
-        for el in combo:
-            r.append(rf"({el})?")
-        regex_numerical_rules.append(r"(:|.| |: )?".join(r))
+        regex_numerical_rules.append(rf"({combo[0]}{combo_separator})?({combo[1]}{combo_separator})?{combo[2]}")
     return regex_numerical_rules
 
 def build_regex(abbreviations, view, annotations):
