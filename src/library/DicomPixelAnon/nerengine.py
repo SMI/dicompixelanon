@@ -47,10 +47,15 @@ except:
 
 
 class NER():
-    """ A class which wraps several NLP engines for NER.
+    """ The NER class wraps several NLP engines for NER.
     It identifies named entities in text and assigns one of four
     classes: PER, LOC, ORG, MISC (but not all NER engines return
-    all of those classes).
+    all of those classes). It can be instantiated with one of the
+    following engine names: spacy, flair, stanford, stanza, and
+    ocr_whitelist. The latter is a set of regex rules trained on
+    the OCR output from a set of CR and DX images which identify
+    safe text, not PII text. The others are language models
+    (which typically require some textual context to determine PII).
     """
 
     @staticmethod

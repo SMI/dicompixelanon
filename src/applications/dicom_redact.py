@@ -308,11 +308,12 @@ def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
 
 def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
     """ Redact a list of rectangles from:
-    * the given image frame (if overlay == -1)
-    * or the given overlay (if frame == -1)
+    * the given image frame (if overlay not given or == -1)
+    * or the given overlay (if frame not given or == -1)
     * or the given frame of the given overlay (if both >= 0)
     * The rectangles are (x,y,width,height) where
       x,y are from 0,0 top-left
+    ds is the pydicom Dataset object.
     """
 
     if not rect_list:
@@ -344,6 +345,13 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
 # whose text exactly matches a pattern.
 
 def load_allowlist(filename = None):
+    """ Initialise the allow-list (whitelist) by constructing a NER
+    object and keeping it in a global variable.
+    XXX this is a hacky way of making a singleton.
+    Returns the NER object on which you can call the detect() method.
+    You only need to call this function once but it's safe to call it
+    every time you need to use detect().
+    """
     global ocr_allowlist
     try:
         return ocr_allowlist
@@ -359,7 +367,8 @@ def test_load_allowlist():
 def rect_in_allowlist(rect):
     """ Return True if the text contained in the rectangle is safe
     and doesn't need to be redacted. By default, return False, unless
-    the text is on a known allowlist.
+    the text is on a known allowlist. rect should be a DicomRectText
+    but if it's a DicomRect or Rect then it simply returns False.
     """
     allowlist = load_allowlist()
     # If the rect is a DicomRectText object it has a text_tuple method
@@ -379,10 +388,10 @@ def test_rect_in_allowlist():
     
 
 def filter_rect_list(rect_list):
-    """ Filter the list to remove all items which are "safe"
+    """ Filter the DicomRectText list to remove all items which are "safe"
     based on an allow-list. The list should be a list of DicomRectText objects
-    so we can test the ocrtext but if it's not (or the text is empty) then
-    it's assumed that it's not safe so is kept in the list.
+    so we can test the ocrtext but if it's not (because it's a DicomRect,
+    or the text is empty) then it's assumed unsafe so is kept in the list.
     """
     rect_list[:] = [rect for rect in rect_list if not rect_in_allowlist(rect)]
     return rect_list
@@ -399,11 +408,17 @@ def test_filter_rect_list():
 # ---------------------------------------------------------------------
 
 def redact_DicomRect_rectangles(ds, dicomrect_list):
-    """ Split the list by frame/overlay and call redact_rectangles.
+    """ Redact all the rectangles in the given DicomRect list
+    from the image in the DICOM file which has been read into a
+    pydicom.dataset.Dataset object (from dcmread).
+    The list may contain rectangles from any frame,overlay, so it
+    splits the list by frame/overlay and call redact_rectangles
+    on each grouping.
     """
     frameoverlay_list = [(dr.F(), dr.O()) for dr in dicomrect_list]
     frameoverlay_set = set(frameoverlay_list) # to get unique values
     for (frame,overlay) in frameoverlay_set:
+        # convert from corner coord to width,height
         rect_list = [ (dr.L(), dr.T(), 1+dr.R()-dr.L(), 1+dr.B()-dr.T())
             for dr in dicomrect_list if dr.F() == frame and dr.O() == overlay]
         rect_list = filter_rect_list(rect_list)
@@ -416,7 +431,7 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
     Can filter by filename, frame, overlay if desired.
-    Returns a map of filenames, where each filename entry is
+    Returns a map/dict of filenames, where each filename entry is
     a list of DicomRect objects, or [].
     If you asked for an explicit filename it will be the only entry in the map.
     e.g.
@@ -454,9 +469,11 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
 
 # ---------------------------------------------------------------------
 def read_DicomRect_list_from_region_tags(filename):
-    """ Read the DICOMtags which define the usable region in an image
+    """ Read the DICOM tags which define the usable region in an image
     and construct a list of rectangles which redact all parts outside.
-    Returns an empty list if there are no UltrasoundRegions.
+    Only applicable to Ultrasound images, as it reads the tag
+    SequenceOfUltrasoundRegions.
+    Returns a list of DicomRect object, or [] if none found.
     """
     rect_list = []
     ds = pydicom.dcmread(filename)
@@ -493,10 +510,14 @@ def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, over
 
 def decode_rect_list_string(rect_str):
     """
-    x0,y0,x1,y1
-    x0,y0,+w,+h
-     with frame,overlay appended
-     separated by ; with optional brackets for clarity
+    Decode a string containing one or more rectangles
+    and return a list of DicomRect objects, or [].
+    x0,y0,x1,y1 - one rectangle given by corner coordinates.
+    x0,y0,+w,+h - one rectangle given by top-left,width,height.
+    frame,overlay can also be appended; use -1 for either if
+    not applicable, e.g. first and only image frame is 0,-1.
+    Multiple rectangles separated by ; semi-colon.
+    Can use optional brackets for clarity, e.g.
     eg. (10,10,30,30,0,-1);10,10,+20,+20
     """
     rect_list = []
@@ -563,6 +584,8 @@ def create_output_filename(infilename, outfilename = None):
         dirname = '.'
     return os.path.join(dirname, infile.replace('.dcm', '') + '.redacted.dcm')
 
+
+# ---------------------------------------------------------------------
 
 if __name__ == '__main__':
 
