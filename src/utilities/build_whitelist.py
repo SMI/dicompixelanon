@@ -111,42 +111,57 @@ def numerical_regex():
     Returns:
         list: regex rules
     """
-    dap_rule = r"[dD][aA][pP]( |: |=)(([0-9]{1,2}\.[0-9]{2})|00) e\([0-9]\)"
-    kv_rule = r"[kK][vV][pP]?( |\.|: |:|)[0-9]{2,3} mAs(:|.| )[0-9](.[0-9]{2})?"
+    dap_rule = r"[dD][aA][pP]( |: |=)(([0-9]{1,2}\.[0-9]{2})|00) e\([0-9]\)( mGycm2)?"
+    kv_rule = r"[kK][vV][pP]?( |\.|: |:|)[0-9]{2,3} mAs(:|\.| )[0-9](\.[0-9]{2})?"
     rex_rule = r"[rR][eE][xX]( |:|: )[0-9]{1,3}"
     regex_numerical_rules = [dap_rule, kv_rule, rex_rule]
     combos = list(itertools.permutations(regex_numerical_rules))  # combinations of the three
-    combo_separator = r"(:|.| |: )?"
+    combo_separator = r"(:|\.| |: )?"
     for combo in combos:
         regex_numerical_rules.append(rf"({combo[0]}{combo_separator})?({combo[1]}{combo_separator})?{combo[2]}")
     return regex_numerical_rules
 
-def build_regex(abbreviations, view, annotations):
+def build_regex(abbreviations, annotations, reduce=False):
     """Build case-insensitive regex rules for strings commonly found.
     Writes rules into file data/ocr_whitelist_regex.txt, separated by newlines.
 
     Args:
         abbreviations (list<str>): abbreviations
-        view (list<str>): procedure view indicators which can be modified by orientations etc.
         annotations (list<str>): medical annotations
+        reduce (bool, optional): whether to reduce the number of regex rules refering to the views and orientations. Defaults to False.
     """
     regex_rules = []
     # view rules
-    for v in view:
-        modes = [r"([lr]t? )?", r"((left|right) )?", r"((pa|ap) )?", r"((mobile|portable) )?"]
-        mode_combos = ["".join(combo) for combo in itertools.permutations(modes)]
-        for combo in mode_combos:
-            regex_rules.append(r"(?i)" + combo + rf"{v}")
+    views = [r"(semi |semi-)?(erect|supine)", r"(weight |wt |weight-|weight)bearing", r"(hb|horizontal beam)( l| lateral)?", r"(sitting|standing)"]
+    one_of_views_rule = r"(" + r"|".join(views) + r")"
+    modes = [r"([lr]t?|(left|right))", r"(pa|ap)", r"(mobile|portable|port)", r"under trolley", r"(in )?resus"]
+    if reduce:  # fewer permutations, resulting in the view always being the last element. Leads to some things not being whitelisted that could be.
+        combos = itertools.permutations(modes)
+        for combo in combos:
+            rule = r"(?i)"
+            for el in combo:
+                rule += rf"({el} )?"
+            rule += rf"{one_of_views_rule}"
+            regex_rules.append(rule)
+    else:
+        combos = itertools.permutations(modes + [one_of_views_rule])
+        for combo in combos:
+            rule = r"(?i)"
+            for el in combo[:-1]:
+                rule += rf"({el} )?"
+            rule += rf"{combo[-1]}"
+            regex_rules.append(rule)
     for an in annotations:
         regex_rules.append(rf"(?i){an}")
     for ab in abbreviations:
         regex_rules.append(rf"(?i){ab}")
     regex_rules += numerical_regex()
+    regex_rules.append(r"(?i)[123](of| of |of | of|/)[123]")  # image no.
     with open("../../data/ocr_whitelist_regex.txt", "w") as f:
         for r in regex_rules:
             f.write(f"{r}\n")
 
-def main(fetchbuild, build):
+def main(fetchbuild, build, reduce):
     if fetchbuild or build:  # rebuild glossary dictionary
         glossary_dict = {}
         if fetchbuild:
@@ -156,10 +171,9 @@ def main(fetchbuild, build):
             for html_response in get_raw_glossary_from_file():
                 glossary_dict |= parse_glossary_html(html_response)
         store_glossary(glossary_dict)  # for later use
-    whitelist_view = ["erect", "supine", "weight bearing", "wt bearing"]
-    whitelist_annotations = ["red dot"]
+    whitelist_annotations = ["red dot", "diabetes", "ankle", "elbow", "expiration", "knee", "little finger", "middle finger", "skull", "ring finger"]
     abbreviations_list = get_abbreviations_from_json("../../data/radiology_glossary/glossary.json")
-    build_regex(abbreviations_list, whitelist_view, whitelist_annotations) 
+    build_regex(abbreviations_list, whitelist_annotations, reduce) 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -170,5 +184,7 @@ if __name__ == "__main__":
                         help="Fetch glossary from radiopeadia.org to build local glossary.  Only do this if it is absolutely necessary, it usually won't be.")
     parser.add_argument("--build", action="store_true", default=False,
                         help="Build local glossary from HTML files in data/radiology_glossary/raw.")
+    parser.add_argument("--reduce", action="store_true", default=False,
+                        help="Produces reduced number of regex rules refering to view and orientation from 3684 to 3084.")
     args = parser.parse_args()
-    main(args.fetchbuild, args.build)
+    main(args.fetchbuild, args.build, args.reduce)
