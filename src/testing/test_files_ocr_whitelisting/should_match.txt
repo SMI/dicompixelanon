@@ -1,646 +1,600 @@
-PA
-AP ERECT
-AP
-HBL
-ERECT
-PA ERECT
-RED DOT
-MOBILE
-SUPINE
-WEIGHT BEARING
-WT BEARING
-PORTABLE
-Weight Bearing
-LT
-PORTABLE AP ERECT
-R HBL
-RESUS
-L HBL
-RIGHT
-RT
-Supine
 1 OF 2
-Wt Bearing
-STANDING
-H BEAM
-AP Erect
-LEFT
-L PA
-Erect
-PORTABLE SUPINE
-1/2
-2 OF 2
-2 of 2
-LeFT
-1 of 2
-WT: BEARING
-Left
-MOBILE AP ERECT
-R PA
-RA
-AP ERECT MOBILE
-Standing
-R AP ERECT
-L AP
-ERECT MOBILE
-AP ERECT RESUS
-WT; BEARING
-R AP
-Cross Table
-Lt
-Weight bearing
-L AP ERECT
-ANKLE
-R PA ERECT
-Red Dot
-UNDER TROLLEY
-LefT
-EXPIRATION
-AP SEMI-ERECT
-AP SEMI ERECT
-AP ERECT L
-MOBILE SUPINE
-HORIZONTAL BEAM
-SEMI ERECT
-Portable
-PA L
-SUPINE MOBILE
-Supine L
-HORIZONTAL BEAM LATERAL
-Horizontal beam
-Rt
-red dot
-PA ERECT L
-Horizontal Beam Lateral
-HBL R
-FH
-AP ERECT PORTABLE
-ap erect
-WEIGHT-BEARING
-supine
-RTa
-Ra
-PORTABLE AP SEMI ERECT
-PA Erect
-LS
-L PA ERECT
-ES
-ERECT AP
-DP
-under trolley
-SEMI SUPINE
-RR
-Horizontal Beam
-H.B.
-BONE SUPRESSION
-AP SEMI SUPINE
-WEIGHT BEARING R
-R Weight Bearing
-R SUPINE
-Ri
-R Cross Table
-PA R
-LPA
-LL
-LA
-KB
-HAND
-EXTERNAL
-SKULL
-SE
-R WEIGHT BEARING
-Rta
-RI
-RESUS AP ERECT
-R AP Erect
-portable
-L AP Erect
-La
-IR
-EXTENSION
-AS
-AP SUPINE
-AP L
-ap
-2/2
 1 OF 3
-WB
-TA
-SUPINE RESUS
-StAndinG
-Rr
-R PORTABLE AP ERECT
-R PA Erect
-Rha
-Re
-R AP ERECT MOBILE
-PA WT BEARING
-PA ERECT R
-L PORTABLE
-LP
-L ERECT
-INT ROT
-INTERNAL
-INSP
-External Rotation
-ERECT RESUS
-CROSS-TABLE
-AP Erect Portable
-Ap
-2 OF 3
-Wt Bearing R
-Weight Bearing R
-WEIGHT BEARING L
-WEIGHTBEARING
-Weight-Bearing
-W BEARING
-STANDING R
-Standing R
-STANdiNG
-StANdinG
-SEMI-ERECT
-RT HBL
-R RESUS
-Rlq
-Right
-Rc
-PORTABLE AP SUPINE
-PAT
-PA SITTING
-pa
-MOBILE RESUS
-MOBILE L
-MH
-L RESUS
-Left AP
-LeFt
-KNEE
-Int-rot
-IL
-ICU
-GM
-FR
-EXT
-Eta
-ERECT PA
-ERECT L
-Er
-CM
-CA
-AD
-Ac
-1/3
-3/3
-2OF2
+1 of 2
 1 of 3
+1/2
+1/3
+1OF2
 1of 2
-WTE BEARING
-WT: BEARING R
-WT BEARING R
-WT.BEARING
-Weight bearing R
-UNDER TROLLEY R
-Tle
-TL
-SUPINE PORTABLE
-SUPINE L
-STANDiNG
-STANDinG
-STANdinG
-Standing 
-standing
-SH
-SEMI SUPINE PORTABLE
-semi-erect
-SEMI
-R WT BEARING
-R UNDER TROLLEY
-R STANDING
-R PA WEIGHT BEARING
-RMO
-RK
-RIGHT HBL
-R Horizontal beam
-RF
-R ERECT
-Red dot
-PORTABLE SUPINE RESUS
-PORTABLE SUPINE L
-Portable Supine
-PORTABLE IN RESUS
-PORTABLE AP ERECT RESUS
-PORTABLE AP ERECT IN RESUS
-Portable AP Erect
-NICU
-MR
-MOBILE ERECT
-Mobile
-MC
-L PORTABLE AP ERECT
-Ll
-Lk
-L Horizontal beam
-L H BEAM
-Left HBL
-Left ERECT AP
-LeFT AP ERECT
-Left AP ERECT
-LeFT AP
-L Cross Table
-kVp.52 mAs:1 DAP:6.00 e(O) mGycm2
-kV 58 mAs 2.50 DAP 4.90 e(1)
-kV 55 rAs 2 DAP 1.30 e(1)
-ITU
-Ip
-Internal Rotation
-Ie
-HF
-HC
-GR
-GD
-FE
-FCC
-FB
-Ext-rot L
-EXT ROT
-EXTERNAL ROT
-ERECT R
-ERECT PORTABLE
-erect
-ELBOW
-DM
-Diabetes
-Di
-CT
-Cross Table R
-Cp
-COMPRESSION
-AP Supine
-AP R ERECT
-AP PORTABLE SEMI ERECT
-AP L ERECT
-AP ERECT RESUS R
-AP ERECT R
-ap erect portable
-AL
-AB
+2 OF 2
+2 OF 3
+2 of 2
+2/2
+2OF2
+2of2
 3 OF 3
 3 of 3
-2of2
-1OF2
-Yo
-WEIGHT-BEARING R
-Weightbearing R
-WEIGHT BEARING PA R
-WEIGHT BEARING PA
-Weight Bearing L
-Weight Bearing 
-Weightbearing
-weight bearing
-Wd
-wb
-VI
-Vap
-Va
-Uz
-Us
-URT
-Under Trolley
-TR
-Tl
-Sx
-SV
-SUPINE UNDER TROLLEY
-Supine R AP
-SUPINE R
-Supine Portable
-Supine portable
-SUPINE Mobile
-Supine Inspiration
-SUPINE AP
-STANndinG
-STANdinG R
-STandinG R
-STANDING L
-Standing L
-STANdING
-STAnDinG
-STAndinG
-StandinG
-standinG
-St
-SS
-Sn
-SMG
-SM
-sitting L
-SITTING
-SI
-SEMI SUPINE MOBILE
-SEMI-SUPINE
-SEMI ERECT PORTABLE
-SEMI ERECT MOBILE
-SEMI-ERECT AP
-SEMI-ERECT 95KV 2MAS SH
-Semi Erect
-SEMI AP ERECT
-Se
-SD
-SC
-Sc
-R Wt Bearing
-RWEIGHT BEARING
-RT Supine
-RTA
-rt
-R Supine Portable
-R Supine
-R STANdING
-R StAndiNG
-R Standing 
-R Standing
-R SITTING
-Rs
-R PA STANDING
-RPA
-Roc
-Rn
-R MOBILE
-Ris
-R Int-rot
-R Internal Rotation
-RING FINGER
-RIGHT SUPINE AP
-RIGHT RESUS
-RIGHT ERECT AP RESUS
-RIGHT ERECT
-RiGHT ERECT
-RIGHT AP
-right
-ri
-RH
-R EXPIRATION
-RESUS R
-RESUS PORTABLE
-RESUS MOBILE
-RESUS ERECT
-RESUS AP
-resus
-R Erect PA
-R ERECT AP
-R Erect
-RED DOt
-RE
-RB
-R AR
-R AP SUPINE
-R AP Supine
-R AP SITTING
-R AP sitting
-R AP ERECT RESUS
-R AP Erect RESUS
-R AP ERECT PORTABLE
-R Ap
-QA
-Qa
-pV
-PR
-PORT AP ERECT
-PORTABLE SUPINE IN RESUS
-PORTABLE SEMI-ERECT
-PORTABLE SEMI ERECT
-PORTABLE R AP ERECT
-Portable Erect
-PORTABLE AP SEMI SUPINE
-PORTABLE AP SEMI-ERECT
-PORTABLE AP ERECT R
-PORTABLE AP ERECT PORT IN RESUS
-PORTABLE AP ERECT L RESUS
-portable AP ERECT
-PORTABLE AP
-pc
-PA WEIGHT BEARING
-PA RT
-PA L ERECT
-pa L
-PAERECT
-OV
-Or
-Od
-OC
-Oc
-NG
-Ms
-Mr
-MP
-MOBLE
-MOBILE L AP ERECT
-MOBILE ERECT AP
-MOBILE AP L ERECT
-MOBILE AP ERECT RESUS
-MOBILE AP
-Mn
-Mmc
-ML
-MIDDLE FINGER
-MB
-LZ
-Ly
-Lx
-L WT BEARING
-L Wt Bearing
-L WEIGHT BEARING
-LT WEIGHTBEARING
-LT Erect
-LSUPINE RESUS
-L Supine
-L supine
-L STANDING
-L Standing
-L semi erect
-Ls
-LRESUS
-LR
-L PORTABLE SUPINE
-L PA WT BEARING
-L PA WTB
-L PA SITTING
-Lpa
-loa
-Lo
-L MOBILE
-Lm
-Lle
-LK
-LITTLE FINGER
-L hbl
-L EXTERNAL ROTATION
-L EXT
-L ERECT AP
-LERECT
-L Erect
-LeFT WT BEARING
-LeFt RESUS
-LEFT ERECT
-LeFt ERECT
-Left ERECT
-LEFTAP SEMI ERECT
-Left AP SEMI ERECT
-LEFT AP ERECT RESUS
-LeFt AP ERECT
-LEFt
-LCH
-Lc
-Las
-L AP Supine
-L AP SEMI ERECT
-L AP Portable
-LAP EREECT
-L AP Erect Portable
-LAP Erect
-kVp.95 mAs.40 DAP:7.37 e(3) mGycm2
-kVp.95 mAs:14 DAP 2.20 e(3) mGycm2
-kVp.92 rAs:17.60 DAP.2.21 e(3) mGycm2
-kVp.92 mAs.32 DAP.3.00 e(3) mGycm2
-kVp.90 mAs.20 DAP:2.94 e(3) mGycm2
-kVp.90 mAs:20 DAP:1.97 e(3) mGycm2
-kVp.90 mAs.20 DAP:1.68 e(3) mGycm2
-kVp.85 mAs.2 DAP:1.15 e(2) mGycm2
-kVp.85 mAs.22 DAP:1.29 e(3) mGycm2
-kVp.85 mAs:1.90 DAP 9.80 e(1) mGycm2
-kVp.85 mAs:1.90 DAP 9.00 e(1) mGycr2
-kVp.85 mAs:1.90 DAP:8.90 e(1) mGycm2
-kVp.85 mAs:1.90 DAP 6.50) e(1) mGycm2
-kVp.85 mAs:1.90 DAP.5.80 e(1 mGycm2
-kVp.85 mAs:1.90 DAP:1.06 e(2) mGycm2
-kVp.85 mAs:14.50 DAP:1.27 e(3) mGycm2
-kVp.85 mAs:1.20 DAP:1.22 e(2) mGycm2
-kVp.80 mAs.9.20 DAP:1.13 e(3) mGycm2
-kVp80 mAs:8 DAP:1.14 e(3) mGycm2
-kVp.80 mAs:7 DAP: mGycm2
-kVp.80 mAs:7.30 DAP 9.83 e(2) mGycm2
-kVp.80 mAs.6 DAP:7.31 e(2) mGycm2
-kVp.80 mAs.6.70 DAP 6.48 e(2) mGycm2
-kVp.80 mAs:6.40 DAP:2.77 e(2) mGycm2
-kVp.80 mAs:6.40 DAP:1.65 e(2) mGycm2
-kVp.80 mAs.5.40 DAP.6.16 e(2) mGycm2
-kVp.80 mAs.5.10 DAP:6.42 e(2) mGycm2
-kVp.80 mAs:4.40 DAP 5.98 e(2) mGycm2
-kVp.80 mAs.3.50 DAP:4.15 e(2) mGycm2
-kVp.80 mAs.3.50 DAP 4.11 e(2) mGycm2
-kVp.80 mAs.3.20 DAP.3.60 e(2) mGycm2
-kVp.80 mAs.31.20 DAP:4.53 e(3) mGycm2
-kVp.80 mAs.31.20 DAP:4.44 e(3) mGycm2
-kVp.80 mAs.31.20 DAP:3.02 e(3) mGycm2
-kVp.80 mAs.31.20 DAP:3.01 e(3) mGycm2
-kVp.80 mAs.31.20 DAP.2.92 e(3) mGycm2
-kVp.80 mAs.2 DAP 3.00 e(2) mGycm2
-kVp.80 mAs.2 DAP 2.73 e(2) mGycm2
-kVp.80 mAs.2 DAP:1.98 e(2) mGycm2
-kVp.80 mAs.2.20 DAP:1.02 e(2) mGycm2
-kVp:80 mAs:1.90 DAP:1.37 e(2) mGycm2
-kVp.80 mAs:15.70 DAP:1.88 e(3) mGycm2
-kVp.80 mAs:15.70 DAP:1.11 e(3) mGycm2
-kVp.80 mAs:11.80 DAP:4.14 e(2) mGycm2
-kVp.80 mAs:10.80 DAP:1.15 e(3) mGycm2
-kVp:78 mAs:6.40 DAP:1.13 e(2) mGycm2
-kVp.:70 mAs:6.40 DAP:1.97 e(2) mGycm2
-kVp.:70 mAs:6.40 DAP:1.76 e(2) mGycm2
-kVp:70 mAs:6.40 DAP:1.34 e(2) mGycm2
-kVp.:70 mAs:4.10 DAP:5.30 e(1) mGycm2
-kVp:70 mAs.25.60 DAP.6.17 e(2) mGycm2
-kVp.70 mAs.25.60 DAP:5.35 e(2) mGycm2
-kVp:70 mAs:12.60 DAP:2.96 e(2) mGycm2
-kVp.65 mAs:6.40 DAP:2.02 e(2) mGycm2
-kVp.65 mAs:6.40 DAP:1.58 e(2) mGycm2
-kVp.65 mAs:6.40 DAP:1.24 e(2) mGycm2
-kVp.65 mAs:6.40 DAP:1.03 e(2) mGycm2
-kVp.62 mAs.2 DAP:4.10 e(1) mGycm2
-kVp.62 mAs.2.50 DAP:2.40 e(1) mGycm2
-kVp.61 mAs:1.60 DAP.2.90 e(1 mGycm2
-kVp.60 mAs:4 DAP:1.74 e(2) mGycm2
-kVp.60 mAs:4.10 DAP:9.60 e(1) mGycm2
-kVp.60 mAs.4.10 DAP:6.90 e(1) mGycm2
-kVp.60 mAs:4.10 DAP:5.10 e(1) mGycm2
-kVp.60 mAs:4.10 DAP:1.39 e(2) mGycm2
-kVp.60 mAs:4.10 DAP:1.05 e(2) mGycm2
-kVp: 60 mAs: 3.20 Rex: 394 09.20.39 DAP - 5.00 e(1) mGycm2
-kVp: 60 mAs: 3.20 Rex: 248 10.38.52 DAP - 6.00 e(1) mGycm2
-kVp.60 mAs.3.20 DAP:4.50 e(1) mGycm2
-kVp: 60 mAs: 2.80 Rex: 299 10.54.23 DAP - 4.50 e(1) mGycm2
-kVp.60 mAs:1.60 DAP:6.40 e(1) mGycm2
-kVp: 60 mAs: 1.20 Rex: 266 14.24.09 DAP - 1.30 e(1) mGycm2
-kVp: 56 mAs: 1.30 Rex: 304 09.34.48 DAP: - 2.20 e(1) mGycm2
-kVp:53 mAs:1 DAP:6.00 e(O) mGycm2
-kVp: 120 mAs: 3.20 Rex: 312 14.00.47 DAP - 1.83 e(2) mGycm2
-kVp: 120 mAs 2.40 Rex: 13.44.04 DAP: 08 e(2) mGycm2
-kVp:120 mAs:1 DAP 6.30 e(1) mGycm2
-kVp:120 mAs:1.50 DAP 9.80 e(1) mGycm2
-kv 68 mAs 6.40 DAP 89 e(2)
-Kv 63mAs 8 DAP 2.10 e(2)
-kV 60 mAs 2.50 DAP 4.40 e(1)
-kV 58 mAs 2.50 DAP 2.20 e(1)
-kV 55 mAs 2 DAP 1.50 e(1)
-kV 54 mAs 2 DAP 2.70 e(1)
-kV 52 mAs 2 DAP 9.00 e(o)
-kV 52 mAs 2 DAP 5.00 e(O)
-KV 52 mAs 2 DAP 3.30 e(1)
-kV 52 mAs 2 DAP 1.50 e(1)
-KV 52 mAs 2 DAP 1.30 e(1)
-KV 50 mAs 2 DAP 1.90 e(1)
-Kv 25 mAs
-KG
-INT ROTATION
-int rot
-INTERNAL ROTATION
-Internal rotation
-INTERNAL ROT
-Im
-ILI
-Ig
-IC
-Horizontal Beam SUPINE
-horizontal beam L
-horizontal beam
-hc
-HBL STANDING
-HB
-GS
-cwd
-CS
-AR
-AP WT BEARING
-AP WEIGHTBEARING R
-ap weight bearing
-AP WB
-AP under trolley
-AP SUPINE RESUS
-AP SUPINE PORTABLE
-AP SITTING
-AP SEMI SUPINE MOBILE
-AP SEMI-SUPINE
-AP SEMI ERECT PORTABLE
-AP Semi-Erect
-AP R
-AP PORTABLE SEMI SUPINE
+3/3
+AB
+AD
+AL
+ANKLE
+AP
+AP ERECT
+AP ERECT L
+AP ERECT L MOBILE
+AP ERECT MOBILE
+AP ERECT PORT
+AP ERECT PORTABLE
+AP ERECT PORTABLE IN RESUS
+AP ERECT R
+AP ERECT RESUS
+AP ERECT RESUS R
+AP Erect
+AP Erect Portable
+AP Erect RESUS L
+AP L
+AP L ERECT
 AP L Portable
 AP LefT ERECT
-AP Erect RESUS L
-AP ERECTRESUS
-AP ERECT PORTABLE IN RESUS
-AP ERECT PORT
-AP ERECT L MOBILE
-Ap Erect L
-ap erect L
-AP-ERECT
+AP PORTABLE SEMI ERECT
+AP PORTABLE SEMI SUPINE
+AP R
+AP R ERECT
+AP SEMI ERECT
+AP SEMI ERECT PORTABLE
+AP SEMI SUPINE
+AP SEMI SUPINE MOBILE
+AP SEMI-ERECT
+AP SEMI-SUPINE
+AP SITTING
+AP SUPINE
+AP SUPINE PORTABLE
+AP SUPINE RESUS
+AP Semi-Erect
+AP Supine
+AP WEIGHTBEARING R
+AP WT BEARING
 AP erect
+AP under trolley
+AR
+AS
+Ac
+Ap
 Ap ERECT
 Ap Erect
-in resus
+Ap Erect L
+CA
+CM
+CS
+CT
+Cp
+DM
+DP
+Di
+Diabetes
+ELBOW
+ERECT
+ERECT AP
+ERECT L
+ERECT MOBILE
+ERECT PA
+ERECT PORTABLE
+ERECT R
+ERECT RESUS
+ES
+EXPIRATION
+EXT
+EXT ROT
+EXTERNAL
+EXTERNAL ROT
+Er
+Erect
+Eta
+Ext-rot
+Ext-rot L
+External Rotation
+FB
+FCC
+FE
+FH
+FR
+GD
+GM
+GR
+GS
+HAND
+HB
+HBL
+HBL L
+HBL R
+HC
+HF
+HORIZONTAL BEAM
+HORIZONTAL BEAM LATERAL
+Horizontal Beam
+Horizontal Beam Lateral
+Horizontal beam
+IC
+ICU
+IL
+ILI
 IN RESUS
+INSP
+INT ROT
+INT ROTATION
+INTERNAL
+INTERNAL ROT
+INTERNAL ROTATION
+IR
+ITU
+Ie
+Ig
+Im
+Int-rot
+Internal Rotation
+Internal rotation
+Ip
+KB
+KG
+KNEE
+KV 50 mAs 2 DAP 1.90 e(1)
+KV 52 mAs 2 DAP 1.30 e(1)
+KV 52 mAs 2 DAP 3.30 e(1)
+L AP
+L AP ERECT
+L AP Erect
+L AP Erect Portable
+L AP Portable
+L AP SEMI ERECT
+L AP Supine
+L ERECT
+L ERECT AP
+L EXT
+L EXTERNAL ROTATION
+L Erect
+L HBL
+L Horizontal beam
+L MOBILE
+L PA
+L PA ERECT
+L PA SITTING
+L PA WT BEARING
+L PORTABLE
+L PORTABLE AP ERECT
+L PORTABLE SUPINE
+L RESUS
+L STANDING
+L Standing
+L Supine
+L WEIGHT BEARING
+L WT BEARING
+L Wt Bearing
 L ap
+L hbl
+L semi erect
+L supine
+LA
+LCH
+LEFT
+LEFT AP ERECT RESUS
+LEFT ERECT
+LEFt
+LITTLE FINGER
+LK
+LL
+LP
+LPA
+LR
+LS
+LT
+LT Erect
+LT WEIGHTBEARING
+LZ
+La
+Las
+Lc
+LeFT
+LeFT AP
+LeFT AP ERECT
+LeFT WT BEARING
+LeFt
+LeFt AP ERECT
+LeFt ERECT
+LeFt RESUS
+LefT
+Left
+Left AP
+Left AP ERECT
+Left AP SEMI ERECT
+Left ERECT
+Left ERECT AP
+Left HBL
+Lk
+Ll
+Lle
+Lm
+Lo
+Lpa
+Ls
+Lt
+Lx
+Ly
+MB
+MC
+MH
+MIDDLE FINGER
+ML
+MOBILE
+MOBILE AP
+MOBILE AP ERECT
+MOBILE AP ERECT RESUS
+MOBILE AP L ERECT
+MOBILE ERECT
+MOBILE ERECT AP
+MOBILE L
+MOBILE L AP ERECT
+MOBILE RESUS
+MOBILE SUPINE
+MP
+MR
+Mmc
+Mn
+Mobile
+Mr
+Ms
+NG
+NICU
+OC
+OV
+Oc
+Od
+Or
+PA
+PA ERECT
+PA ERECT L
+PA ERECT R
+PA Erect
+PA L
+PA L ERECT
+PA R
+PA RT
+PA SITTING
+PA WEIGHT BEARING
+PA WT BEARING
+PAT
 PORT
+PORT AP ERECT
+PORTABLE
+PORTABLE AP
+PORTABLE AP ERECT
+PORTABLE AP ERECT IN RESUS
+PORTABLE AP ERECT L RESUS
+PORTABLE AP ERECT R
+PORTABLE AP ERECT RESUS
+PORTABLE AP SEMI ERECT
+PORTABLE AP SEMI SUPINE
+PORTABLE AP SEMI-ERECT
+PORTABLE AP SUPINE
+PORTABLE IN RESUS
+PORTABLE R AP ERECT
+PORTABLE SEMI ERECT
+PORTABLE SEMI-ERECT
+PORTABLE SUPINE
+PORTABLE SUPINE IN RESUS
+PORTABLE SUPINE L
+PORTABLE SUPINE RESUS
+PR
+Portable
+Portable AP Erect
+Portable Erect
+Portable Supine
+QA
+Qa
+R AP
+R AP ERECT
+R AP ERECT MOBILE
+R AP ERECT PORTABLE
+R AP ERECT RESUS
+R AP Erect
+R AP Erect RESUS
+R AP SITTING
+R AP SUPINE
+R AP Supine
+R AP sitting
+R Ap
+R ERECT
+R ERECT AP
+R EXT
+R Erect
+R Erect PA
+R HBL
+R Horizontal beam
+R Int-rot
+R Internal Rotation
+R MOBILE
+R PA
+R PA ERECT
+R PA Erect
+R PA STANDING
+R PA WEIGHT BEARING
+R PORTABLE AP ERECT
 R PORTABLE IN RESUS
+R RESUS
+R RESUS HBL
+R SITTING
+R STANDING
+R STANdING
+R SUPINE
+R StAndiNG
+R Standing
+R Supine
+R Supine Portable
+R UNDER TROLLEY
+R WEIGHT BEARING
+R WT BEARING
+R Weight Bearing
+R Wt Bearing
+RA
+RB
+RE
+RED DOT
+RED DOt
+RESUS
+RESUS AP
+RESUS AP ERECT
+RESUS ERECT
+RESUS MOBILE
+RESUS PORTABLE
+RESUS R
+REX 102 kv 110 mAs1.40 DAP8.50 e(1)
+RF
+RH
+RI
+RIGHT
+RIGHT AP
+RIGHT ERECT
+RIGHT ERECT AP RESUS
+RIGHT HBL
+RIGHT RESUS
+RIGHT SUPINE AP
+RING FINGER
+RK
+RMO
+RPA
+RR
+RT
+RT HBL
+RT Supine
+RTA
+RTa
+Ra
+Rc
+Re
+Red Dot
+Red dot
+Rha
+Ri
+RiGHT ERECT
+Right
+Ris
+Rlq
+Rn
+Roc
+Rr
+Rs
+Rt
+Rta
+SC
+SD
+SE
+SEMI ERECT
+SEMI ERECT MOBILE
+SEMI ERECT PORTABLE
+SEMI SUPINE
+SEMI SUPINE MOBILE
+SEMI SUPINE PORTABLE
+SEMI-ERECT
+SEMI-ERECT AP
+SEMI-SUPINE
+SH
+SI
+SITTING
+SKULL
+SM
+SMG
+SS
+STANDING
+STANDING L
+STANDING R
+STANDiNG
+STANDinG
+STANdING
+STANdiNG
+STANdinG
+STANdinG R
+STAnDinG
+STAndinG
+STandinG R
+SUPINE
+SUPINE AP
+SUPINE L
+SUPINE MOBILE
+SUPINE Mobile
 SUPINE PORT
+SUPINE PORTABLE
+SUPINE R
+SUPINE RESUS
+SUPINE UNDER TROLLEY
+SV
+Sc
+Se
+Semi Erect
+Sn
+St
+StANdinG
+StAndinG
+StandinG
+Standing
+Standing L
+Standing R
+Supine
+Supine L
+Supine Portable
+Supine R AP
+Supine portable
+Sx
+TA
+TL
+TR
+Tl
+Tle
+UNDER TROLLEY
 UNDER TROLLEY L SUPINE
+UNDER TROLLEY R
+URT
+Under Trolley
+Us
+Uz
+VI
+Va
+Vap
+WB
+WEIGHT BEARING
+WEIGHT BEARING L
+WEIGHT BEARING PA
+WEIGHT BEARING PA R
+WEIGHT BEARING R
+WEIGHT-BEARING
+WEIGHT-BEARING R
+WEIGHTBEARING
+WT BEARING
+WT BEARING R
+Wd
+Weight Bearing
+Weight Bearing L
+Weight Bearing R
+Weight bearing
+Weight bearing R
+Weight-Bearing
+Weightbearing
+Weightbearing R
+Wt Bearing
+Wt Bearing R
+Yo
+ap
+ap erect
+ap erect L
+ap erect portable
+ap weight bearing
+cwd
+erect
+hc
+horizontal beam
+horizontal beam L
+in resus
+int rot
+kV 52 mAs 2 DAP 1.50 e(1)
+kV 52 mAs 2 DAP 5.00 e(O)
+kV 52 mAs 2 DAP 9.00 e(o)
+kV 54 mAs 2 DAP 2.70 e(1)
+kV 55 mAs 2 DAP 1.50 e(1)
+kV 58 mAs 2.50 DAP 2.20 e(1)
+kV 58 mAs 2.50 DAP 4.90 e(1)
+kV 60 mAs 2.50 DAP 4.40 e(1)
+kVp.52 mAs:1 DAP:6.00 e(O) mGycm2
+kVp.60 mAs.3.20 DAP:4.50 e(1) mGycm2
+kVp.60 mAs.4.10 DAP:6.90 e(1) mGycm2
+kVp.60 mAs:1.60 DAP:6.40 e(1) mGycm2
+kVp.60 mAs:4 DAP:1.74 e(2) mGycm2
+kVp.60 mAs:4.10 DAP:1.05 e(2) mGycm2
+kVp.60 mAs:4.10 DAP:1.39 e(2) mGycm2
+kVp.60 mAs:4.10 DAP:5.10 e(1) mGycm2
+kVp.60 mAs:4.10 DAP:9.60 e(1) mGycm2
+kVp.62 mAs.2 DAP:4.10 e(1) mGycm2
+kVp.62 mAs.2.50 DAP:2.40 e(1) mGycm2
+kVp.65 mAs:6.40 DAP:1.03 e(2) mGycm2
+kVp.65 mAs:6.40 DAP:1.24 e(2) mGycm2
+kVp.65 mAs:6.40 DAP:1.58 e(2) mGycm2
+kVp.65 mAs:6.40 DAP:2.02 e(2) mGycm2
+kVp.70 mAs.25.60 DAP:5.35 e(2) mGycm2
+kVp.80 mAs.2 DAP 2.73 e(2) mGycm2
+kVp.80 mAs.2 DAP 3.00 e(2) mGycm2
+kVp.80 mAs.2 DAP:1.98 e(2) mGycm2
+kVp.80 mAs.2.20 DAP:1.02 e(2) mGycm2
+kVp.80 mAs.3.20 DAP.3.60 e(2) mGycm2
+kVp.80 mAs.3.50 DAP 4.11 e(2) mGycm2
+kVp.80 mAs.3.50 DAP:4.15 e(2) mGycm2
+kVp.80 mAs.31.20 DAP.2.92 e(3) mGycm2
+kVp.80 mAs.31.20 DAP:3.01 e(3) mGycm2
+kVp.80 mAs.31.20 DAP:3.02 e(3) mGycm2
+kVp.80 mAs.31.20 DAP:4.44 e(3) mGycm2
+kVp.80 mAs.31.20 DAP:4.53 e(3) mGycm2
+kVp.80 mAs.5.10 DAP:6.42 e(2) mGycm2
+kVp.80 mAs.5.40 DAP.6.16 e(2) mGycm2
+kVp.80 mAs.6 DAP:7.31 e(2) mGycm2
+kVp.80 mAs.6.70 DAP 6.48 e(2) mGycm2
+kVp.80 mAs.9.20 DAP:1.13 e(3) mGycm2
+kVp.80 mAs:10.80 DAP:1.15 e(3) mGycm2
+kVp.80 mAs:11.80 DAP:4.14 e(2) mGycm2
+kVp.80 mAs:15.70 DAP:1.11 e(3) mGycm2
+kVp.80 mAs:15.70 DAP:1.88 e(3) mGycm2
+kVp.80 mAs:4.40 DAP 5.98 e(2) mGycm2
+kVp.80 mAs:6.40 DAP:1.65 e(2) mGycm2
+kVp.80 mAs:6.40 DAP:2.77 e(2) mGycm2
+kVp.80 mAs:7.30 DAP 9.83 e(2) mGycm2
+kVp.85 mAs.2 DAP:1.15 e(2) mGycm2
+kVp.85 mAs.22 DAP:1.29 e(3) mGycm2
+kVp.85 mAs:1.20 DAP:1.22 e(2) mGycm2
+kVp.85 mAs:1.90 DAP 9.80 e(1) mGycm2
+kVp.85 mAs:1.90 DAP:1.06 e(2) mGycm2
+kVp.85 mAs:1.90 DAP:8.90 e(1) mGycm2
+kVp.85 mAs:14.50 DAP:1.27 e(3) mGycm2
+kVp.90 mAs.20 DAP:1.68 e(3) mGycm2
+kVp.90 mAs.20 DAP:2.94 e(3) mGycm2
+kVp.90 mAs:20 DAP:1.97 e(3) mGycm2
+kVp.92 mAs.32 DAP.3.00 e(3) mGycm2
+kVp.95 mAs.40 DAP:7.37 e(3) mGycm2
+kVp.95 mAs:14 DAP 2.20 e(3) mGycm2
+kVp.:70 mAs:4.10 DAP:5.30 e(1) mGycm2
+kVp.:70 mAs:6.40 DAP:1.76 e(2) mGycm2
+kVp.:70 mAs:6.40 DAP:1.97 e(2) mGycm2
+kVp80 mAs:8 DAP:1.14 e(3) mGycm2
+kVp: 120 mAs 2.40 Rex: 13.44.04 DAP: 08 e(2) mGycm2
+kVp: 120 mAs: 3.20 Rex: 312 14.00.47 DAP - 1.83 e(2) mGycm2
+kVp: 56 mAs: 1.30 Rex: 304 09.34.48 DAP: - 2.20 e(1) mGycm2
+kVp: 60 mAs: 1.20 Rex: 266 14.24.09 DAP - 1.30 e(1) mGycm2
+kVp: 60 mAs: 2.80 Rex: 299 10.54.23 DAP - 4.50 e(1) mGycm2
+kVp: 60 mAs: 3.20 Rex: 248 10.38.52 DAP - 6.00 e(1) mGycm2
+kVp: 60 mAs: 3.20 Rex: 394 09.20.39 DAP - 5.00 e(1) mGycm2
+kVp: 70 mAs: 5 Rex: 188 10.13.47 DAP - 28 e(2) mGycm2
+kVp:120 mAs:1 DAP 6.30 e(1) mGycm2
+kVp:120 mAs:1.50 DAP 9.80 e(1) mGycm2
+kVp:53 mAs:1 DAP:6.00 e(O) mGycm2
+kVp:70 mAs.25.60 DAP.6.17 e(2) mGycm2
+kVp:70 mAs:12.60 DAP:2.96 e(2) mGycm2
+kVp:70 mAs:6.40 DAP:1.34 e(2) mGycm2
+kVp:78 mAs:6.40 DAP:1.13 e(2) mGycm2
+kVp:80 mAs:1.90 DAP:1.37 e(2) mGycm2
+kv 68 mAs 6.40 DAP 89 e(2)
+loa
+pV
+pa
+pa L
+pc
+portable
+portable AP ERECT
 portable ap semi-erect in resus
+red dot
+resus
+ri
+right
+rt
+semi-erect
+sitting L
+standinG
+standing
+supine
+under trolley
+wb
+weight bearing

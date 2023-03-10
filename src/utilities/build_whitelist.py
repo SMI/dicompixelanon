@@ -111,9 +111,10 @@ def numerical_regex():
     Returns:
         list: regex rules
     """
-    dap_rule = r"[dD][aA][pP]( |: |=)(([0-9]{1,2}\.[0-9]{2})|00) e\([0-9]\)( mGycm2)?"
-    kv_rule = r"[kK][vV][pP]?( |\.|: |:|)[0-9]{2,3} mAs(:|\.| )[0-9](\.[0-9]{2})?"
-    rex_rule = r"[rR][eE][xX]( |:|: )[0-9]{1,3}"
+    # whenever we might expect 0, allow O or o as well
+    dap_rule = r"[dD][aA][pP]( |:|: |=|\.|\.:)?( - )?(([Oo0-9]{1,2}\.[Oo0-9]{2})|[Oo0-9]{2}) e\([Oo0-9]\)( mGycm2)?"
+    kv_rule = r"[kK][vV][pP]?( |:|: |=|\.|\.:)?[Oo0-9]{2,3} mAs( |:|: |=|\.|\.:)?[Oo0-9]{1,2}(\.[0-9]{2})?"
+    rex_rule = r"[rR][eE][xX]( |:|: |=|\.|\.:)?([Oo0-9]{1,3}|([Oo0-9]{1,3})?( |\.)[Oo0-9]{2}\.[Oo0-9]{2}\.[Oo0-9]{2})"
     regex_numerical_rules = [dap_rule, kv_rule, rex_rule]
     combos = list(itertools.permutations(regex_numerical_rules))  # combinations of the three
     combo_separator = r"(:|\.| |: )?"
@@ -131,8 +132,10 @@ def build_regex(abbreviations, annotations, reduce=False):
         reduce (bool, optional): whether to reduce the number of regex rules refering to the views and orientations. Defaults to False.
     """
     regex_rules = []
+    regex_rules += numerical_regex()
+    regex_rules.append(r"(?i)[123](of| of |of | of|/)[123]")  # image no.
     # view rules
-    views = [r"(semi |semi-)?(erect|supine)", r"(weight |wt |weight-|weight)bearing", r"(hb|horizontal beam)( l| lateral)?", r"(sitting|standing)"]
+    views = [r"(semi |semi-)?(erect|supine)", r"(weight |wt |weight-|weight)bearing", r"(hb|horizontal beam)( l| lateral|l)?", r"(sitting|standing)"]
     one_of_views_rule = r"(" + r"|".join(views) + r")"
     modes = [r"([lr]t?|(left|right))", r"(pa|ap)", r"(mobile|portable|port)", r"under trolley", r"(in )?resus"]
     if reduce:  # fewer permutations, resulting in the view always being the last element. Leads to some things not being whitelisted that could be.
@@ -151,12 +154,12 @@ def build_regex(abbreviations, annotations, reduce=False):
                 rule += rf"({el} )?"
             rule += rf"{combo[-1]}"
             regex_rules.append(rule)
+    rotations_rule = r"(?i)(r |l )?(ext|int)(ernal)?(( |-)rot(ation)?)?( r| l)?"
+    regex_rules.append(rotations_rule)
     for an in annotations:
         regex_rules.append(rf"(?i){an}")
     for ab in abbreviations:
         regex_rules.append(rf"(?i){ab}")
-    regex_rules += numerical_regex()
-    regex_rules.append(r"(?i)[123](of| of |of | of|/)[123]")  # image no.
     with open("../../data/ocr_whitelist_regex.txt", "w") as f:
         for r in regex_rules:
             f.write(f"{r}\n")
@@ -185,6 +188,6 @@ if __name__ == "__main__":
     parser.add_argument("--build", action="store_true", default=False,
                         help="Build local glossary from HTML files in data/radiology_glossary/raw.")
     parser.add_argument("--reduce", action="store_true", default=False,
-                        help="Produces reduced number of regex rules refering to view and orientation from 3684 to 3084.")
+                        help="Produces reduced number of regex rules refering to view and orientation from 3692 to 3092.")
     args = parser.parse_args()
     main(args.fetchbuild, args.build, args.reduce)
