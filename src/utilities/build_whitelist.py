@@ -161,8 +161,9 @@ def build_regex(abbreviations, annotations, reduce=False):
     for ab in abbreviations:
         regex_rules.append(rf"(?i){ab}")
     with open("../../data/ocr_whitelist_regex.txt", "w") as f:
-        for r in regex_rules:
+        for r in regex_rules[:-1]:
             f.write(f"{r}\n")
+        f.write(f"{regex_rules[-1]}")
 
 def main(fetchbuild, build, reduce):
     if fetchbuild or build:  # rebuild glossary dictionary
