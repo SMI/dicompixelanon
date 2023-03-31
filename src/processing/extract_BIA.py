@@ -149,6 +149,7 @@ if __name__ == '__main__':
     cursor = coll.find( { } )
     for doc in cursor:
       file = doc['header']['DicomFilePath']
+      mod = get_or(doc, 'Modality', modality)
       bia = get_or(doc, 'BurnedInAnnotation', 'NOBIATAG')
       rvf = get_or(doc, 'RecognizableVisualFeatures', 'NORVFTAG')
       man = get_or(doc, 'Manufacturer', '')
@@ -177,7 +178,7 @@ if __name__ == '__main__':
       obits = get_or(doc, "(6000,0100)-OverlayBitsAllocated", '')
       obitpos = get_or(doc, "(6000,0102)-OverlayBitPosition", '')
   
-      out_csv.writerow([modality,
+      out_csv.writerow([mod,
         file, bia, rvf, man, model, swv, scman, scmodel, modelname, cm, cord, imtype2, imtype, ivn, sd, ww, rows, columns,
         bitsstored, bitsalloc, numframes,
         orows, ocols, otype, oframes, odesc, obits, obitpos])
