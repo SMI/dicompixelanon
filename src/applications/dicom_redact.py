@@ -376,7 +376,7 @@ def rect_in_allowlist(rect):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    if allowlist.detect(ocrtext) == []:
+    if ocrtext and allowlist.detect(ocrtext) == []:
         return True
     return False
 
