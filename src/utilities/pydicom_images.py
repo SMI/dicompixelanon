@@ -181,6 +181,9 @@ def process_dicom(filename, to_save = False, output_format = 'png', ocr_engine =
         frame, overlay = dicomimg.get_current_frame_overlay()
         if ignore_overlays and overlay != -1:
             continue
+        if not img:
+            logging.error('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
+            continue
         process_image(np.asarray(img), filename=filename, output_dir=output_dir, frame=frame, overlay=overlay, **meta)
     return
 
