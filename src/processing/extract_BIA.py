@@ -11,8 +11,11 @@ import csv, os, re, sys, socket
 import bson.json_util
 import pymongo
 
+# List of modalities in the image_OTHER collection:
+other_collection = [ "PX" ]
+
 modalities = [
-  "OTHER",
+  "PX",
   "NM",
   "PR",
   "MG",
@@ -132,8 +135,10 @@ def test_derived_model_name():
 if __name__ == '__main__':
   for modality in modalities:
     csv_file = 'extract_BIA_from_%s.csv' % modality
-    print('Extracting %s to %s' % (modality, csv_file))
     collection = 'image_'+modality
+    if modality in other_collection:
+      collection = 'image_OTHER'
+    print('Extracting %s from %s to %s' % (modality, collection, csv_file))
     coll = db[collection]
     out_fd = open('extract_BIA_from_%s.csv' % modality, 'w', newline='')
     out_csv = csv.writer(out_fd, quoting = csv.QUOTE_MINIMAL, lineterminator='\n')
@@ -146,7 +151,10 @@ if __name__ == '__main__':
       'OverlayRows','OverlayColumns','OverlayType','NumberOfFramesInOverlay',
       'OverlayDescription','OverlayBitsAllocated','OverlayBitPosition'])
   
-    cursor = coll.find( { } )
+    if collection == 'image_OTHER':
+      cursor = coll.find( { "Modality" : modality } )
+    else:
+      cursor = coll.find( { } )
     for doc in cursor:
       file = doc['header']['DicomFilePath']
       mod = get_or(doc, 'Modality', modality)
