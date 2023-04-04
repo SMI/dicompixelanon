@@ -22,6 +22,7 @@ except AssertionError as e:
     # Ignore if a CPU version of CUDA
     if str(e) == "Torch not compiled with CUDA enabled":
         pass
-    raise
+    else:
+        raise
 except Exception as e:
     raise
