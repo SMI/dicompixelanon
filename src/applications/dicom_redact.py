@@ -468,6 +468,8 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
 
 
 # ---------------------------------------------------------------------
+# XXX this function also in dicom_ocr.py
+
 def read_DicomRect_list_from_region_tags(filename):
     """ Read the DICOM tags which define the usable region in an image
     and construct a list of rectangles which redact all parts outside.

@@ -19,14 +19,16 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
  --ocr OCR             OCR using "tesseract" or "easyocr", output to stdout
  --pii PII             Check OCR output for PII using "spacy" or "flair"
                        (add ,model if needed)
+ --use-ultrasound-regions
+                       collect rectangles from Ultrasound region tags
  --db database_dir     output to database in directory, or use "default" for the default directory
  --csv file.csv        output to CSV filename, or use "stdout" for stdout
  --rects               Output each OCR rectangle separately with coordinates
  --no-overlays         Do not process any DICOM overlays (default processes overlays)
 ```
 
-* ocr options: easyocr / tesseract
-* pii options: spacy / flair / stanford / stanza
+* ocr options: `easyocr` / `tesseract`
+* pii options: `spacy` / `flair` / `stanford` / `stanza`
 * database filename: will be dcmaudit.sqlite
 * default directory: $SMI_ROOT/data/dicompixelanon
 
@@ -36,10 +38,18 @@ To run on a CPU you should install the CPU version of PyTorch
 When run on a GPU it is configured to use a maximum of 40% of available
 GPU memory so that two processes can be run in parallel.
 
+Besides (or instead of) using OCR to find text, this program can also use
+metadata inside Ultrasound DICOM files that indicate image regions.
+The tag `SequenceOfUltrasoundRegions` contains a set of rectangles defining
+the image content so this program can invert those to get a set of rectangles
+surrounding the image content. Such rectangles can be treated the same way
+as rectangles found using OCR; stored in a database or CSV file for future
+redaction.
+
 ## Example
 
 ```
-dicom_ocr.py --ocr easyocr --pii flair --db dbdir --rect file*.dcm 
+dicom_ocr.py --ocr easyocr --pii flair --db dbdir --rects  file*.dcm
 ```
 
 ## Output CSV format
@@ -64,5 +74,9 @@ filename,frame,overlay,imagetype,manufacturer,burnedinannotation,ocr_engine,left
 * is_sensitive - 0 if no PII, 1 if PII, -1 if not checked
 
 ## Output Database
+
+Database output is better than CSV as the information can be shared between programs.
+For example `dcmaudit.py` and `dicom_redact.py` can both read from a database.
+The database location is specified by a directory (the filename inside is fixed).
 
 See the documentation of the `DicomRects` table in the [dicomrectdb](dicomrectdb.md) document.
