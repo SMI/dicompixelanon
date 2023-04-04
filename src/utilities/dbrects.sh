@@ -11,4 +11,4 @@ fi
 if [ -d "$db" ]; then
     db="$db"/dcmaudit.sqlite.db
 fi
-sqlite3 -separator , -cmd 'select * from DicomRects' "$db" < /dev/null
+sqlite3 -csv -header -separator , -cmd 'select * from DicomRects' "$db" < /dev/null

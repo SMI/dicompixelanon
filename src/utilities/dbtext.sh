@@ -11,4 +11,4 @@ fi
 if [ -d "$db" ]; then
     db="$db"/dcmaudit.sqlite.db
 fi
-sqlite3 -separator , -cmd 'select ocrtext from DicomRects where ocrtext != "" and left != -1' "$db" < /dev/null
+sqlite3 -csv -header -separator , -cmd 'select ocrtext from DicomRects where ocrtext != "" and left != -1' "$db" < /dev/null
