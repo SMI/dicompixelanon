@@ -64,6 +64,14 @@ Some sample data is provided as part of the GDCM repo:
 * https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.gz/download (gdcm Data)
 * https://sourceforge.net/projects/gdcm/files/gdcmData/gdcmData/gdcmData.tar.bz2/download (corrupt version of gdcm Data)
 
+Useful sample files:
+
+* gdcm-US-ALOKA-16.dcm - has Sequence of Ultrasound Regions (3) plus text within the image regions
+* CT_OSIRIX_OddOverlay.dcm - has 1 overlay
+* XA_GE_JPEG_02_with_Overlays.dcm - has 8 overlays in high bits
+* PHILIPS_Brilliance_ExtraBytesInOverlay.dcm - has 1 overlay
+
+
 # Requirements
 
 Before installing these requirements please read the Installation Notes below.
