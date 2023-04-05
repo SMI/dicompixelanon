@@ -24,6 +24,8 @@ Utilities:
 * `dbrects.sh` - display the rectangles in the database (simple sqlite3 wrapper)
 * `dbtext.sh` - display the OCR text in the database (simple sqlite3 wrapper)
 * `dbtags.sh` - display the tagged DICOM files in the database (simple sqlite3 wrapper)
+* `dbtagged.sh` - display the tagged DICOM filenames in the database (simple sqlite3 wrapper)
+* `dbtext_for_tagged.sh` - display OCR details of tagged files
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
 * `build_whitelist.py` - create list of regex rules for whitelisting OCR output and write to file, optionally reduce the number of rules by 20 percent (leading to more redactions of non-PII data, but significantly shorter runtime)
 
@@ -39,6 +41,8 @@ prepended)
 * `export HF_HUB_OFFLINE=1` if using `flair` inside a safe haven without
 internet access, to prevent it from trying to download models from huggingface
 (and crashing when it can't connect).
+* export `PYTHONPATH=../../library/` if you want to try any of the applications
+from their directory without building and installing the library
 
 Setup
 
@@ -55,6 +59,8 @@ Now you can run the applications:
  * dicom_redact, if you want to redact the DICOM file based on the rectangles in the database
  * dicom_pixel_anon, to run both ocr and redact together
 
+See below for a suggested workflow.
+
 # Sample data
 
 Some sample data is provided as part of the GDCM repo:
@@ -66,10 +72,10 @@ Some sample data is provided as part of the GDCM repo:
 
 Useful sample files:
 
-* gdcm-US-ALOKA-16.dcm - has Sequence of Ultrasound Regions (3) plus text within the image regions
-* CT_OSIRIX_OddOverlay.dcm - has 1 overlay
-* XA_GE_JPEG_02_with_Overlays.dcm - has 8 overlays in high bits
-* PHILIPS_Brilliance_ExtraBytesInOverlay.dcm - has 1 overlay
+* `gdcm-US-ALOKA-16.dcm` - has Sequence of Ultrasound Regions (3) plus text within the image regions
+* `CT_OSIRIX_OddOverlay.dcm` - has 1 overlay
+* `XA_GE_JPEG_02_with_Overlays.dcm` - has 8 overlays in high bits
+* `PHILIPS_Brilliance_ExtraBytesInOverlay.dcm` - has 1 overlay
 
 
 # Requirements
@@ -78,13 +84,14 @@ Before installing these requirements please read the Installation Notes below.
 
 Python requirements
 
+* pytorch CPU version (if no GPU available), see the pytorch website
+NOTE install this separately first before installing any others.
 * pydicom - for reading DICOM format
 * pydal - for database access (the db is typically `sqlite` format)
 * easyocr - to extract text from images
 * numpy
 * opencv_python_headless
 * Pillow
-* pytorch CPU version (if no GPU available), see the pytorch website
 * other dependencies of the above
 
 Optional Python requirements
@@ -98,6 +105,7 @@ Optional Python requirements
 
 OS packages
 
+* sqlite3
 * python3-tk (for dcmaudit), this will install tk8.6 and libtk8.6
 * tesseract-ocr (optional)
 
@@ -162,3 +170,17 @@ Note that this includes the CoreNLP Java software which needs Java 1.8
 
 Download the models from https://huggingface.co/stanfordnlp/stanza-en/resolve/v1.4.1/models/default.zip
 Unpack `default.zip` into `$SMI_ROOT/data/stanza/en/`
+
+
+# Workflow
+
+A suggested workflow might be:
+* Get a list of filenames to examine
+  - extract_BIA to extract a modality from MongoDB
+  - randomly sample from the output file
+* dicom_ocr.py to create a database from
+  - OCR
+  - Ultrasound tags
+* dcmaudit.py to review the results
+* dbtagged.sh to go back over the ones you tagged in dcmaudit
+* dicom_redact.py to actually redact images
