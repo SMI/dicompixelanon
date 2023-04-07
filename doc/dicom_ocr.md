@@ -52,6 +52,24 @@ redaction.
 dicom_ocr.py --ocr easyocr --pii flair --db dbdir --rects  file*.dcm
 ```
 
+To test one of the Ultrasound examples, output CSV to stdout,
+you should expect to see the three Ultrasound regions converted into
+four redaction rectangles, then the rectangles from the easyocr OCR.
+```
+PYTHONPATH=../library/ ./dicom_ocr.py --rects --csv /dev/tty --use-ultrasound-regions ~/data/gdcm/gdcmData/gdcm-US-ALOKA-16.dcm
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,ultrasoundregions,0,0,639,24,,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,ultrasoundregions,0,24,32,415,,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,ultrasoundregions,335,24,336,415,,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,ultrasoundregions,0,415,639,479,,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,246,0,340,64,8s79 127/2884},,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,559,31,640,67,1103 2812,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,19,429,241,471,9123 5.0 R15 066 c6 8e,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,259,431,281,447,Az,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,339,431,381,447,9123,,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,399,429,633,471,"5,0 R15 063 c6 Az  no",,-1
+gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,-1,-1,-1,-1,"8s79 127/2884} 1103 2812 9123 5.0 R15 066 c6 8e Az 9123 5,0 R15 063 c6 Az  no ",,-1
+```
+
 ## Output CSV format
 
 OCR results are written out in CSV format.
