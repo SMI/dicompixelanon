@@ -22,6 +22,7 @@ import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 from DicomPixelAnon.nerengine import NER
+from DicomPixelAnon import ultrasound
 import sys
 try:
     from DicomPixelAnon.dicomrectdb import DicomRectDB
@@ -468,32 +469,6 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
 
 
 # ---------------------------------------------------------------------
-# XXX this function also in dicom_ocr.py
-
-def read_DicomRect_list_from_region_tags(filename):
-    """ Read the DICOM tags which define the usable region in an image
-    and construct a list of rectangles which redact all parts outside.
-    Only applicable to Ultrasound images, as it reads the tag
-    SequenceOfUltrasoundRegions.
-    Returns a list of DicomRect object, or [] if none found.
-    """
-    rect_list = []
-    ds = pydicom.dcmread(filename)
-    if 'SequenceOfUltrasoundRegions' in ds:
-        keep_list = []
-        width = int(ds['Columns'].value)
-        height = int(ds['Rows'].value)
-        for region in ds['SequenceOfUltrasoundRegions']:
-            x0 = int(region['RegionLocationMinX0'].value)
-            y0 = int(region['RegionLocationMinY0'].value)
-            x1 = int(region['RegionLocationMaxX1'].value)
-            y1 = int(region['RegionLocationMaxY1'].value)
-            keep_list.append(DicomRect(left=x0, right=x1, top=y0, bottom=y1, frame=-1, overlay=-1))
-        rect_list = rect_exclusive_list(keep_list, width, height)
-    return rect_list
-
-
-# ---------------------------------------------------------------------
 def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, overlay=-1):
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
@@ -632,7 +607,7 @@ if __name__ == '__main__':
 
     # Get a list of rectangles surrounding the UltrasoundRegions
     if args.dicom and args.remove_ultrasound_regions:
-        rect_list_map[args.dicom] += read_DicomRect_list_from_region_tags(args.dicom)
+        rect_list_map[args.dicom] += ultrasound.read_DicomRect_list_from_region_tags(filename = args.dicom)
 
     # If given a database then we need a filename to search for
     if args.db:
