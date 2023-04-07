@@ -160,11 +160,46 @@ class DicomRectText(DicomRect):
 
 # ---------------------------------------------------------------------
 
+def rect_is_huge_font(rect):
+    """
+    Returns True if the rect has an area which is very much larger
+    than the amount of text would suggest, implying that the font is
+    extremely large, and thus that the OCR has picked up something
+    which is most likely not normal text.
+    Returns False if not sure, e.g. if not a DicomRectText object.
+    """
+    if not isinstance(rect, DicomRectText):
+        return False
+    if rect.L() == -1:
+        return False
+    (E,text,N,P) = rect.text_tuple()
+    if not text:
+        return False
+    if (rect.R() - rect.L()) * (rect.B() - rect.T()) > 3000 * len(text):
+        #print('ignore rect with text %s' % text)
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------
+
+def filter_DicomRectText_list_by_fontsize(rectlist):
+    """ Return a new list containing the rectangles from rectlist
+    which do not contain text in a huge font, i.e. a small number of
+    characters in a very large area. This is to filter out rectangles
+    where OCR thinks it's found some text but probably hasn't.
+    """
+    retlist = [ rect for rect in rectlist if not rect_is_huge_font(rect) ]
+    return retlist
+
+
+# ---------------------------------------------------------------------
+
 def add_Rect_to_list(rectlist, addrect):
     """ Extend the given list of rectangles with the given rectangle.
     Handles overlaps to ensure that the list does not contain any
     rectangles which would lie inside a larger rectangle.
-    Works with Rect or DicomRect objects.
+    Works with Rect or DicomRect or DicomRectText objects.
     """
     # If new rectangle is empty then do nothing
     if not addrect.is_valid():
