@@ -7,6 +7,9 @@
   tests for PII.
 """
 
+from copy import deepcopy
+
+
 class Rect:
     """ Holds one rectangle.
     Coordinates start at 0, top left.
@@ -194,7 +197,8 @@ def rect_exclusive_list(rectlist, width, height):
     # Create all new list elements from same type as existing
     RectType = type(rectlist[0])
     # Start with a rectangle which is full size
-    newlist = [ RectType(0, height-1, 0, width-1) ]
+    r0 = deepcopy(rectlist[0]).set_rect(0, height-1, 0, width-1)
+    newlist = [ r0 ]
     for inner_rect in rectlist:
         new2list = []
         for newrect in newlist:
@@ -203,19 +207,25 @@ def rect_exclusive_list(rectlist, width, height):
                 # Replace newrect with four surrounding rect
                 nl,nt,nr,nb = newrect.ltrb()
                 l,t,r,b = intersection.ltrb()
-                # XXX check we're not off-by-one with any of these coordinates
-                add_Rect_to_list(new2list, RectType(min(t,nt), t, min(l,nl), max(r,nr))) # T,B,L,R
-                add_Rect_to_list(new2list, RectType(t,b, min(l,nl), l))
-                add_Rect_to_list(new2list, RectType(t,b, r, max(r,nr)))
-                add_Rect_to_list(new2list, RectType(b, max(b,nb), min(l,nl), max(r,nr)))
+                # Create a new object of same type as original, and preserve ocrengine value
+                # Set coordinates in the order: (T,B,L,R)
+                # XXX these are off-by-one and need fixed
+                r1 = deepcopy(rectlist[0]).set_rect(min(t,nt), t, min(l,nl), max(r,nr))
+                r2 = deepcopy(rectlist[0]).set_rect(t, b, min(l,nl), l)
+                r3 = deepcopy(rectlist[0]).set_rect(t, b, r, max(r,nr))
+                r4 = deepcopy(rectlist[0]).set_rect(b, max(b,nb), min(l,nl), max(r,nr))
+                add_Rect_to_list(new2list, r1)
+                add_Rect_to_list(new2list, r2)
+                add_Rect_to_list(new2list, r3)
+                add_Rect_to_list(new2list, r4)
             else:
                 add_Rect_to_list(new2list, newrect)
         newlist = new2list
     # XXX should really coalesce all adjoining rectangles for efficiency
     return newlist
 
-# ---------------------------------------------------------------------
 
+# ---------------------------------------------------------------------
 def test_rect():
     r = Rect(1, 11, 2, 12) # T,B,L,R
     assert r.ltrb() == (2, 1, 12, 11)
