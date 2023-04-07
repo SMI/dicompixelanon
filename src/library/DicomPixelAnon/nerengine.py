@@ -18,6 +18,7 @@ import re
 import sys
 from pathlib import Path
 from importlib.util import find_spec
+from DicomPixelAnon.nerenum import NEREnum
 
 # Try to import spacy
 try:
@@ -129,7 +130,7 @@ class NER():
                     'en_core_web_sm']):
                     if find_spec(trymodel):
                         model = trymodel
-                        self._engine_enum = 10 + ii
+                        self._engine_enum = NEREnum.spacy_en_core_web_trf + ii
                         break
             self._engine_name = engine
             self.engine_version = spacy.__version__
@@ -143,7 +144,7 @@ class NER():
             if 'flair' not in sys.modules:
                 logging.error('flair requested but not available')
                 return
-            self._engine_enum = 20
+            self._engine_enum = NEREnum.flair
             # default model is 'ner' but can use 'ner', 'ner-fast', 'ner-large', 'ner-ontonotes', etc.
             if not model:
                 model = 'ner'
@@ -171,7 +172,7 @@ class NER():
                 logging.error('stanford_ner requested but not available')
                 return
             self._engine_name = engine
-            self._engine_enum = 30
+            self._engine_enum = NEREnum.stanford
             self.engine_version = stanford_ner.__version__
             self.engine_data_dir = None
             # '../../Stanford-NER-Python/stanford-ner/'
@@ -196,7 +197,7 @@ class NER():
                 logging.error('stanza requested but not available')
                 return
             self._engine_name = engine
-            self._engine_enum = 40
+            self._engine_enum = NEREnum.stanza
             self.engine_version = stanza.__version__
             self.engine_data_dir = None
             stanza_path_list = [ os.getenv('STANZA_DATA_ROOT', '.stanford_ner'),
@@ -219,7 +220,7 @@ class NER():
         elif engine == 'ocr_whitelist':
             # Default is $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
             self._engine_name = engine
-            self._engine_enum = 50
+            self._engine_enum = NEREnum.whitelist
             self.engine_model = model
             self.engine_version = '1.0.0' # XXX maybe timestamp of file?
             self.engine_data_dir = None
