@@ -27,10 +27,14 @@ try:
 except:
     logging.warning('OCR: tesseract module not available')
 from DicomPixelAnon.rect import Rect
+from DicomPixelAnon.ocrenum import OCREnum
 import cv2
 
 
 class OCR:
+    """ A class which encapsulates an OCR engine
+    to return text given an image.
+    """
     # Configuration
     easy_language = 'en'
     easy_cfg_dir = os.path.join(os.environ.get('SMI_ROOT', ''), 'data', 'easyocr')
@@ -39,20 +43,15 @@ class OCR:
     tess_language = 'eng'
     tess_dir = os.path.join(os.environ.get('SMI_ROOT', ''), 'data', 'tessdata')
     tess_cfg = "--psm 11"  # default is 3 but 11 tries harder to get text fragments
-    confidence_threshold = 0.4
+    confidence_threshold = 0.4 # determined empirically
     min_string_length = 2
-
-    # Static constants
-    TesseractEngine = 1
-    EasyOCREngine = 2
-    Keras = 3
 
     def __init__(self, engine):
         """ engine can be one of the enums, or one of the names
         'tesseract' or 'easyocr'
         """
-        if engine == OCR.TesseractEngine or engine == 'tesseract':
-            self.engine = OCR.TesseractEngine
+        if engine == OCREnum.TesseractEngine or engine == 'tesseract':
+            self.engine = OCREnum.TesseractEngine
             # Tesseract initialisation
             self.tess_language = OCR.tess_language
             self.tess_dir = OCR.tess_dir
@@ -64,8 +63,8 @@ class OCR:
                 if not shutil.which('tesseract'):
                     logging.warning('OCR: tesseract program not found')
             logging.debug('OCR: Using Tesseract(%s,%s,%s)' % (shutil.which('tesseract'), self.tess_language, self.tess_dir))
-        elif engine == OCR.EasyOCREngine or engine == 'easyocr':
-            self.engine = OCR.EasyOCREngine
+        elif engine == OCREnum.EasyOCREngine or engine == 'easyocr':
+            self.engine = OCREnum.EasyOCREngine
             # EasyOCR initialisation
             self.easy_language = OCR.easy_language
             self.easy_gpu = OCR.easy_gpu
@@ -85,14 +84,10 @@ class OCR:
     def engine_name(self):
         """ Return a string indicating which OCR engine is used.
         """
-        if self.engine == OCR.TesseractEngine:
-            return "tesseract"
-        elif self.engine == OCR.EasyOCREngine:
-            return "easyocr"
-        elif self.engine == OCR.Keras:
-            return "keras"
-        else:
-            raise RuntimeError('unsupported OCR engine')
+        name = OCREnum().name(self.engine)
+        if name:
+            return name
+        raise RuntimeError('unsupported OCR engine')
 
     def engine_enum(self):
         """ Return an integer indicating which OCR engine is used.
@@ -105,7 +100,7 @@ class OCR:
         { "text", "conf" (percent confidence), "rect" (a Rect object)}
         """
         results = []
-        if self.engine == OCR.TesseractEngine:
+        if self.engine == OCREnum.TesseractEngine:
             # default config is --psm 3 --oem 3
             # Help if noisy but not for our DICOMS: c1 = cv2.GaussianBlur(img, (3,3), 0)
             # Use 35 for surrounding regions but larger fails?
@@ -144,7 +139,7 @@ class OCR:
                         top = res['top'][rec],
                         bottom = res['top'][rec] + res['height'][rec])
                 })
-        elif self.engine == OCR.EasyOCREngine:
+        elif self.engine == OCREnum.EasyOCREngine:
             # cv2 cannot handle 4-byte grayscale so reduce to uint8
             if img.itemsize > 1:
                 max = img.max()
@@ -159,7 +154,7 @@ class OCR:
                     continue
                 results.append( {
                     'text': txt,
-                    'conf': 1.0, # XXX
+                    'conf': 1.0, # XXX see above
                     'rect': Rect(left = bbox[0][0],
                         right = bbox[2][0],
                         top = bbox[0][1],
@@ -171,6 +166,10 @@ class OCR:
         return results
 
     def image_to_text(self, img):
+        """ Perform OCR on img which must be a numpy array
+        and return the whole found text as a single string.
+        Compare with image_to_data().
+        """
         dat = self.image_to_data(img)
         str = ''
         for item in dat:
