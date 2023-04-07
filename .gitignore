@@ -1,3 +1,10 @@
+# Added by abrooks specifically for this repo only
+*.table
+*.dcm
+*.tiff
+*.csv
+*.sqlite.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
