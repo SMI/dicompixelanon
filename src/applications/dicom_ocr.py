@@ -12,10 +12,13 @@ import pydicom
 import sys
 from PIL import Image
 from DicomPixelAnon.ocrengine import OCR
+from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerengine import NER
+from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon.dicomrectdb import DicomRectDB
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
+from DicomPixelAnon.ultrasound import read_DicomRect_list_from_region_tags
 import DicomPixelAnon.torchmem
 
 
@@ -69,32 +72,6 @@ def check_for_pii(nlp_engine : NER, text) -> int:
 
 
 # ---------------------------------------------------------------------
-# XXX this function also in dicom_redact.py
-
-def read_DicomRect_list_from_region_tags(filename):
-    """ Read the DICOM tags which define the usable region in an image
-    and construct a list of rectangles which redact all parts outside.
-    Only applicable to Ultrasound images, as it reads the tag
-    SequenceOfUltrasoundRegions.
-    Returns a list of DicomRect object, or [] if none found.
-    """
-    rect_list = []
-    ds = pydicom.dcmread(filename)
-    if 'SequenceOfUltrasoundRegions' in ds:
-        keep_list = []
-        width = int(ds['Columns'].value)
-        height = int(ds['Rows'].value)
-        for region in ds['SequenceOfUltrasoundRegions']:
-            x0 = int(region['RegionLocationMinX0'].value)
-            y0 = int(region['RegionLocationMinY0'].value)
-            x1 = int(region['RegionLocationMaxX1'].value)
-            y1 = int(region['RegionLocationMaxY1'].value)
-            keep_list.append(DicomRect(left=x0, right=x1, top=y0, bottom=y1, frame=-1, overlay=-1))
-        rect_list = rect_exclusive_list(keep_list, width, height)
-    return rect_list
-
-
-# ---------------------------------------------------------------------
 def process_image(img, filename = None,
         frame = -1, overlay = -1,
         ocr_engine: OCR = None, nlp_engine: NER = None,
@@ -120,54 +97,58 @@ def process_image(img, filename = None,
     nlp_engine_name = nlp_engine.engine_name() if nlp_engine else 'NONLP'
     nlp_engine_enum = nlp_engine.engine_enum() if nlp_engine else -1
 
-    ocr_rectlist = []   # array of tuple(Rect, text, is_sensitive)
+    ocr_rectlist = []   # array of DicomRectText (was tuple(Rect, text, is_sensitive))
 
     # Try Ultrasound regions
     if us_regions:
-        us_rect_list = read_DicomRect_list_from_region_tags(filename)
-        ocr_rectlist.extend([ (r, '', False) for r in us_rect_list ])
-        # XXX we should really create DicomRectText and set ocrengine = US
+        ocr_rectlist = read_DicomRectText_list_from_region_tags(filename = filename)
 
     # Run OCR
     debug('OCR(%s,%s) %s (%d,%d)' % (ocr_engine_name, nlp_engine_name, filename, frame, overlay))
     ocr_text = ''
     if output_rects:
         # Get a list of rectangles and construct text string
+        # image_to_data returns dict with text,conf,rect keys.
+        # XXX regardless of frame,overlay supplied the US regions are always attributed to frame=0
         ocr_data = ocr_engine.image_to_data(img)
         for item in ocr_data:
             if item['conf'] > OCR.confidence_threshold:
                 ocr_text += item['text'] + ' '
                 is_sensitive = check_for_pii(nlp_engine, item['text'])
-                ocr_rectlist.append( (item['rect'], item['text'], is_sensitive) )
+                ocr_rectlist.append( DicomRectText(arect = item['rect'],
+                    frame=0, overlay=-1, 
+                    ocrengine=ocr_engine_enum, ocrtext=item['text'],
+                    nerengine=nlp_engine_enum, nerpii=is_sensitive) )
         # Now append the whole string with a null rectangle
         is_sensitive = check_for_pii(nlp_engine, ocr_text)
-        ocr_rectlist.append( (Rect(), ocr_text, is_sensitive) )
+        ocr_rectlist.append( DicomRectText(ocrengine=ocr_engine_enum, ocrtext=ocr_text,
+            nerengine=nlp_engine_enum, nerpii=is_sensitive) )
     else:
         ocr_text = ocr_engine.image_to_text(img)
         is_sensitive = check_for_pii(nlp_engine, ocr_text)
-        ocr_rectlist.append( (Rect(), ocr_text, is_sensitive) )
+        ocr_rectlist.append( DicomRectText(ocrengine=ocr_engine_enum, ocrtext=ocr_text,
+            nerengine=nlp_engine_enum, nerpii=is_sensitive) )
+
+    # Filter out huge rectangles
+    ocr_rectlist = filter_DicomRectText_list_by_fontsize(ocr_rectlist)
 
     # Output in CSV format
     if csv_writer:
-        for rect,text,is_sensitive in ocr_rectlist:
+        for rect,text, in ocr_rectlist:
+            ocrenum, ocrtext, nerenum, is_sensitive = rect.text_tuple()
             csv_writer.writerow([
                 filename, frame, overlay,
                 imagetype, manufacturer, bia,
-                ocr_engine.engine_name(),
+                OCREnum().name(ocrenum),
                 rect.L(), rect.T(), rect.R(), rect.B(),
-                text,
-                nlp_engine_name,
+                ocrtext,
+                NEREnum().name(nerenum),
                 is_sensitive
             ])
 
     # Output to database
     if db_writer:
-        for rect,text,is_sensitive in ocr_rectlist:
-            dicomrect = DicomRectText(top = rect.T(), bottom = rect.B(),
-                left = rect.L(), right = rect.R(),
-                frame = frame, overlay = overlay,
-                ocrengine = ocr_engine_enum, ocrtext = text,
-                nerengine = nlp_engine_enum, nerpii = is_sensitive)
+        for dicomrect in ocr_rectlist:
             db_writer.add_rect(filename, dicomrect)
 
     return
