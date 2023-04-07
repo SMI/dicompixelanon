@@ -26,6 +26,7 @@ class Rect:
 
     def set_rect(self, t, b, l, r):
         self.top, self.bottom, self.left, self.right = t, b, l, r
+        return self
 
     def get_rect(self):
         return self.top, self.bottom, self.left, self.right
