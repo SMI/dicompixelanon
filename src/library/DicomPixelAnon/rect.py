@@ -95,6 +95,8 @@ class DicomRect(Rect):
             super().__init__(arect.T(), arect.B(), arect.L(), arect.R())
         elif top != None:
             super().__init__(top, bottom, left, right)
+        else:
+            super().__init__()
         self.frame, self.overlay = frame, overlay
 
     def __repr__(self):
@@ -138,9 +140,8 @@ class DicomRectText(DicomRect):
             super().__init__(arect.T(), arect.B(), arect.L(), arect.R(), frame, overlay)
         elif top != None:
             super().__init__(top, bottom, left, right, frame, overlay)
-
-
-        super().__init__(top, bottom, left, right, frame, overlay)
+        else:
+            super().__init__()
         self.ocrengine, self.ocrtext = ocrengine, ocrtext
         self.nerengine, self.nerpii  = nerengine, nerpii
 
