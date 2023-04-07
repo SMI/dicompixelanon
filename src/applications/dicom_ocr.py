@@ -17,8 +17,9 @@ from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon.dicomrectdb import DicomRectDB
-from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
-from DicomPixelAnon.ultrasound import read_DicomRect_list_from_region_tags
+from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText
+from DicomPixelAnon.rect import rect_exclusive_list, filter_DicomRectText_list_by_fontsize
+from DicomPixelAnon.ultrasound import read_DicomRectText_list_from_region_tags
 import DicomPixelAnon.torchmem
 
 
@@ -134,7 +135,7 @@ def process_image(img, filename = None,
 
     # Output in CSV format
     if csv_writer:
-        for rect,text, in ocr_rectlist:
+        for rect in ocr_rectlist:
             ocrenum, ocrtext, nerenum, is_sensitive = rect.text_tuple()
             csv_writer.writerow([
                 filename, frame, overlay,
