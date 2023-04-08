@@ -280,10 +280,10 @@ class DicomImage:
             else:
                 if overlay_data.ndim == 3:
                     # the first dimension is the frame
-                    return Image.fromarray(rescale_np(overlay_data[frame_num,:,:], False))
+                    return Image.fromarray(rescale_np(overlay_data[frame,:,:], False))
                 else:
                     # assume the fourth dimension is RGB
-                    return Image.fromarray(rescale_np(overlay_data[frame_num,:,:,:], False))
+                    return Image.fromarray(rescale_np(overlay_data[frame,:,:,:], False))
 
     def idx_to_tuple(self, n = -1):
         """ Sequential index into the image frames,
