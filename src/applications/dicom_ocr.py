@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Run OCR on DICOM images and optionally also NER to detect PII
 # Output to CSV file or database
+# e.g. PYTHONPATH=../library/ ./dicom_ocr.py --rects --csv /dev/tty --use-ultrasound-regions ~/data/gdcm/gdcmData/gdcm-US-ALOKA-16.dcm
 
 import argparse
 import csv
@@ -117,7 +118,7 @@ def process_image(img, filename = None,
                 ocr_text += item['text'] + ' '
                 is_sensitive = check_for_pii(nlp_engine, item['text'])
                 ocr_rectlist.append( DicomRectText(arect = item['rect'],
-                    frame=0, overlay=-1, 
+                    frame=frame, overlay=overlay, 
                     ocrengine=ocr_engine_enum, ocrtext=item['text'],
                     nerengine=nlp_engine_enum, nerpii=is_sensitive) )
         # Now append the whole string with a null rectangle
