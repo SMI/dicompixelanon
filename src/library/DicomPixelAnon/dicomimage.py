@@ -307,7 +307,7 @@ class DicomImage:
                     break
                 else:
                     n -= self.overlay_group_num_frames[overlay_num]
-        logging.debug('idx %d (%d) -> %d %d' % (orig_n, self.image_idx, frame, overlay))
+        #logging.debug('idx %d (%d) -> %d %d' % (orig_n, self.image_idx, frame, overlay))
         return frame, overlay
 
     def get_current_idx(self):
