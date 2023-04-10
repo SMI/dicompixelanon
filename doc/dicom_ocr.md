@@ -46,8 +46,10 @@ surrounding the image content. Such rectangles can be treated the same way
 as rectangles found using OCR; stored in a database or CSV file for future
 redaction.
 
-## Example
+## Examples
 
+To run OCR and then detect PII in the resulting text, and save the
+details of each individual rectangle into a database in dbdir directory:
 ```
 dicom_ocr.py --ocr easyocr --pii flair --db dbdir --rects  file*.dcm
 ```
@@ -55,6 +57,8 @@ dicom_ocr.py --ocr easyocr --pii flair --db dbdir --rects  file*.dcm
 To test one of the Ultrasound examples, output CSV to stdout,
 you should expect to see the three Ultrasound regions converted into
 four redaction rectangles, then the rectangles from the easyocr OCR.
+Note how each text string appears separately with its coordinates and
+then all of the text concatenated appears with a null rectangle.
 ```
 PYTHONPATH=../library/ ./dicom_ocr.py --rects --csv /dev/tty --use-ultrasound-regions ~/data/gdcm/gdcmData/gdcm-US-ALOKA-16.dcm
 gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,ultrasoundregions,0,0,639,24,,,-1
@@ -68,6 +72,15 @@ gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,259,
 gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,339,431,381,447,9123,,-1
 gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,399,429,633,471,"5,0 R15 063 c6 Az  no",,-1
 gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,-1,-1,-1,-1,"8s79 127/2884} 1103 2812 9123 5.0 R15 066 c6 8e Az 9123 5,0 R15 063 c6 Az  no ",,-1
+```
+
+To do the same and also filter out text which is safe (not PII) using an allowlist.
+Note that the output will still include all the text rectangles but those which
+are safe will have `ner_engine=whitelist` and `is_sensitive=0`
+```
+cp data/ocr_whitelist_regex.txt $SMI_ROOT/data/dicompixelanon
+dicom_ocr.py --pii ocr_whitelist ...etc as above...
+filename.dcm, ... ,whitelist,0
 ```
 
 ## Output CSV format
