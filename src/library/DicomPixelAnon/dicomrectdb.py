@@ -99,6 +99,7 @@ class DicomRectDB():
                     nerengine = nerengine, nerpii = nerpii,
                     last_modified = lastmod, last_modified_by = self.username)
                 self.db.commit()
+                break
             except Exception as e:
                 if str(e) == 'database is locked' and attempts < 99:
                     time.sleep(0.1)
