@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import sys
+import time
 from pydal import DAL, Field
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
 
@@ -88,13 +89,21 @@ class DicomRectDB():
         else:
             ocrengine, ocrtext, nerengine, nerpii = -1, '', -1, -1
         lastmod = datetime.datetime.now()
-        self.db.DicomRects.insert(filename=filename,
-            top = t, bottom = b, left = l, right = r,
-            frame = frame, overlay = overlay,
-            ocrengine = ocrengine, ocrtext = ocrtext,
-            nerengine = nerengine, nerpii = nerpii,
-            last_modified = lastmod, last_modified_by = self.username)
-        self.db.commit()
+        # Sadly pydal does not retry this if the database is locked
+        for attempts in range(99):
+            try:
+                self.db.DicomRects.insert(filename=filename,
+                    top = t, bottom = b, left = l, right = r,
+                    frame = frame, overlay = overlay,
+                    ocrengine = ocrengine, ocrtext = ocrtext,
+                    nerengine = nerengine, nerpii = nerpii,
+                    last_modified = lastmod, last_modified_by = self.username)
+                self.db.commit()
+            except Exception as e:
+                if str(e) == 'database is locked' and attempts < 99:
+                    time.sleep(0.1)
+                    continue
+                raise(e)
         return
 
     def add_tag(self, filename, mark : bool, comment = None):
