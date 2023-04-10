@@ -12,9 +12,9 @@ before installing requirements.txt otherwise you will get the default
 
 ## Installation
 
-Run `python3 setup.py bdist_wheel` to create `dist/DicomPixelAnon-1.0.0-py3-none-any.whl`
+Run `python3 ./setup.py bdist_wheel` to create `dist/DicomPixelAnon-1.0.0-py3-none-any.whl`
 
-Run `python3 setup.py install` to install (including dependencies) into your python site-packages
+Run `python3 ./setup.py install` to install (including dependencies) into your python site-packages
 (whether that be global or inside a current virtualenv).
 
 Note that the version number is read from version.txt in the current directory.
