@@ -18,9 +18,10 @@ class DicomRectDB():
     See: http://www.web2py.com/books/default/chapter/29/06/the-database-abstraction-layer
     """
     # Class static variable holding path to database, needs trailing slash.
-    # Set the value using DicomRectDB.db_path = 'dir/'
+    # Set the value using set_db_path('dir/') or DicomRectDB.db_path = 'dir/'
     db_path = ''
 
+    @staticmethod
     def set_db_path(path):
         """ Set the class-static path to the database directory.
         Note that this affects all instances of this class.
