@@ -36,7 +36,7 @@ class DicomRectDB():
         if DicomRectDB.db_path and not os.path.isdir(DicomRectDB.db_path):
             logging.warning('Database path does not exist: %s (will use current directory)' % DicomRectDB.db_path)
             DicomRectDB.db_path = ''
-        self.db=DAL('sqlite://dcmaudit.sqlite.db', folder = DicomRectDB.db_path) # debug=True
+        self.db=DAL('sqlite://dcmaudit.sqlite.db', folder = DicomRectDB.db_path, attempts=60) # debug=True
         self.db.define_table('DicomRects', Field('filename'),
             Field('top', type='integer'), Field('bottom', type='integer'),
             Field('left', type='integer'), Field('right', type='integer'),
