@@ -133,6 +133,10 @@ class DicomRectText(DicomRect):
     Right now ocrengine (enum), ocrtext (str), nerengine (enum), nerpii (enum)
     are all considered together so returned as a tuple from text_tuple().
     """
+    pii_not_checked = -1
+    pii_not_found = 0
+    pii_possible = 1
+
     def __init__(self, arect = None, dicomrect = None, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1):
         if dicomrect:
             super.__init__(dicomrect.T(), dicomrect.B(), dicomrect.L(), dicomrect.R(), dicomrect.F(), dicomrect.O())
