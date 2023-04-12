@@ -170,11 +170,13 @@ def remove_overlays_in_high_bits(ds):
 
 # ---------------------------------------------------------------------
 
-def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
+def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=None):
     """ Redact a list of rectangles (x0,y0,w,h) from the given overlay
     which is stored in the high bits of the image data, by setting the
     enclosed bits to zero.
     """
+    if not rect_list:
+        rect_list = []
 
     # bits_allocated is the physical space used, 1 or a multiple of 8.
     # bits_stored is the number of meaningful bits within those allocated.
@@ -220,10 +222,12 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=[]):
     return
 
 
-def redact_rectangles_from_image_frame(ds, frame=0, rect_list=[]):
+def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
     """ Redact a list of rectangles (x0,y0,w,h) from a specific image frame,
     counting from zero.
     """
+    if not rect_list:
+        rect_list = []
 
     samples = ds['SamplesPerPixel'].value if 'SamplesPerPixel' in ds else -1
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
@@ -307,7 +311,7 @@ def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
     return
 
 
-def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
+def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
     """ Redact a list of rectangles from:
     * the given image frame (if overlay not given or == -1)
     * or the given overlay (if frame not given or == -1)
@@ -316,6 +320,9 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=[]):
       x,y are from 0,0 top-left
     ds is the pydicom Dataset object.
     """
+
+    if not rect_list:
+        rect_list = []
 
     if not rect_list:
         logger.debug('no rectangles to redact')
