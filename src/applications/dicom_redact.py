@@ -22,6 +22,8 @@ import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 from DicomPixelAnon.nerengine import NER
+from DicomPixelAnon.ocrenum import OCREnum
+from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon import ultrasound
 import sys
 try:
@@ -384,6 +386,10 @@ def rect_in_allowlist(rect):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
+    # Check if rectangle already tested against whitelist
+    if ocrtext and (nerengine == NEREnum.whitelist) and (nerpii == 0):
+        return True
+    # Check whitelist
     if ocrtext and allowlist.detect(ocrtext) == []:
         return True
     return False
@@ -486,7 +492,8 @@ def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, over
     if db_dir:
         DicomRectDB.set_db_path(db_dir)
     db = DicomRectDB()
-    rect_list = db.query_rects(filename, frame=frame, overlay=overlay)
+    rect_list = db.query_rects(filename, frame=frame, overlay=overlay,
+        ignore_whitelisted = True)
     return rect_list
 
 
