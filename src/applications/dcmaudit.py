@@ -829,7 +829,8 @@ class App:
                 self.dcm.get_num_frames_in_overlays()))
             # Find out whether it's been redacted
             frame, overlay = self.dcm.get_current_frame_overlay()
-            self.redacted_rects = db.query_rects(filename, frame=frame, overlay=overlay)
+            self.redacted_rects = db.query_rects(filename, frame=frame, overlay=overlay,
+                ignore_whitelisted = True)
             # Look for similar files in the database
             # Keep a copy of them so user can Apply them later
             self.possible_rects = db.query_similar_rects(filename, self.dcm.get_selected_metadata(), frame=frame, overlay=overlay)
