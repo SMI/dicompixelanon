@@ -406,6 +406,7 @@ def filter_rect_list(rect_list):
     based on an allow-list. The list should be a list of DicomRectText objects
     so we can test the ocrtext but if it's not (because it's a DicomRect,
     or the text is empty) then it's assumed unsafe so is kept in the list.
+    Filters in-place and also returns list.
     """
     rect_list[:] = [rect for rect in rect_list if not rect_in_allowlist(rect)]
     return rect_list
@@ -422,7 +423,7 @@ def test_filter_rect_list():
 # ---------------------------------------------------------------------
 
 def redact_DicomRect_rectangles(ds, dicomrect_list):
-    """ Redact all the rectangles in the given DicomRect list
+    """ Redact all the rectangles in the given DicomRectText list
     from the image in the DICOM file which has been read into a
     pydicom.dataset.Dataset object (from dcmread).
     The list may contain rectangles from any frame,overlay, so it
@@ -435,13 +436,15 @@ def redact_DicomRect_rectangles(ds, dicomrect_list):
         # convert from corner coord to width,height
         rect_list = [ (dr.L(), dr.T(), 1+dr.R()-dr.L(), 1+dr.B()-dr.T())
             for dr in dicomrect_list if dr.F() == frame and dr.O() == overlay]
+        # Remove rect which are safe (in the allowlist)
         rect_list = filter_rect_list(rect_list)
+        # Perform the redaction on the pydicom dataset
         redact_rectangles(ds, frame=frame, overlay=overlay, rect_list=rect_list)
 
 
 # ---------------------------------------------------------------------
 
-def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overlay=-1):
+def read_DicomRectText_listmap_from_csv(csv_filename, filename=None, frame=-1, overlay=-1):
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
     Can filter by filename, frame, overlay if desired.
@@ -458,11 +461,17 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
             # If a filename has been given then ignore any other files
             if filename and ('filename' in row) and (filename != row['filename']):
                 continue
-            # Ignore entries which don't have a valid rectangle
-            # (these will be OCR summaries for the whole frame)
             (row_left, row_top, row_right, row_bottom) = (int(row['left']), int(row['top']), int(row['right']), int(row['bottom']))
             (row_frame, row_overlay) = (int(row.get('frame', -1)), int(row.get('overlay', -1)))
-            # XXX read ocrtext as well, if present in CSV, and construct a DicomRectText object
+            row_ocrenginename = row.get('ocr_engine', '')
+            row_ocrtext = row.get('ocr_text', '')
+            row_nerenginename = row.get('ner_engine', '')
+            row_nerpii = row.get('is_sensitive', -1)
+            row_ocrengine = OCREnum().enum(row_ocrenginename)
+            row_nerengine = NEREnum().enum(row_nerenginename)
+
+            # Ignore entries which don't have a valid rectangle
+            # (these will be OCR summaries for the whole frame)
             if row_left < 0:
                 continue
             # If a frame has been given then ignore any other frames
@@ -471,9 +480,11 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
             # If an overlay has been given then ignore any other overlays
             if (overlay != -1) and (overlay != row_overlay):
                 continue
-            dicomrect = DicomRect(left=row_left, top=row_top,
+            dicomrect = DicomRectText(left=row_left, top=row_top,
                 right=row_right, bottom=row_bottom,
-                frame=row_frame, overlay=row_overlay)
+                frame=row_frame, overlay=row_overlay,
+                ocrengine = row_ocrengine, ocrtext = row_ocrtext,
+                nerengine = row_nerengine, nerpii = row_nerpii)
             if row['filename'] in dicom_rectlist:
                 dicom_rectlist[row['filename']].append( dicomrect )
             else:
@@ -482,7 +493,7 @@ def read_DicomRect_listmap_from_csv(csv_filename, filename=None, frame=-1, overl
 
 
 # ---------------------------------------------------------------------
-def read_DicomRect_list_from_database(db_dir=None, filename=None, frame=-1, overlay=-1):
+def read_DicomRectText_list_from_database(db_dir=None, filename=None, frame=-1, overlay=-1):
     """ Read left,top,right,bottom from CSV and turn into rectangle list.
     Ignores coordinates which are all negative -1,-1,-1,-1.
     Can filter by filename, frame, overlay if desired.
@@ -631,15 +642,15 @@ if __name__ == '__main__':
         if not args.dicom:
             logger.error('Must specify a DICOM file to find in the database')
             sys.exit(1)
-        rect_list_map[args.dicom] += read_DicomRect_list_from_database(db_dir = args.db, filename = args.dicom)
+        rect_list_map[args.dicom] += read_DicomRectText_list_from_database(db_dir = args.db, filename = args.dicom)
 
     # If given a CSV file then we can process every DICOM in the file
     # or just the single filename provided
     if args.csv:
         if args.dicom:
-            rect_list_map = read_DicomRect_listmap_from_csv(csv_filename = args.csv, filename = args.dicom)
+            rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv, filename = args.dicom)
         else:
-            rect_list_map = read_DicomRect_listmap_from_csv(csv_filename = args.csv)
+            rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv)
 
     # Redact 
     for infilename in rect_list_map.keys():
