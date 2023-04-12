@@ -56,16 +56,22 @@ def find_file(filename : str) -> str:
 
 # ---------------------------------------------------------------------
 def check_for_pii(nlp_engine : NER, text) -> int:
-    """ Use NER (e.g. SpaCy) to check for PII in some text.
+    """ Use NER (e.g. SpaCy) to check for PII in some text,
+    or use a whitelist to check if text is safe.
     nlp_engine must be an instance of NER()
-    Returns -1 if it's None, 0 if no PII found, or
-    1 if any of the entities were PER, ORG or LOC.
+    Returns -1 if it's None (could not check for PII),
+    0 if no PII found,
+      or whitelist was used and text was on list,
+    1 if any of the entities were PER, ORG or LOC,
+      or whitelist was used but text was not on list.
     """
     is_sensitive = -1
     if nlp_engine and len(text):
         entities = nlp_engine.detect(text)
         for ent in entities:
             if ent['label'] in ['PER', 'ORG', 'LOC']:
+                is_sensitive = 1
+            elif nlp_engine.engine_enum == NEREnum.whitelist:
                 is_sensitive = 1
         # If no PII found then mark as checked
         if is_sensitive == -1:
@@ -102,6 +108,8 @@ def process_image(img, filename = None,
     ocr_rectlist = []   # array of DicomRectText (was tuple(Rect, text, is_sensitive))
 
     # Try Ultrasound regions
+    # XXX we should only call this if frame==0 and overlay==-1
+    # to avoid adding rectangles with every other frame/overlay?
     if us_regions:
         ocr_rectlist = read_DicomRectText_list_from_region_tags(filename = filename)
 
