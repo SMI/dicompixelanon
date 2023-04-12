@@ -27,8 +27,8 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
  --no-overlays         Do not process any DICOM overlays (default processes overlays)
 ```
 
-* ocr options: `easyocr` / `tesseract`
-* pii options: `spacy` / `flair` / `stanford` / `stanza`
+* OCR options: `easyocr` / `tesseract`
+* PII options: `spacy` / `flair` / `stanford` / `stanza` / `ocr_whitelist`
 * database filename: will be dcmaudit.sqlite
 * default directory: $SMI_ROOT/data/dicompixelanon
 
@@ -45,6 +45,18 @@ the image content so this program can invert those to get a set of rectangles
 surrounding the image content. Such rectangles can be treated the same way
 as rectangles found using OCR; stored in a database or CSV file for future
 redaction.
+
+PII can be detected using one of a number of algorithms; SpaCy and Flair
+also have several language models to choose from, although none are highly
+accurate on short text fragments without context. A check for PII will set
+a flag 0 if no named entities are found and 1 if some are found.
+
+An OCR whitelist is also available in the PII option, which operates slightly
+differently. If the whole exact string is in the whitelist it marks the
+rectangle as non-PII as determined by a whitelist, otherwise it marks the
+rectangle as PII because it was not on a whitelist. The text may still be
+safe without PII but the whitelist alone cannot determine this so it errs on
+the side of caution.
 
 ## Examples
 
