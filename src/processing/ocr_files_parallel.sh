@@ -22,8 +22,15 @@ echo "Database is in $dbdir"
 
 # Find programs
 export PATH=${PATH}:.:../applications:../utilities
+
 # Use latest devel library
-export PYTHONPATH=../library/
+if [ -d ../library/ ]; then
+    export PYTHONPATH=../library/
+fi
+
+# Try to prevent CUDA memory errors from pytorch by
+# garbage collecting when reaching 33% usage (assuming each process limited to 40%)
+export PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.33
 
 # Get a selection of filenames from the random list of filename positions
 echo "Getting $numPerCombo filenames per combination"
