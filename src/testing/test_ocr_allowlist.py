@@ -3,8 +3,8 @@ import argparse
 from os import mkdir
 from tqdm import tqdm
 
-def is_in_whitelist(s, rules, verbose=False):
-    """Checks if string matches any of the whitelist rules.
+def is_in_allowlist(s, rules, verbose=False):
+    """Checks if string matches any of the allowlist rules.
 
     Args:
         s (str): string to check
@@ -12,11 +12,11 @@ def is_in_whitelist(s, rules, verbose=False):
         verbose (bool, optional): if true, print matches (defaults to False)
 
     Returns:
-        boolean: True if s matches one of the whitelist rules, False o/w
+        boolean: True if s matches one of the allowlist rules, False o/w
     """
     for r in rules:
         try:
-            if re.fullmatch(r, s) is not None:  # found match, s is whitelisted
+            if re.fullmatch(r, s) is not None:  # found match, s is allowlisted
                 if verbose:
                     print(f"Full text match:\n{s}\n{r}\n\n")
                 return True
@@ -40,40 +40,40 @@ def write_list_to_file(path, l):
             f.write(f"{l[-1]}")
 
 def main(verbose, reduced):
-    whitelist = read_list_from_file("../../data/ocr_whitelist_regex.txt")
-    print(f"Loaded {len(whitelist)} rules.")
-    pos = read_list_from_file("test_files_ocr_whitelisting/should_match.txt")
-    neg = read_list_from_file("test_files_ocr_whitelisting/should_not_match.txt")
+    allowlist = read_list_from_file("../../data/ocr_allowlist_regex.txt")
+    print(f"Loaded {len(allowlist)} rules.")
+    pos = read_list_from_file("test_files_ocr_allowlisting/should_match.txt")
+    neg = read_list_from_file("test_files_ocr_allowlisting/should_not_match.txt")
     if reduced:
-        red = read_list_from_file("test_files_ocr_whitelisting/should_not_match_reduced.txt")
+        red = read_list_from_file("test_files_ocr_allowlisting/should_not_match_reduced.txt")
         neg += red
     false_pos = []
     false_neg = []
     for s in tqdm(pos):
         if not (reduced and s in red):
-            if not is_in_whitelist(s, whitelist):
+            if not is_in_allowlist(s, allowlist):
                 false_neg.append(s)
     for s in tqdm(neg):
-        if is_in_whitelist(s, whitelist, verbose):
+        if is_in_allowlist(s, allowlist, verbose):
             false_pos.append(s)
     # write results
     try:
-        mkdir("test_files_ocr_whitelisting/test_results")
+        mkdir("test_files_ocr_allowlisting/test_results")
     except FileExistsError:
         pass
-    write_list_to_file("test_files_ocr_whitelisting/test_results/false_positives.txt", false_pos)
-    write_list_to_file("test_files_ocr_whitelisting/test_results/false_negatives.txt", false_neg)
+    write_list_to_file("test_files_ocr_allowlisting/test_results/false_positives.txt", false_pos)
+    write_list_to_file("test_files_ocr_allowlisting/test_results/false_negatives.txt", false_neg)
     print(f"False positives: {len(false_pos)}\nFalse negatives: {len(false_neg)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog='test_ocr_whitelist',
-        description='Load samples, run against whitelist.'
+        prog='test_ocr_allowlist',
+        description='Load samples, run against allowlist.'
     )
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print full text matches.")
     parser.add_argument("--reduced", action="store_true", default=False,
-                        help="Indicates that the reduced set of whitelisting rules is used.")
+                        help="Indicates that the reduced set of allowlisting rules is used.")
     args = parser.parse_args()
     main(args.verbose, args.reduced)
     

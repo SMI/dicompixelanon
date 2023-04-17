@@ -215,7 +215,7 @@ class DicomRectDB():
             rc.append(row['filename'])
         return rc
 
-    def query_rects(self, filename, frame = -1, overlay = -1, ignore_whitelisted = False):
+    def query_rects(self, filename, frame = -1, overlay = -1, ignore_allowlisted = False):
         """ Return a list of DicomRectText objects for the given filename
         by reading from the database.
         Filtered to just the given frame and overlay, if specified,
@@ -229,7 +229,7 @@ class DicomRectDB():
                     frame = row.frame, overlay = row.overlay,
                     ocrengine = row.ocrengine, ocrtext=row.ocrtext,
                     nerengine = row.nerengine, nerpii = row.nerpii)
-                if ignore_whitelisted and (nerengine == NEREnum.whitelist) and (nerpii == 0):
+                if ignore_allowlisted and (nerengine == NEREnum.allowlist) and (nerpii == 0):
                     continue
                 rc.append(dicomrect)
         return rc

@@ -10,7 +10,7 @@ class NEREnum:
     flair = 20
     stanford = 30
     stanza = 40
-    whitelist = 50
+    allowlist = 50
 
     def __init__(self):
         """
@@ -25,7 +25,7 @@ class NEREnum:
         self._mapping[NEREnum.flair] = 'flair'
         self._mapping[NEREnum.stanford] = 'stanford'
         self._mapping[NEREnum.stanza] = 'stanza'
-        self._mapping[NEREnum.whitelist] = 'whitelist'
+        self._mapping[NEREnum.allowlist] = 'allowlist'
 
     def name(self, nerenum):
         """ Return the name (string) given an enum (integer).

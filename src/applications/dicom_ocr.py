@@ -57,13 +57,13 @@ def find_file(filename : str) -> str:
 # ---------------------------------------------------------------------
 def check_for_pii(nlp_engine : NER, text) -> int:
     """ Use NER (e.g. SpaCy) to check for PII in some text,
-    or use a whitelist to check if text is safe.
+    or use a allowlist to check if text is safe.
     nlp_engine must be an instance of NER()
     Returns -1 if it's None (could not check for PII),
     0 if no PII found,
-      or whitelist was used and text was on list,
+      or allowlist was used and text was on list,
     1 if any of the entities were PER, ORG or LOC,
-      or whitelist was used but text was not on list.
+      or allowlist was used but text was not on list.
     """
     is_sensitive = -1
     if nlp_engine and len(text):
@@ -71,7 +71,7 @@ def check_for_pii(nlp_engine : NER, text) -> int:
         for ent in entities:
             if ent['label'] in ['PER', 'ORG', 'LOC']:
                 is_sensitive = 1
-            elif nlp_engine.engine_enum == NEREnum.whitelist:
+            elif nlp_engine.engine_enum == NEREnum.allowlist:
                 is_sensitive = 1
         # If no PII found then mark as checked
         if is_sensitive == -1:

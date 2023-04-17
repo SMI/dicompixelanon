@@ -355,7 +355,7 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
 # whose text exactly matches a pattern.
 
 def load_allowlist(filename = None):
-    """ Initialise the allow-list (whitelist) by constructing a NER
+    """ Initialise the allow-list (allowlist) by constructing a NER
     object and keeping it in a global variable.
     XXX this is a hacky way of making a singleton.
     Returns the NER object on which you can call the detect() method.
@@ -366,7 +366,7 @@ def load_allowlist(filename = None):
     try:
         return ocr_allowlist
     except:
-        ocr_allowlist = NER('ocr_whitelist')
+        ocr_allowlist = NER('ocr_allowlist')
     return ocr_allowlist
 
 def test_load_allowlist():
@@ -386,10 +386,10 @@ def rect_in_allowlist(rect):
         ocrengine,ocrtext,nerengine,nerpii = rect.text_tuple()
     else:
         ocrtext = ''
-    # Check if rectangle already tested against whitelist
-    if ocrtext and (nerengine == NEREnum.whitelist) and (nerpii == 0):
+    # Check if rectangle already tested against allowlist
+    if ocrtext and (nerengine == NEREnum.allowlist) and (nerpii == 0):
         return True
-    # Check whitelist
+    # Check allowlist
     if ocrtext and allowlist.detect(ocrtext) == []:
         return True
     return False
@@ -504,7 +504,7 @@ def read_DicomRectText_list_from_database(db_dir=None, filename=None, frame=-1, 
         DicomRectDB.set_db_path(db_dir)
     db = DicomRectDB()
     rect_list = db.query_rects(filename, frame=frame, overlay=overlay,
-        ignore_whitelisted = True)
+        ignore_allowlisted = True)
     return rect_list
 
 

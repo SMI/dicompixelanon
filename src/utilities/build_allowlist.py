@@ -106,7 +106,7 @@ def get_abbreviations_from_json(path):
     return list(d.keys())
 
 def numerical_regex():
-    """Build hand-crafted list of regex rules for whitelisting commonly found strings containing digits.
+    """Build hand-crafted list of regex rules for allowlisting commonly found strings containing digits.
 
     Returns:
         list: regex rules
@@ -124,7 +124,7 @@ def numerical_regex():
 
 def build_regex(abbreviations, annotations, reduce=False):
     """Build case-insensitive regex rules for strings commonly found.
-    Writes rules into file data/ocr_whitelist_regex.txt, separated by newlines.
+    Writes rules into file data/ocr_allowlist_regex.txt, separated by newlines.
 
     Args:
         abbreviations (list<str>): abbreviations
@@ -138,7 +138,7 @@ def build_regex(abbreviations, annotations, reduce=False):
     views = [r"(semi |semi-)?(erect|supine)", r"(weight |wt |weight-|weight)bearing", r"(hb|horizontal beam)( l| lateral|l)?", r"(sitting|standing)"]
     one_of_views_rule = r"(" + r"|".join(views) + r")"
     modes = [r"([lr]t?|(left|right))", r"(pa|ap)", r"(mobile|portable|port)", r"under trolley", r"(in )?resus"]
-    if reduce:  # fewer permutations, resulting in the view always being the last element. Leads to some things not being whitelisted that could be.
+    if reduce:  # fewer permutations, resulting in the view always being the last element. Leads to some things not being allowlisted that could be.
         combos = itertools.permutations(modes)
         for combo in combos:
             rule = r"(?i)"
@@ -160,7 +160,7 @@ def build_regex(abbreviations, annotations, reduce=False):
         regex_rules.append(rf"(?i){an}")
     for ab in abbreviations:
         regex_rules.append(rf"(?i){ab}")
-    with open("../../data/ocr_whitelist_regex.txt", "w") as f:
+    with open("../../data/ocr_allowlist_regex.txt", "w") as f:
         for r in regex_rules[:-1]:
             f.write(f"{r}\n")
         f.write(f"{regex_rules[-1]}")
@@ -175,14 +175,14 @@ def main(fetchbuild, build, reduce):
             for html_response in get_raw_glossary_from_file():
                 glossary_dict |= parse_glossary_html(html_response)
         store_glossary(glossary_dict)  # for later use
-    whitelist_annotations = ["red dot", "diabetes", "ankle", "elbow", "expiration", "knee", "little finger", "middle finger", "skull", "ring finger"]
+    allowlist_annotations = ["red dot", "diabetes", "ankle", "elbow", "expiration", "knee", "little finger", "middle finger", "skull", "ring finger"]
     abbreviations_list = get_abbreviations_from_json("../../data/radiology_glossary/glossary.json")
-    build_regex(abbreviations_list, whitelist_annotations, reduce) 
+    build_regex(abbreviations_list, allowlist_annotations, reduce) 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog='build_whitelist',
-        description='Build list of regular expressions whitelisting OCR output and write to file.'
+        prog='build_allowlist',
+        description='Build list of regular expressions allowlisting OCR output and write to file.'
     )
     parser.add_argument("--fetchbuild", action='store_true', default=False,
                         help="Fetch glossary from radiopeadia.org to build local glossary.  Only do this if it is absolutely necessary, it usually won't be.")

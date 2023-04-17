@@ -28,7 +28,7 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
 ```
 
 * OCR options: `easyocr` / `tesseract`
-* PII options: `spacy` / `flair` / `stanford` / `stanza` / `ocr_whitelist`
+* PII options: `spacy` / `flair` / `stanford` / `stanza` / `ocr_allowlist`
 * database filename: will be dcmaudit.sqlite
 * default directory: $SMI_ROOT/data/dicompixelanon
 
@@ -51,11 +51,11 @@ also have several language models to choose from, although none are highly
 accurate on short text fragments without context. A check for PII will set
 a flag 0 if no named entities are found and 1 if some are found.
 
-An OCR whitelist is also available in the PII option, which operates slightly
-differently. If the whole exact string is in the whitelist it marks the
-rectangle as non-PII as determined by a whitelist, otherwise it marks the
-rectangle as PII because it was not on a whitelist. The text may still be
-safe without PII but the whitelist alone cannot determine this so it errs on
+An OCR allowlist is also available in the PII option, which operates slightly
+differently. If the whole exact string is in the allowlist it marks the
+rectangle as non-PII as determined by a allowlist, otherwise it marks the
+rectangle as PII because it was not on a allowlist. The text may still be
+safe without PII but the allowlist alone cannot determine this so it errs on
 the side of caution.
 
 ## Examples
@@ -88,11 +88,11 @@ gdcm-US-ALOKA-16.dcm,0,-1,ORIGINAL/PRIMARY/ABDOM/RAD/0001,SSD-4000,,easyocr,-1,-
 
 To do the same and also filter out text which is safe (not PII) using an allowlist.
 Note that the output will still include all the text rectangles but those which
-are safe will have `ner_engine=whitelist` and `is_sensitive=0`
+are safe will have `ner_engine=allowlist` and `is_sensitive=0`
 ```
-cp data/ocr_whitelist_regex.txt $SMI_ROOT/data/dicompixelanon
-dicom_ocr.py --pii ocr_whitelist ...etc as above...
-filename.dcm, ... ,whitelist,0
+cp data/ocr_allowlist_regex.txt $SMI_ROOT/data/dicompixelanon
+dicom_ocr.py --pii ocr_allowlist ...etc as above...
+filename.dcm, ... ,allowlist,0
 ```
 
 ## Output CSV format

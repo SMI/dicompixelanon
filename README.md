@@ -28,7 +28,7 @@ Utilities:
 * `dbtagged.sh` - display the tagged DICOM filenames in the database (simple sqlite3 wrapper)
 * `dbtext_for_tagged.sh` - display OCR details of tagged files
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
-* `build_whitelist.py` - create list of regex rules for whitelisting OCR output and write to file, optionally reduce the number of rules by 20 percent (leading to more redactions of non-PII data, but significantly shorter runtime)
+* `build_allowlist.py` - create list of regex rules for allowlisting OCR output and write to file, optionally reduce the number of rules by 20 percent (leading to more redactions of non-PII data, but significantly shorter runtime)
 
 # Usage
 
@@ -50,7 +50,7 @@ Setup
 * Create a Python virtual environment and activate it
 * Create a config file directory `$SMI_ROOT/data` (you can set `$SMI_ROOT` anywhere)
 * Install all of the Python requirements (see below)
-* Copy `data/ocr_whitelist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt` if required for dicom_redact
+* Copy `data/ocr_allowlist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt` if required for dicom_redact
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
 

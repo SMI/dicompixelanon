@@ -53,7 +53,7 @@ class NER():
     classes: PER, LOC, ORG, MISC (but not all NER engines return
     all of those classes). It can be instantiated with one of the
     following engine names: spacy, flair, stanford, stanza, and
-    ocr_whitelist. The latter is a set of regex rules trained on
+    ocr_allowlist. The latter is a set of regex rules trained on
     the OCR output from a set of CR and DX images which identify
     safe text, not PII text. The others are language models
     (which typically require some textual context to determine PII).
@@ -217,37 +217,37 @@ class NER():
             # Mark this object as valid by updating value of model
             self.engine_model = model
 
-        elif engine == 'ocr_whitelist':
-            # Default is $SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt
+        elif engine == 'ocr_allowlist':
+            # Default is $SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt
             self._engine_name = engine
-            self._engine_enum = NEREnum.whitelist
+            self._engine_enum = NEREnum.allowlist
             self.engine_model = model
             self.engine_version = '1.0.0' # XXX maybe timestamp of file?
             self.engine_data_dir = None
-            ocr_whitelist_path_list = [ os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'dicompixelanon'),
+            ocr_allowlist_path_list = [ os.path.join(os.environ.get('SMI_ROOT','.'), 'data', 'dicompixelanon'),
                 '../../data',
                 '../../../data']
-            for whitelist_path in ocr_whitelist_path_list:
-                if os.path.isdir(whitelist_path):
-                    self.engine_data_dir = whitelist_path
+            for allowlist_path in ocr_allowlist_path_list:
+                if os.path.isdir(allowlist_path):
+                    self.engine_data_dir = allowlist_path
                     break
             if not self.engine_data_dir:
-                logging.error('ocr_whitelist requested but no data directory found')
+                logging.error('ocr_allowlist requested but no data directory found')
                 return
             if not model:
-                model = 'ocr_whitelist_regex.txt'
-            ocr_whitelist_file = os.path.join(self.engine_data_dir, model)
-            if not os.path.isfile(ocr_whitelist_file):
-                logging.error('ocr_whitelist requested but no data file found (%s)' % ocr_whitelist_file)
+                model = 'ocr_allowlist_regex.txt'
+            ocr_allowlist_file = os.path.join(self.engine_data_dir, model)
+            if not os.path.isfile(ocr_allowlist_file):
+                logging.error('ocr_allowlist requested but no data file found (%s)' % ocr_allowlist_file)
                 return
             self.ocr_allowlist_regex_list = []
-            with open(ocr_whitelist_file) as fd:
+            with open(ocr_allowlist_file) as fd:
                 self.ocr_allowlist_regex_list = [re.compile(line.strip()) for line in fd.readlines()]
             # Mark this object as valid by updating value of model
             self.engine_model = model
 
         else:
-            logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza/ocr_whitelist)' % engine)
+            logging.error('unknown NER engine %s (expected spacy/flair/stanford/stanza/ocr_allowlist)' % engine)
             return
 
     def __repr__(self):
@@ -301,7 +301,7 @@ class NER():
             entities_list = [ {'text':e.text, 'label':NER.stanford_entity_map(e.type)}
                 for e in entities if NER.stanza_entity_map(e.type) ]
             return entities_list
-        elif self._engine_name == 'ocr_whitelist':
+        elif self._engine_name == 'ocr_allowlist':
             # Return the whole string as a MISC entity if it's not in the allowlist
             entities_list = [ {'text': text, 'label': 'MISC'} ]
             for pattern in self.ocr_allowlist_regex_list:
@@ -328,8 +328,8 @@ def test_stanford():
     assert ner.isValid()
     assert ner.detect('Queen Elizabeth Hospital') == [{'label': 'LOC', 'text': 'Queen Elizabeth Hospital'}]
 
-def test_ocr_whitelist():
-    ner = NER('ocr_whitelist')
+def test_ocr_allowlist():
+    ner = NER('ocr_allowlist')
     assert ner.isValid()
     assert ner.detect('PA ERECT') == []
     assert ner.detect('AP ERECT') == []

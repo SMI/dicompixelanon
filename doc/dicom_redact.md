@@ -29,7 +29,7 @@ The purpose of redaction is to remove PII, but some text rectangles
 may contain no PII and in fact may be worth keeping, so this tool
 has an allow-list to preserve specific fragments of text. The allow-
 list is currently a set of regular expressions which is read from a
-text file in `$SMI_ROOT/data/dicompixelanon/ocr_whitelist_regex.txt`
+text file in `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt`
 If the text in a rectangle exactly matches the regex then the
 rectangle is not redacted.
 
