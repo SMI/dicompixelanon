@@ -71,7 +71,7 @@ def check_for_pii(nlp_engine : NER, text) -> int:
         for ent in entities:
             if ent['label'] in ['PER', 'ORG', 'LOC']:
                 is_sensitive = 1
-            elif nlp_engine.engine_enum == NEREnum.allowlist:
+            elif nlp_engine.engine_enum() == NEREnum.allowlist:
                 is_sensitive = 1
         # If no PII found then mark as checked
         if is_sensitive == -1:
