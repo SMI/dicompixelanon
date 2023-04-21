@@ -10,6 +10,7 @@ import sys
 import time
 from pydal import DAL, Field
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
+from DicomPixelAnon.nerenum import NEREnum
 
 
 class DicomRectDB():
@@ -229,7 +230,7 @@ class DicomRectDB():
                     frame = row.frame, overlay = row.overlay,
                     ocrengine = row.ocrengine, ocrtext=row.ocrtext,
                     nerengine = row.nerengine, nerpii = row.nerpii)
-                if ignore_allowlisted and (nerengine == NEREnum.allowlist) and (nerpii == 0):
+                if ignore_allowlisted and (row.nerengine == NEREnum.allowlist) and (row.nerpii == 0):
                     continue
                 rc.append(dicomrect)
         return rc
