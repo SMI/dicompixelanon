@@ -176,9 +176,9 @@ class OCR:
                 img_half = cv2.resize(img,
                     dsize = (img.shape[1]//2, img.shape[0]//2),
                     interpolation = cv2.INTER_AREA)
-                res = self.easyreader.readtext(img_half, 2, paragraph=True)
+                res = self.easyreader.readtext(img_half, paragraph=True)
                 # Append, even though rectangles may overlap, safer this way
-                easyocr_to_list(res, results)
+                easyocr_to_list(res, 2, results)
         else:
             raise RuntimeError('unsupported OCR engine')
         self.ocr_data = results
