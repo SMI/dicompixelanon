@@ -38,7 +38,8 @@ class OCR:
     # Configuration
     easy_language = 'en'
     easy_cfg_dir = os.path.join(os.environ.get('SMI_ROOT', ''), 'data', 'easyocr')
-    easy_gpu = True
+    easy_gpu = True        # whether to use a GPU
+    easy_reduce = True     # whether to do OCR again on a reduced size image
     tess_path = '/opt/tesseract/bin'
     tess_language = 'eng'
     tess_dir = os.path.join(os.environ.get('SMI_ROOT', ''), 'data', 'tessdata')
@@ -140,26 +141,44 @@ class OCR:
                         bottom = res['top'][rec] + res['height'][rec])
                 })
         elif self.engine == OCREnum.EasyOCREngine:
+            # Convenience function to convert easyocr results into our format
+            def easyocr_to_list(ocr_res, results_list):
+                """ ocr_res is as returned from readtext()
+                Returns in results_list a list of dict { text: str, conf: float, rect: Rect }
+                bbox is returned as [ [left,top], [a,b], [right,bottom], [c,d] ]
+                XXX with paragraph=False the tuple would include conf too.
+                We will assume it's done its own threshold and set conf=1.
+                """
+                for (bbox, txt) in ocr_res:
+                    if len(txt) < OCR.min_string_length:
+                        continue
+                    results_list.append( {
+                        'text': txt,
+                        'conf': 1.0, # XXX see above
+                        'rect': Rect(left = bbox[0][0],
+                            right = bbox[2][0],
+                            top = bbox[0][1],
+                            bottom = bbox[2][1])
+                    })
+
             # cv2 cannot handle 4-byte grayscale so reduce to uint8
             if img.itemsize > 1:
                 max = img.max()
                 img = numpy.divide(img, (max+256)/256).astype(numpy.uint8)
+            # First OCR the full size image
+            # (but be aware easyocr scales down if > 2560 anyway!)
             res = self.easyreader.readtext(img, paragraph=True)
-            str = ''
-            # bbox is returned as [ [left,top], [a,b], [right,bottom], [c,d] ]
-            # XXX with paragraph=False the tuple includes conf
-            # so we will assume it's done its own threshold and conf=1
-            for (bbox, txt) in res:
-                if len(txt) < OCR.min_string_length:
-                    continue
-                results.append( {
-                    'text': txt,
-                    'conf': 1.0, # XXX see above
-                    'rect': Rect(left = bbox[0][0],
-                        right = bbox[2][0],
-                        top = bbox[0][1],
-                        bottom = bbox[2][1])
-                })
+            easyocr_to_list(res, results)
+            if OCR.easy_reduce:
+                # Scale down to catch text made from spaced-out dot pixels
+                # hopefully only spaced by a single pixel,
+                # INTER_NEAREST best but only if you're lucky, so use _AREA.
+                img_half = cv2.resize(img,
+                    dsize = (img.shape[1]//2, img.shape[0]//2),
+                    interpolation = cv2.INTER_AREA)
+                res = self.easyreader.readtext(img_half, paragraph=True)
+                # Append, even though rectangles may overlap, safer this way
+                easyocr_to_list(res, results)
         else:
             raise RuntimeError('unsupported OCR engine')
         self.ocr_data = results
