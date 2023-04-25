@@ -142,7 +142,7 @@ class OCR:
                 })
         elif self.engine == OCREnum.EasyOCREngine:
             # Convenience function to convert easyocr results into our format
-            def easyocr_to_list(ocr_res, results_list):
+            def easyocr_to_list(ocr_res, img_scale, results_list):
                 """ ocr_res is as returned from readtext()
                 Returns in results_list a list of dict { text: str, conf: float, rect: Rect }
                 bbox is returned as [ [left,top], [a,b], [right,bottom], [c,d] ]
@@ -155,10 +155,10 @@ class OCR:
                     results_list.append( {
                         'text': txt,
                         'conf': 1.0, # XXX see above
-                        'rect': Rect(left = bbox[0][0],
-                            right = bbox[2][0],
-                            top = bbox[0][1],
-                            bottom = bbox[2][1])
+                        'rect': Rect(left = bbox[0][0] * img_scale,
+                            right = bbox[2][0] * img_scale,
+                            top = bbox[0][1] * img_scale,
+                            bottom = bbox[2][1] * img_scale)
                     })
 
             # cv2 cannot handle 4-byte grayscale so reduce to uint8
@@ -168,7 +168,7 @@ class OCR:
             # First OCR the full size image
             # (but be aware easyocr scales down if > 2560 anyway!)
             res = self.easyreader.readtext(img, paragraph=True)
-            easyocr_to_list(res, results)
+            easyocr_to_list(res, 1, results)
             if OCR.easy_reduce:
                 # Scale down to catch text made from spaced-out dot pixels
                 # hopefully only spaced by a single pixel,
@@ -176,7 +176,7 @@ class OCR:
                 img_half = cv2.resize(img,
                     dsize = (img.shape[1]//2, img.shape[0]//2),
                     interpolation = cv2.INTER_AREA)
-                res = self.easyreader.readtext(img_half, paragraph=True)
+                res = self.easyreader.readtext(img_half, 2, paragraph=True)
                 # Append, even though rectangles may overlap, safer this way
                 easyocr_to_list(res, results)
         else:
