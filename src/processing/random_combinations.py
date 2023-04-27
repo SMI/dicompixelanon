@@ -10,17 +10,22 @@ import csv
 import random
 import sys
 
-filename = sys.argv[1]
+# Configuration:
 num_samples = 20          # how many randomly selected lines for each combination
 max_lines_per_combo = 1000000 # don't need to choose from any more than 1 million examples
 debug = False
+
+# Select the set of columns which together make up a 'primary key'
+# i.e. you want combinations of the combined values of these columns.
+desired_cols = ['ModelName', 'ImageType2', 'BurnedInAnnotation']
+
+# Internal variables:
 debug_fd = sys.stderr
-
-desired_cols = ['ModelName', 'ImageType2', 'BurnedInAnnotation'] # names of columns (as defined in header row) which you want
-desired_cols_index = []        # will be filled in with the index of those columns
-
 line_addr = {} # dict has a list of file pointers for each combination of the desired columns
 reached_limit_on_examples_per_combo = False
+
+# Command-line parameters
+filename = sys.argv[1]
 
 
 class SizedReader:
@@ -50,15 +55,12 @@ class SizedReader:
         self.fd.close()
 
 
-# Read the header line of a CSV file,
-# look for a given set of column names,
-# and record which array index they appear at,
-# so if you want C and E from A,B,C,D,E
-# you get desired_cols_index = [2,4] (counting from zero).
+# Open the CSV file and read the header line.
 raw_fd = open(filename, 'rb') # binary mode so that filepos is accurate byte count
 fd = SizedReader(raw_fd)
 csvrdr = csv.DictReader(fd)
 csvrdr.fieldnames # read the header
+
 # Read the whole CSV file, one line at a time (nothing kept in memory).
 # Extract the values of all the columns of interest,
 # concatenate them into a single string,
@@ -97,28 +99,20 @@ if reached_limit_on_examples_per_combo:
 output_fd = open(filename + '_filepos.csv', 'w', newline='')
 csv_fd = csv.writer(output_fd, lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
 csv_fd.writerow(['combination', 'total'] + [str(x) for x in range(num_samples)])
-for entry in line_addr:
-    ll = [str(x) for x in random.choices(line_addr[entry], k=num_samples)]
-    csv_fd.writerow([entry, len(line_addr[entry])] + ll)
+for combo in line_addr:
+    ll = [str(x) for x in random.choices(line_addr[combo], k=num_samples)]
+    csv_fd.writerow([combo, len(line_addr[combo])] + ll)
 output_fd.close()
 
 # Ditto but output filenames instead of file pointers
 output_fd = open(filename + '_filenames.csv', 'w', newline='')
 csv_fd = csv.writer(output_fd, lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
 csv_fd.writerow(['combination', 'filename'])
-for entry in line_addr:
-    for filepos in random.choices(line_addr[entry], k=num_samples):
+for combo in line_addr:
+    for filepos in random.choices(line_addr[combo], k=num_samples):
         fd.seek(int(filepos))
-        #ll = fd.readline().rstrip()
-        #print(filepos)
-        #print(ll)
-        #csv_row = next(csv.reader([ll]))
         csv_row = next(csv.reader([fd.readline().rstrip()]))
-
-        #print(csv_row)
         fn = csv_row[1] # DicomFilePath
-        #print(fn)
-        #print(csv_row)
-        csv_fd.writerow([entry, fn])
+        csv_fd.writerow([combo, fn])
 output_fd.close()
 fd.close()
