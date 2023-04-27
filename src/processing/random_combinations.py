@@ -22,57 +22,56 @@ desired_cols_index = []        # will be filled in with the index of those colum
 line_addr = {} # dict has a list of file pointers for each combination of the desired columns
 reached_limit_on_examples_per_combo = False
 
+
+class SizedReader:
+    """ After fd=open(, 'rb') create a SizedReader(fd)
+    and use that instead of fd when opening a CSV
+    so that every time csv calls next() the size value is updated
+    thus you can implement a tell() method which is otherwise
+    not available in python3.
+    """
+    def __init__(self, fd, encoding='utf-8'):
+        self.fd = fd
+        self.size = 0
+        self.encoding = encoding   # specify encoding in constructor, with utf8 as default
+    def __next__(self):
+        line = next(self.fd)
+        self.size += len(line)
+        return line.decode(self.encoding)   # returns a decoded line (a true Python 3 string)
+    def __iter__(self):
+        return self
+    def seek(self, offset):
+        self.fd.seek(offset)
+    def tell(self):
+        return self.size
+    def readline(self):
+        return self.fd.readline().decode(self.encoding)
+    def close(self):
+        self.fd.close()
+
+
 # Read the header line of a CSV file,
 # look for a given set of column names,
 # and record which array index they appear at,
 # so if you want C and E from A,B,C,D,E
 # you get desired_cols_index = [2,4] (counting from zero).
-fd = open(filename)
-header_line = fd.readline().rstrip()
-header_row = next(csv.reader([header_line]))
-num_cols = len(header_row)
-if debug: print('columns in file: %s' % header_row)
-for idx in range(len(header_row)):
-    if header_row[idx] in desired_cols:
-        desired_cols_index.append(idx)
-if debug: print('indexes of desired columns: %s' % desired_cols_index)
-
+raw_fd = open(filename, 'rb') # binary mode so that filepos is accurate byte count
+fd = SizedReader(raw_fd)
+csvrdr = csv.DictReader(fd)
+csvrdr.fieldnames # read the header
 # Read the whole CSV file, one line at a time (nothing kept in memory).
 # Extract the values of all the columns of interest,
 # concatenate them into a single string,
 # use that as a key in a dict,
 # where the value is a list of file pointers.
-# This code looks complicated because we can't get a file pointer from the
-# python csv reader so we have to read the CSV manually :-(
 line_num = 1
-while True:
-    pos = fd.tell()
-    line = ''
-    line_cols = 0
-    row = []
-    # One CSV row may span multiple lines so read until num_cols read.
-    while line_cols < num_cols:
-        line_part = fd.readline()
-        if not line_part:
-            break
-        line += line_part
-        line_cols = len(next(csv.reader([line])))
-    if line_cols < num_cols:
-        break
+pos = fd.tell()
+for row in csvrdr:
     line_num += 1
-    row = next(csv.reader([line]))
     if debug: print('At %d is %s' % (pos, row))
     unique_str = ''
-    for col_idx in desired_cols_index:
-        if debug: print('%d is %s' % (col_idx, row[col_idx]))
-        try:
-            unique_str += row[col_idx] + ','
-        except:
-            print('\nCannot access idx %s in %s' % (col_idx, row))
-            print('\nDesired cols is %s' % (desired_cols_index))
-            print('\nLine %d' % line_num)
-            exit(1)
-    if debug: print(unique_str)
+    for col in desired_cols:
+        unique_str += row[col] + ','
     if unique_str in line_addr:
         if len(line_addr[unique_str]) < max_lines_per_combo:
             line_addr[unique_str].append(pos)
@@ -82,6 +81,7 @@ while True:
         line_addr[unique_str] = [pos]
     if line_num % 20 == 0:
         print('%s Line %d Combinations %d\r' % (filename, line_num, len(line_addr)), file=debug_fd, end='')
+    pos = fd.tell()
 print(file=debug_fd)
 if reached_limit_on_examples_per_combo:
     print('WARNING: reached limit at least once on number of samples per combination of variables', file=debug_fd)
@@ -100,5 +100,25 @@ csv_fd.writerow(['combination', 'total'] + [str(x) for x in range(num_samples)])
 for entry in line_addr:
     ll = [str(x) for x in random.choices(line_addr[entry], k=num_samples)]
     csv_fd.writerow([entry, len(line_addr[entry])] + ll)
+output_fd.close()
+
+# Ditto but output filenames instead of file pointers
+output_fd = open(filename + '_filenames.csv', 'w', newline='')
+csv_fd = csv.writer(output_fd, lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+csv_fd.writerow(['combination', 'filename'])
+for entry in line_addr:
+    for filepos in random.choices(line_addr[entry], k=num_samples):
+        fd.seek(int(filepos))
+        #ll = fd.readline().rstrip()
+        #print(filepos)
+        #print(ll)
+        #csv_row = next(csv.reader([ll]))
+        csv_row = next(csv.reader([fd.readline().rstrip()]))
+
+        #print(csv_row)
+        fn = csv_row[1] # DicomFilePath
+        #print(fn)
+        #print(csv_row)
+        csv_fd.writerow([entry, fn])
 output_fd.close()
 fd.close()
