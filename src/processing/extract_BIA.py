@@ -6,6 +6,7 @@
 # The output is CSV of every DICOM in every modality.
 # You'll need to parse it afterwards to check the actual images!
 # v2 - added NumberOfFrames, RecognizableVisualFeatures, BitsStored, BitsAllocated
+# Usage: [modality or comma-separated list of modalities], default is all
 
 import csv, os, re, sys, socket
 import bson.json_util
@@ -133,6 +134,10 @@ def test_derived_model_name():
 
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
+
+  if len(sys.argv)>1:
+    modalities = sys.argv[1].split(',')
+
   for modality in modalities:
     csv_file = 'extract_BIA_from_%s.csv' % modality
     collection = 'image_'+modality
