@@ -154,7 +154,8 @@ if __name__ == '__main__':
       'ImplementationVersionName','SeriesDescription','WindowWidth',
       'Rows','Columns','BitsStored','BitsAllocated','NumberOfFrames',
       'OverlayRows','OverlayColumns','OverlayType','NumberOfFramesInOverlay',
-      'OverlayDescription','OverlayBitsAllocated','OverlayBitPosition'])
+      'OverlayDescription','OverlayBitsAllocated','OverlayBitPosition',
+      'ZeihmCreator', 'ZeihmImageCaptureData'])
   
     if collection == 'image_OTHER':
       cursor = coll.find( { "Modality" : modality } )
@@ -190,10 +191,14 @@ if __name__ == '__main__':
       odesc = get_or(doc, '(6000,0022)-OverlayDescription', '')
       obits = get_or(doc, "(6000,0100)-OverlayBitsAllocated", '')
       obitpos = get_or(doc, "(6000,0102)-OverlayBitPosition", '')
+      zeihmcreator = get_or(doc, '(0019,0010)-PrivateCreator', '') # is "ZIEHM_1.0 DeviceConfigData" ?
+      zeihmimagecapture = get_or(doc, '(0019,1201:ZIEHM_1_0 ImageCaptureData)-Unknown', '') # is "Fluoro" ?
   
       out_csv.writerow([mod,
-        file, bia, rvf, man, model, swv, scman, scmodel, modelname, cm, cord, imtype2, imtype, ivn, sd, ww, rows, columns,
+        file, bia, rvf, man, model, swv, scman, scmodel, modelname,
+        cm, cord, imtype2, imtype, ivn, sd, ww, rows, columns,
         bitsstored, bitsalloc, numframes,
-        orows, ocols, otype, oframes, odesc, obits, obitpos])
+        orows, ocols, otype, oframes, odesc, obits, obitpos,
+        zeihmcreator, zeihmimagecapture])
   
     out_fd.close()
