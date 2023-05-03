@@ -111,6 +111,43 @@ def deid_dataset_to_DicomRectList(pydicom_dataset):
     return rectlist
 
 
+def test_deid_result_rectangles():
+    # Example taken from gdcmData/gdcm-US-ALOKA-16.dcm
+    # with two extra coords added to test the code.
+    rc = {
+        'flagged': True,
+        'results': [
+            {
+                'reason': ' SequenceOfUltrasoundRegions present ',
+                'group': 'graylist',
+                'coordinates': [
+                    [0, '(33,34,35,36)'],
+                    [1, ['32,24,335,415', '336,24,639,415', '32,40,63,103']]
+                ]
+            },
+            {
+                'reason': ' Fake test ',
+                'group': 'blacklist',
+                'coordinates': [ [0, '41,42,43,44']]
+            }
+        ]
+    }
+    result_list = rc['results'][0]['coordinates']
+    if len(rc['results'])>1:
+        result_list.extend(rc['results'][1]['coordinates'])
+    rectlist = result_coords_to_DicomRectList(result_list, 640, 480)
+    rectlist_str = str(rectlist)
+    # We are expected 3 rectangles which cover the inverse
+    # of the regions listed in the results because they are
+    # type 1 (meaning keep) from Ultrasound.
+    assert(len(rectlist) == 6)
+    assert('<DicomRect frame=-1 overlay=-1 0,0->639,24>' in rectlist_str)
+    assert('<DicomRect frame=-1 overlay=-1 0,24->32,415>' in rectlist_str)
+    assert('<DicomRect frame=-1 overlay=-1 335,24->336,415>' in rectlist_str)
+    assert('<DicomRect frame=-1 overlay=-1 0,415->639,479>' in rectlist_str)
+    assert('<DicomRect frame=-1 overlay=-1 33,34->35,36>' in rectlist_str)
+    assert('<DicomRect frame=-1 overlay=-1 41,42->43,44>' in rectlist_str)
+
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
 
