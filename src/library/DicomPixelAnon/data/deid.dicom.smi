@@ -1,0 +1,20 @@
+FORMAT dicom
+
+# File created on 2023-05-03
+
+%filter graylist
+
+# Generic rule to handle any Ultrasound images
+LABEL Clean Areas Outside Ultrasound Regions
+    present SequenceOfUltrasoundRegions
+    keepcoordinates from:SequenceOfUltrasoundRegions
+
+# XXX should also check + equals Rows 1024 or whatever the size is
+LABEL Ziehm X-Rays
+  contains Modality XA
+  + contains 0x00190010 ZIEHM_1.0 DeviceConfigData
+  + contains 0x00191201 Fluoro
+  coordinates (0,0,196,148)
+  coordinates (0,940,189,1006)
+  coordinates (706,0,1023,66)
+

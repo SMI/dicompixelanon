@@ -1,6 +1,7 @@
 pydicom
 pylibjpeg
 pylibjpeg_libjpeg
+deid
 pydal
 pymongo
 Pillow
