@@ -14,7 +14,7 @@ LABEL Ziehm X-Rays
   contains Modality XA
   + contains 0x00190010 ZIEHM_1.0 DeviceConfigData
   + contains 0x00191201 Fluoro
-  coordinates (0,0,196,148)
-  coordinates (0,940,189,1006)
-  coordinates (706,0,1023,66)
+  coordinates 0,0,196,148
+  coordinates 0,940,189,1006
+  coordinates 706,0,1023,66
 

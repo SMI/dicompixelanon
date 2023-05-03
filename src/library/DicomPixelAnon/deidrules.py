@@ -25,12 +25,15 @@ def coord_str_to_DicomRect(coord_str : str, width = None, height = None):
         else:
             raise Exception('undefined image dimensions, cannot return "all"')
     #print('decode coord_str "%s"' % coord_str)
-    if '(' in coord_str:
-        left, top, right, bottom = [int(ii) for ii in coord_str.replace('(','').replace(')','').split(',')]
-    else:
-        left, top, width, height = [int(ii) for ii in coord_str.split(',')]
-        right = left + width
-        bottom = top + height
+    # WAS: assuming ctp (relative) coords unless inside brackets:
+    #if '(' in coord_str:
+    #    left, top, right, bottom = [int(ii) for ii in coord_str.replace('(','').replace(')','').split(',')]
+    #else:
+    #    left, top, width, height = [int(ii) for ii in coord_str.split(',')]
+    #    right = left + width
+    #    bottom = top + height
+    # NOW: coordinates are always absolute
+    left, top, right, bottom = [int(ii) for ii in coord_str.replace('(','').replace(')','').split(',')]
     #print('"%s" -> %d %d %d %d' % (coord_str, left, top, right, bottom))
     return DicomRect(top = top, bottom = bottom, left = left, right = right)
 
