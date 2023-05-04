@@ -50,10 +50,9 @@ for row in drdb.db(drdb.db.DicomRects.filename == drdb.db.DicomTags.filename).se
     # Construct a rectangle tuple
     rect = (row.DicomRects.left, row.DicomRects.top, row.DicomRects.right, row.DicomRects.bottom)
     # Add the rectangle to a set (ensures no duplicates)
-    if bits_to_group_by in rectlist_dict:
-        rectlist_dict[bits_to_group_by].append(rect)
-    else:
-        rectlist_dict[bits_to_group_by] = [rect]
+    if not bits_to_group_by in rectlist_dict:
+        rectlist_dict[bits_to_group_by] = set()
+    rectlist_dict[bits_to_group_by].add(rect)
     # Not needed
     prev_group_by = bits_to_group_by
 
