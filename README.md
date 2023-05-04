@@ -24,9 +24,12 @@ Utilities:
 * `pydicom_images.py` - extract all the image frames, overlays, overlay frames as PNG format from a DICOM file, optionally run through OCR to get text, optionally run that through NER to get PII
 * `dbrects.sh` - display the rectangles in the database (simple sqlite3 wrapper)
 * `dbtext.sh` - display the OCR text in the database (simple sqlite3 wrapper)
-* `dbtags.sh` - display the tagged DICOM files in the database (simple sqlite3 wrapper)
-* `dbtagged.sh` - display the tagged DICOM filenames in the database (simple sqlite3 wrapper)
-* `dbtext_for_tagged.sh` - display OCR details of tagged files
+* `dbtags.sh` - display the table of files marked as Done in the database (simple sqlite3 wrapper)
+* `dbtagged.sh` - display the filenames marked as Done in the database (simple sqlite3 wrapper)
+* `dbtext_for_tagged.sh` - display OCR details of files marked as Done
+* `dbrects_for_tagged.sh` - display rectangles of files marked as Done
+* `dbrects_to_deid_rules.py` - convert rectangles from files marked as Done into deid rules
+* `dicomls.py` - simply list all DICOM tags and values from a file
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
 * `build_allowlist.py` - create list of regex rules for allowlisting OCR output and write to file, optionally reduce the number of rules by 20 percent (leading to more redactions of non-PII data, but significantly shorter runtime)
 
