@@ -151,6 +151,15 @@ def test_deid_result_rectangles():
 # ---------------------------------------------------------------------
 
 def detect(pydicom_dataset):
+    """ Alternative name for the function deid_dataset_to_DicomRectList()
+    but this one can also take a filename to a DICOM file as a parameter,
+    not just a pydicom FileDataset object.
+    Returns the list of DicomRect rectangles from the deid rules which
+    match the criteria from this DICOM file.
+    """
+    # If given a filename instead of a dataset then read the file
+    if isinstance(pydicom_dataset, str):
+        pydicom_dataset = pydicom.dcmread(pydicom_dataset)
     return deid_dataset_to_DicomRectList(pydicom_dataset)
 
 
