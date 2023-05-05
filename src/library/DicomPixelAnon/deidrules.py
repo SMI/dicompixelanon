@@ -149,6 +149,12 @@ def test_deid_result_rectangles():
     assert('<DicomRect frame=-1 overlay=-1 41,42->43,44>' in rectlist_str)
 
 # ---------------------------------------------------------------------
+
+def detect(pydicom_dataset):
+    return deid_dataset_to_DicomRectList(pydicom_dataset)
+
+
+# ---------------------------------------------------------------------
 if __name__ == '__main__':
 
     filenames = [ '/home/arb/src/pydicom/deid/examples/dicom/header-manipulation/func-sequence-replace/MR.dcm',
