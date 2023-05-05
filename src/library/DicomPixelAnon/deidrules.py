@@ -102,12 +102,13 @@ def deid_dataset_to_DicomRectList(pydicom_dataset):
     Returns [] if this file's metadata matches no rules.
     """
     rectlist = []
-    rc = DicomCleaner(deid=find_deid_rules_files()).detect(ds)
+    print('deid using rules files %s' % find_deid_rules_files())
+    rc = DicomCleaner(deid=find_deid_rules_files()).detect(pydicom_dataset)
     if rc['results']:
         result_list = []
         for result in rc['results']:
             result_list.extend(result['coordinates'])
-        rectlist = result_coords_to_DicomRectList(result_list, ds.Columns, ds.Rows)
+        rectlist = result_coords_to_DicomRectList(result_list, pydicom_dataset.Columns, pydicom_dataset.Rows)
     return rectlist
 
 
