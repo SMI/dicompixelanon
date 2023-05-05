@@ -38,6 +38,7 @@ from DicomPixelAnon.dicomrectdb import DicomRectDB
 from DicomPixelAnon.rect import Rect, DicomRect, add_Rect_to_list
 from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.dicomimage import DicomImage
+from DicomPixelAnon import deidrules
 
 
 # =====================================================================
@@ -834,6 +835,10 @@ class App:
             # Look for similar files in the database
             # Keep a copy of them so user can Apply them later
             self.possible_rects = db.query_similar_rects(filename, self.dcm.get_selected_metadata(), frame=frame, overlay=overlay)
+            # Add the list of rectangles from the deid recipes
+            # (XXX add them to suggested rectangles, or redacted rectangles?)
+            deid_rects = deidrules.detect(self.dcm.get_dataset())
+            self.redacted_rects.extend(deid_rects)
             # Resize to fit screen and apply rectangles, trigger window refresh
             self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
             # Update the info label
