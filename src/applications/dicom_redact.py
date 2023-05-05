@@ -504,7 +504,7 @@ def read_DicomRectText_list_from_database(db_dir=None, filename=None, frame=-1, 
         DicomRectDB.set_db_path(db_dir)
     db = DicomRectDB()
     rect_list = db.query_rects(filename, frame=frame, overlay=overlay,
-        ignore_allowlisted = True)
+        ignore_allowlisted = True, ignore_summaries = True)
     return rect_list
 
 
