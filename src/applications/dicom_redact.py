@@ -334,9 +334,31 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
         logger.error('no pixel data present')
         return None
 
+    # Redact all frames, all overlays, all frames in overlays
+    if overlay == -1 and frame == -1:
+        num_frames = ds['NumberOfFrames'].value if 'NumberOfFrames' in ds else 1
+        # Redact all the frames
+        for frame in range(num_frames):
+            redact_rectangles_from_image_frame(ds, frame, rect_list)
+        # Redact all the high-bit overlays (if any)
+        for overlay_num in range(16):
+            overlay_bit = overlay_bit_position(ds, overlay_num)
+            if overlay_bit_position(ds, overlay_num) > 0:
+                redact_rectangles_from_high_bit_overlay(ds, overlay_num, rect_list)
+        # Redact all the frames in all the overlays
+        for overlay_num in range(16):
+            overlay_group_num = overlay_tag_group_from_index(overlay_num)
+            if [overlay_group_num, elem_OverlayData] in ds:
+                # Redact the first frame in this overlay
+                redact_rectangles_from_overlay_frame(ds, 0, overlay_num, rect_list)
+                # XXX not yet implemented - does not redact ALL frames in this overlay
+        return
+
+    # Only a single frame
     if overlay == -1:
         return redact_rectangles_from_image_frame(ds, frame, rect_list)
 
+    # A single overlay
     if overlay < 0 or overlay > 15:
         logger.error('invalid overlay requested %d' % overlay)
         return None
