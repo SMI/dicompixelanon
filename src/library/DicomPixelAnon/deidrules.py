@@ -102,7 +102,6 @@ def deid_dataset_to_DicomRectList(pydicom_dataset):
     Returns [] if this file's metadata matches no rules.
     """
     rectlist = []
-    print('deid using rules files %s' % find_deid_rules_files())
     rc = DicomCleaner(deid=find_deid_rules_files()).detect(pydicom_dataset)
     if rc['results']:
         result_list = []

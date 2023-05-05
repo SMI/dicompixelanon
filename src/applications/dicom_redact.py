@@ -25,6 +25,7 @@ from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon import ultrasound
+from DicomPixelAnon import deidrules
 import sys
 try:
     from DicomPixelAnon.dicomrectdb import DicomRectDB
@@ -621,6 +622,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
     parser.add_argument('--remove-ultrasound-regions', action="store_true", help='remove around the stored ultrasound regions', default=False)
+    parser.add_argument('--deid', action="store_true", help='Use deid-recipe rules to redact', default=False)
+    parser.add_argument('--deid-rules', action="store", help='Path to file or directory containing deid recipe files (deid.dicom.*)', default=None)
     parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
     args = parser.parse_args()
 
@@ -665,6 +668,12 @@ if __name__ == '__main__':
             logger.error('Must specify a DICOM file to find in the database')
             sys.exit(1)
         rect_list_map[args.dicom] += read_DicomRectText_list_from_database(db_dir = args.db, filename = args.dicom)
+
+    # If using deid recipes then find the recipe files and use them to add rectangles
+    if args.deid:
+        if args.deid_rules:
+            logger.error('Sorry, specifying a deid rules file/directory is not yet implemented')
+        rect_list_map[args.dicom] += deidrules.detect(args.dicom)
 
     # If given a CSV file then we can process every DICOM in the file
     # or just the single filename provided
