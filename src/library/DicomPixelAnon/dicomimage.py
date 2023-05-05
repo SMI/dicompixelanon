@@ -142,6 +142,11 @@ class DicomImage:
         """
         print(self.ds)
 
+    def get_dataset(self):
+        """ Return the pydicom dataset object
+        """
+        return self.ds
+
     def get_tag(self, tag):
         """ Return the tag or None if it doesn't exist
         """
