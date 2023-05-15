@@ -67,7 +67,7 @@ data_types = { 'Modality': 'category',
 # Read the CSV into memory
 # NOTE must use na_filter=False to prevent empty string becoming NaN
 logging.debug('Reading CSV')
-df = pd.read_csv(csv_filename, dtype=data_types, na_filter=False)
+df = pd.read_csv(csv_filename, dtype=data_types, na_filter=False, index_col=False)
 
 # Group by columns and output CSV
 logging.debug('Grouping')
