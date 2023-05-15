@@ -37,12 +37,17 @@ class FileList:
                     rdr = csv.DictReader(fd)
                     for row in rdr:
                         if 'filename' in row:
-                            self.files.append(row['filename'])
+                            cfile = row['filename']
                         elif 'DicomFilePath' in row:
-                            self.files.append(row['DicomFilePath'])
+                            cfile = row['DicomFilePath']
                         else:
                             print('not sure which column in CSV holds filename')
                             break
+                        if os.path.isabs(cfile):
+                            self.files.extend(glob.glob(cfile))
+                        else:
+                            for prefix in self.prefixes:
+                                self.files.extend(glob.glob(os.path.join(prefix, cfile)))
             elif os.path.isabs(file):
                 self.files.extend(glob.glob(file))
             else:
