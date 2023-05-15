@@ -8,17 +8,20 @@
 
 import argparse
 import csv
+import logging
 import sys
 import pandas as pd
 
 group_by_columns = ['Manufacturer', 'ManufacturerModelName', 'Zeihm1', 'Zeihm2', 'Rows', 'Columns']
 output_columns = ['DicomFilePath']
+output_random = True
+num_per_group = 3
 
 parser = argparse.ArgumentParser(description='DICOM image frames to PNG')
 parser.add_argument('-d', '--debug', action="store_true", help='more verbose (show DEBUG messages)')
 parser.add_argument('-c', '--csv', action="store", help='input CSV file')
 parser.add_argument('-g', '--groupby', action="store", help='group by column names, comma-separated')
-parser.add_argument('-p', '--print', action="store", help='output column names, comma-separated')
+parser.add_argument('-p', '--print', action="store", help='output column names, comma-separated. Use + to insert the groupby columns')
 parser.add_argument('--random', action='store', help='Output random N rows from each group', default=None)
 parser.add_argument('--head', action='store', help='Output first N rows from each group', default=None)
 args = parser.parse_args()
@@ -34,11 +37,14 @@ if args.groupby:
     group_by_columns = args.groupby.split(',')
 if args.print:
     output_columns = args.print.split(',')
+    try:
+        ii = output_columns.index('+')
+        output_columns = output_columns[0:ii] + group_by_columns + output_columns[ii+1:]
+    except:
+        pass
 
 # Columns in CSV file
-# Modality,DicomFilePath,BurnedInAnnotation,RecognizableVisualFeatures,Manufacturer,ManufacturerModelName,SoftwareVersions,SecondaryCaptureDeviceManufacturer,SecondaryCaptureDeviceManufactur
-erModelName,ModelName,CodeMeaning,CommentsOnRadiationDose,ImageType2,ImageType,ImplementationVersionName,SeriesDescription,WindowWidth,Rows,Columns,BitsStored,BitsAllocated,NumberOfFrames,Ov
-erlayRows,OverlayColumns,OverlayType,NumberOfFramesInOverlay,OverlayDescription,OverlayBitsAllocated,OverlayBitPosition,Zeihm1,Zeihm2
+# Modality,DicomFilePath,BurnedInAnnotation,RecognizableVisualFeatures,Manufacturer,ManufacturerModelName,SoftwareVersions,SecondaryCaptureDeviceManufacturer,SecondaryCaptureDeviceManufacturerModelName,ModelName,CodeMeaning,CommentsOnRadiationDose,ImageType2,ImageType,ImplementationVersionName,SeriesDescription,WindowWidth,Rows,Columns,BitsStored,BitsAllocated,NumberOfFrames,OverlayRows,OverlayColumns,OverlayType,NumberOfFramesInOverlay,OverlayDescription,OverlayBitsAllocated,OverlayBitPosition,Zeihm1,Zeihm2
 
 # Define some columns as 'category' to reduce memory and speed up processing
 data_types = { 'Modality': 'category',
@@ -60,15 +66,18 @@ data_types = { 'Modality': 'category',
 
 # Read the CSV into memory
 # NOTE must use na_filter=False to prevent empty string becoming NaN
-print('Reading CSV')
+logging.debug('Reading CSV')
 df = pd.read_csv(csv_filename, dtype=data_types, na_filter=False)
 
 # Group by columns and output CSV
-print('Grouping')
+logging.debug('Grouping')
+
+# Create empty copy of df so we can print the CSV header line just once
+print(df.iloc[0:0].copy().to_csv(header = True, columns = output_columns), end='')
+
 for key,val in df.groupby(group_by_columns):
     if output_random:
         df_out = val.sample(n = num_per_group, replace = True)
     else:
         df_out = val.head(num_per_group)
-    print(key)
-    print(df_out.to_csv(header = False, columns = output_columns), end='\n\n')
+    print(df_out.to_csv(header = False, columns = output_columns), end='')
