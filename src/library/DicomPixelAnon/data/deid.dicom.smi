@@ -9,12 +9,39 @@ LABEL Clean Areas Outside Ultrasound Regions
     present SequenceOfUltrasoundRegions
     keepcoordinates from:SequenceOfUltrasoundRegions
 
-# XXX should also check + equals Rows 1024 or whatever the size is
 LABEL Ziehm X-Rays
   contains Modality XA
-  + contains 0x00190010 ZIEHM_1.0 DeviceConfigData
+  + contains 0x00190010 ZIEHM_1.0
   + contains 0x00191201 Fluoro
+  + equals Rows 1024
+  + equals Columns 1024
   coordinates 0,0,196,148
   coordinates 0,940,189,1006
   coordinates 706,0,1023,66
 
+LABEL Ziehm X-Rays
+  contains Modality XA
+  + ManufacturerModelName ZiehmNetPort
+  + equals Rows 1024
+  + equals Columns 1024
+  coordinates 0,0,196,148
+  coordinates 0,940,189,1006
+  coordinates 706,0,1023,66
+
+LABEL Ziehm X-Rays
+  contains Modality XA
+  + ManufacturerModelName ZiehmNetPort
+  + equals Rows 512
+  + equals Columns 512
+  coordinates 0,0,98,74
+  coordinates 0,470,95,503
+  coordinates 353,0,512,33
+
+LABEL Ziehm X-Rays
+  contains Modality XA
+  + ManufacturerModelName ZiehmNetPort
+  + equals Rows 576
+  + equals Columns 576
+  coordinates 0,0,110,83
+  coordinates 0,529,106,566
+  coordinates 397,0,575,37
