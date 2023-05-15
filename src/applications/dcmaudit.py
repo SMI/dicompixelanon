@@ -887,7 +887,7 @@ if __name__=='__main__':
     parser.add_argument('--dump-database', action="store_true", help='show database content')
     parser.add_argument('--db', action="store", help='database directory')
     parser.add_argument('--review', action="store_true", help='review files already marked as done')
-    parser.add_argument('-i', dest='infiles', nargs='*', default=[]) # can use: -i *.txt
+    parser.add_argument('-i', dest='infiles', nargs='*', help='list of DICOM files, or a filename.csv (for DicomFilePath)', default=[]) # can use: -i *.txt
     args = parser.parse_args()
     if args.debug:
         logging.basicConfig(level = logging.DEBUG)

@@ -3,6 +3,7 @@ allowing you to step forwards and backwards through the list.
 It was intended to do more than this, but it's quite simple right now.
 """
 
+import csv
 import glob
 import os
 
@@ -25,9 +26,24 @@ class FileList:
     def set_list(self, filenames):
         """ Record a list of filenames. Each entry can be a wildcard
         which is expanded to include all the matching files.
+        If an entry in the list is a filename *.csv or *.CSV then the
+        CSV file is read and the list of filenames is taken from the
+        'filename' or 'DicomFilePath' column.
         """
         for file in filenames:
-            if os.path.isabs(file):
+            # Read filenames from a CSV file
+            if file.endswith('.csv') or file.endswith('.CSV'):
+                with open(file, newline='') as fd:
+                    rdr = csv.DictReader(fd)
+                    for row in rdr:
+                        if 'filename' in row:
+                            self.files.append(row['filename'])
+                        elif 'DicomFilePath' in row:
+                            self.files.append(row['DicomFilePath'])
+                        else:
+                            print('not sure which column in CSV holds filename')
+                            break
+            elif os.path.isabs(file):
                 self.files.extend(glob.glob(file))
             else:
                 for prefix in self.prefixes:
