@@ -15,6 +15,7 @@ Utilities:
 * `dicom_redact_db.py` - redact every file in the database which has rectangles
 * `extract_all.py` - extract as JSON every document from every image modality in MongoDB
 * `extract_BIA.py` - extract all the DICOM tags relevant to annotations, overlays, frames from every document from every image modality in MongoDB
+* `csv_groupby_filter.py` - group CSV rows and output a selection from each group
 * `summary.py` - report a count of the unique values in each column of the CSV
 * `summary_overlay.py` - print the overlay-related columns from the CSV
 * `random_combinations.sh` - run `random_combinations.py` for every image modality CSV file
