@@ -657,7 +657,7 @@ if __name__ == '__main__':
 
     # Get a list of rectangles surrounding the UltrasoundRegions
     if args.dicom and args.remove_ultrasound_regions:
-        rect_list_map[args.dicom] += ultrasound.read_DicomRect_list_from_region_tags(filename = args.dicom)
+        rect_list_map[args.dicom] += ultrasound.read_DicomRectText_list_from_region_tags(filename = args.dicom)
 
     # If given a database then we need a filename to search for
     if args.db:
