@@ -55,6 +55,7 @@ Setup
 * Create a config file directory `$SMI_ROOT/data` (you can set `$SMI_ROOT` anywhere)
 * Install all of the Python requirements (see below)
 * Copy `data/ocr_allowlist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt` if required for dicom_redact
+* Copy `src/library/DicomPixelAnon/data/deid.dicom.smi` into `$SMI_ROOT/data/deid/deid.dicom.smi`
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
 
