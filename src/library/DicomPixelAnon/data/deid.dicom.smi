@@ -21,7 +21,7 @@ LABEL Ziehm X-Rays
 
 LABEL Ziehm X-Rays
   contains Modality XA
-  + ManufacturerModelName ZiehmNetPort
+  + contains ManufacturerModelName ZiehmNetPort
   + equals Rows 1024
   + equals Columns 1024
   coordinates 0,0,196,148
@@ -30,7 +30,7 @@ LABEL Ziehm X-Rays
 
 LABEL Ziehm X-Rays
   contains Modality XA
-  + ManufacturerModelName ZiehmNetPort
+  + contains ManufacturerModelName ZiehmNetPort
   + equals Rows 512
   + equals Columns 512
   coordinates 0,0,98,74
@@ -39,7 +39,7 @@ LABEL Ziehm X-Rays
 
 LABEL Ziehm X-Rays
   contains Modality XA
-  + ManufacturerModelName ZiehmNetPort
+  + contains ManufacturerModelName ZiehmNetPort
   + equals Rows 576
   + equals Columns 576
   coordinates 0,0,110,83
