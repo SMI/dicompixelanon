@@ -1,43 +1,47 @@
 FORMAT dicom
 
-# File created on 2023-05-03
+# File created on 2023-05-17
 
 %filter graylist
 
 # Generic rule to handle any Ultrasound images
+
 LABEL Clean Areas Outside Ultrasound Regions
     present SequenceOfUltrasoundRegions
     keepcoordinates from:SequenceOfUltrasoundRegions
 
-LABEL Ziehm X-Rays
+# The Ziehm rules created by analysis of PHS/SMI archive 2010-2018
+
+LABEL Ziehm X-Rays 1024
   contains Modality XA
   + contains 0x00190010 ZIEHM_1.0
-  + contains 0x00191201 Fluoro
+  + contains 0x00191201 Fluoro|LowDose|Snapshot|HiQ|LPK|HLC
   + equals Rows 1024
   + equals Columns 1024
   coordinates 0,0,196,148
   coordinates 0,940,189,1006
   coordinates 706,0,1023,66
 
-LABEL Ziehm X-Rays
+LABEL Ziehm X-Rays 512
   contains Modality XA
-  + contains ManufacturerModelName ZiehmNetPort
-  + equals Rows 1024
-  + equals Columns 1024
-  coordinates 0,0,196,148
-  coordinates 0,940,189,1006
-  coordinates 706,0,1023,66
-
-LABEL Ziehm X-Rays
-  contains Modality XA
-  + contains ManufacturerModelName ZiehmNetPort
+  + contains 0x00190010 ZIEHM_1.0
+  + contains 0x00191201 Fluoro|LowDose|HiQ|LPK
   + equals Rows 512
   + equals Columns 512
   coordinates 0,0,98,74
   coordinates 0,470,95,503
   coordinates 353,0,512,33
 
-LABEL Ziehm X-Rays
+LABEL ZiehmNetPort X-Rays 1024
+  contains Modality XA
+  + contains ManufacturerModelName ZiehmNetPort
+  + equals Rows 1024
+  + equals Columns 1024
+  coordinates 0,0,196,148
+  coordinates 0,940,189,1006
+  coordinates 706,0,1023,66
+
+LABEL ZiehmNetPort X-Rays 576
   contains Modality XA
   + contains ManufacturerModelName ZiehmNetPort
   + equals Rows 576
@@ -45,3 +49,12 @@ LABEL Ziehm X-Rays
   coordinates 0,0,110,83
   coordinates 0,529,106,566
   coordinates 397,0,575,37
+
+LABEL ZiehmNetPort X-Rays 512
+  contains Modality XA
+  + contains ManufacturerModelName ZiehmNetPort
+  + equals Rows 512
+  + equals Columns 512
+  coordinates 0,0,98,74
+  coordinates 0,470,95,503
+  coordinates 353,0,512,33
