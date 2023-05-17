@@ -9,6 +9,7 @@ Contents:
 * [dicom_pixel_anon](doc/dicom_pixel_anon.md) - run OCR and redact regions from DICOM images
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 * [dicom rect db](doc/dicomrectdb.md) - the database about DICOM files which have been examined
+* [deidrules](doc/deidrules.md) - redaction using rules
 
 Utilities:
 * `dcmaudit.py` - interactive GUI to mark rectangles for redaction in DICOM image frames and overlays
@@ -37,7 +38,7 @@ Utilities:
 # Usage
 
 
-Environment variables
+## Environment variables
 
 * `$SMI_ROOT` - this will be used to find data and configuration files
 * `$PACS_ROOT` - this will be used to find DICOM files (e.g. if a path to a
@@ -49,15 +50,17 @@ internet access, to prevent it from trying to download models from huggingface
 * export `PYTHONPATH=../../library/` if you want to try any of the applications
 from their directory without building and installing the library
 
-Setup
+## Setup
 
 * Create a Python virtual environment and activate it
 * Create a config file directory `$SMI_ROOT/data` (you can set `$SMI_ROOT` anywhere)
 * Install all of the Python requirements (see below)
 * Copy `data/ocr_allowlist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt` if required for dicom_redact
-* Copy `src/library/DicomPixelAnon/data/deid.dicom.smi` into `$SMI_ROOT/data/deid/deid.dicom.smi`
+* Copy `data/deid.dicom.smi` into `$SMI_ROOT/data/deid/deid.dicom.smi`
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
+
+## Run
 
 Now you can run the applications:
  * dcmaudit, if you want to view a DICOM file and manually curate a database of rectangles

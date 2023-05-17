@@ -96,34 +96,12 @@ are assumed to be defining the useful parts of the image).
 To redact based on rules which match DICOM metadata tags give the `--deid`
 option which by default will read rules from `$SMI_ROOT/data/deid/deid.dicom.*`
 files. The `--deid-rules` option can be used to specify different files.
-The rules are documented in https://pydicom.github.io/deid/user-docs/recipe-filters/
-and https://pydicom.github.io/deid/getting-started/dicom-pixels/
+See the [deidrules](deidrules.md) document for more details.
+
 Note that rule-based redaction has to be applied to every frame and every
 overlay in a file because the rules have no way to specify individual frames.
 
-e.g.
-```
-LABEL Ziehm X-Rays
-  contains Modality XA
-  + contains 0x00190010 ZIEHM_1.0
-  + contains 0x00191201 Fluoro
-  + equals Rows 1024
-  + equals Columns 1024
-  coordinates 0,0,196,148
-  coordinates 0,940,189,1006
-  coordinates 706,0,1023,66
-```
-
-To use the rules for redacting Ultrasound Regions you can add
-```
-LABEL Clean Areas Outside Ultrasound Regions
-    present SequenceOfUltrasoundRegions
-    keepcoordinates from:SequenceOfUltrasoundRegions
-```
-Note one difference from the `pydicom/deid` rules is that there is no need
-for an inverse mask to be specified using `coordinates all` when using Ultrasound
-regions because all coordinates specified using `keepcoordinates` will be
-inverted automatically. You can omit the Ultrasound rule and use the
+Rules can also be used for redacting around Ultrasound Regions, or you can use the
 `--remove-ultrasound-regions` option instead.
 
 ### Rectangles from a CSV file
