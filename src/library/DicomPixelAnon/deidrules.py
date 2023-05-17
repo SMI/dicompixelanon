@@ -117,6 +117,18 @@ def deid_dataset_to_DicomRectList(pydicom_dataset):
     return rectlist
 
 
+def test_deid_dataset_to_DicomRectList():
+    # Construct a fake DICOM which matches a known rule
+    from pydicom.dataset import FileDataset, FileMetaDataset
+    ds = FileDataset('filename', {},
+        file_meta=FileMetaDataset(), preamble=b"\0" * 128)
+    ds.Modality = 'XA'
+    ds.Rows = ds.Columns = 1024
+    ds.ManufacturerModelName = 'ZiehmNetPort'
+    results = deid_dataset_to_DicomRectList(ds)
+    assert(str(results[0]) == '<DicomRect frame=-1 overlay=-1 0,0->196,148>')
+
+
 def test_deid_result_rectangles():
     # Example taken from gdcmData/gdcm-US-ALOKA-16.dcm
     # with two extra coords added to test the code.
