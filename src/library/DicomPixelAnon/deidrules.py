@@ -6,6 +6,7 @@
 # the metadata in this file).
 
 import glob
+import logging
 import os
 import sys
 import pydicom
@@ -109,9 +110,10 @@ def deid_dataset_to_DicomRectList(pydicom_dataset):
     """
     rectlist = []
     rc = DicomCleaner(deid=find_deid_rules_files()).detect(pydicom_dataset)
-    if rc['results']:
+    if rc.get('flagged', False) and rc.get('results', []):
         result_list = []
         for result in rc['results']:
+            logging.getLogger(__name__).debug('deid reason: %s' % result['reason'])
             result_list.extend(result['coordinates'])
         rectlist = result_coords_to_DicomRectList(result_list, pydicom_dataset.Columns, pydicom_dataset.Rows)
     return rectlist
