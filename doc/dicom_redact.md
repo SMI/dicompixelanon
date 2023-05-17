@@ -11,13 +11,15 @@ DICOM tags to determine which rectangles to redact. Both have limitations
 on which image frames can be redacted, and how well the DICOM tags match
 those in the configuration file.
 
-This tool can redact rectangles in four ways:
+This tool can redact rectangles in five ways:
 * from a list specified on the command line
 * from a list provided in a CSV file, for example the output from
  `pydicom_images.py` running OCR on DICOM files
 * from a list stored in a database, for example the output from
  `dcmaudit.py` with manually marked-up DICOM files, or from `dicom_ocr.py`
 * from a set of regions defined in the metadata of an UltraSound DICOM
+* from rules which define rectangles for files whose metadata tags
+match specific criteria.
 
 It should be noted that all of these tools can be used standalone or
 in conjunction with other tools, for example you can use CTP and/or
@@ -62,6 +64,8 @@ compression support can of course be added to this tool later.
                         remove overlays in high-bits of image pixels
   --remove-ultrasound-regions
                         remove around the stored ultrasound regions
+  --deid                Use deid-recipe rules to redact
+  --deid-rules          Path to file or directory containing deid recipe files (deid.dicom.*)
   -r [RECTS ...], --rect [RECTS ...]
                         rectangles x0,y0,x1,y1 or x0,y0,+w,+h; ...
 ```
@@ -69,14 +73,63 @@ compression support can of course be added to this tool later.
 Use `--db` to read rectangles from a database, e.g. from `dcmaudit`,
 or `--csv` to read rectangles from a CSV file, e.g. from `pydicom_images`,
 or specify the rectangles directly with `--rect`. In all cases you can
-specify `--dicom` to find only that path in the database/CSV. If reading
-from a CSV and no DICOM has been specified then all filenames listed in
-the CSV will be redacted.
+specify `--dicom` to find only that path in the database/CSV.
+
+### Rectangles
+
+The `--rect` option can have multiple rectangle arguments after it
+(if it's specified last on the command line) or you can specify multiple
+rectangles in a single argument by separating them with a semicolon.
+The format is either `x0,y0,x1,y1` (left,top,right,bottom) or
+`x0,y0,+w,+h` (left,top and width,height). Brackets around the whole
+set are optional. Example: `(10,10,20,20);(30,30,+10,+10)`
+
+### Ultrasound Regions
 
 If the image is an UltraSound and has a set of regions defined within
 its metadata ("SequenceOfUltrasoundRegions") then the `--remove-ultrasound-regions`
 option will redact all of the areas outside of those regions (the regions
 are assumed to be defining the useful parts of the image).
+
+### Rule-based redaction
+
+To redact based on rules which match DICOM metadata tags give the `--deid`
+option which by default will read rules from `$SMI_ROOT/data/deid/deid.dicom.*`
+files. The `--deid-rules` option can be used to specify different files.
+The rules are documented in https://pydicom.github.io/deid/user-docs/recipe-filters/
+and https://pydicom.github.io/deid/getting-started/dicom-pixels/
+Note that rule-based redaction has to be applied to every frame and every
+overlay in a file because the rules have no way to specify individual frames.
+
+e.g.
+```
+LABEL Ziehm X-Rays
+  contains Modality XA
+  + contains 0x00190010 ZIEHM_1.0
+  + contains 0x00191201 Fluoro
+  + equals Rows 1024
+  + equals Columns 1024
+  coordinates 0,0,196,148
+  coordinates 0,940,189,1006
+  coordinates 706,0,1023,66
+```
+
+To use the rules for redacting Ultrasound Regions you can add
+```
+LABEL Clean Areas Outside Ultrasound Regions
+    present SequenceOfUltrasoundRegions
+    keepcoordinates from:SequenceOfUltrasoundRegions
+```
+Note one difference from the `pydicom/deid` rules is that there is no need
+for an inverse mask to be specified using `coordinates all` when using Ultrasound
+regions because all coordinates specified using `keepcoordinates` will be
+inverted automatically. You can omit the Ultrasound rule and use the
+`--remove-ultrasound-regions` option instead.
+
+### Rectangles from a CSV file
+
+If reading from a CSV and no DICOM has been specified then all filenames listed in
+the CSV will be redacted.
 
 The CSV file is expected to have (at least) these columns, in any order:
 ```
@@ -90,22 +143,15 @@ The database has a table called `DicomRects` having columns with
 the same names as for CSV files above.
 Other columns and tables in the database are ignored.
 
+### Output filename
+
 The output filename can be specified for a single input file.
 If not specified then the output filename is the same as the input
 filename but with `.dcm` removed and `.redacted.dcm` appended.
 If that directory is not writable then the current directory is used.
 The `--output` option can also refer to a directory.
 
-## Rectangles
-
-The `--rect` option can have multiple rectangle arguments after it
-(if it's specified last on the command line) or you can specify multiple
-rectangles in a single argument by separating them with a semicolon.
-The format is either `x0,y0,x1,y1` (left,top,right,bottom) or
-`x0,y0,+w,+h` (left,top and width,height). Brackets around the whole
-set are optional. Example: `(10,10,20,20);(30,30,+10,+10)`
-
-## Removing only the high-bit overlays
+### Removing only the high-bit overlays
 
 If you only want to remove high-bit overlays (not redact rectangles),
 then only use the `--remove-high-bit-overlays` and `--dicom` options.

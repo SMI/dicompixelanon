@@ -36,6 +36,8 @@ Also ensure that the `PATH` variable contains the path to the `tesseract`
 program.  Try installing `tesseract-ocr` if not, or download from
 https://github.com/second-state/OCR-tesseract-on-Centos7/raw/main/tesseract.tar.gz
 
+If relying on redaction defined by rules then ensure the rules are
+in `$SMI_ROOT/data/deid/`.
 
 ## Usage
 
@@ -54,6 +56,15 @@ optional arguments:
   -i [INFILES [INFILES ...]] list of DICOM filenames, or a
      CSV filename to get the filenames from the DicomFilePath column
 ```
+
+When the image is displayed it will automatically have rectangles redacted if
+* the database contains rectangles for this filename
+* the metadata tags match some deid rules (see dicom_redact for details)
+* but note that Ultrasound regions are not automatically redacted
+
+A set of suggested rectangles may be displayed if the metadata matches
+a similar file in the database, typically same Manufacturer, Model, and
+image dimensions, because you've just edited one previously.
 
 A rectangle is displayed and can be dragged around the image.
 If you drag from the middle of the rectangle it will stick inside the image.
