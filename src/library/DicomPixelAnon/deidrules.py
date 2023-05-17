@@ -80,9 +80,9 @@ def result_coords_to_DicomRectList(result_coords, width = None, height = None):
 def find_deid_rules_files():
     """ Find a list of deid recipe filenames, first looking in
     $SMI_ROOT/data/deid
-    then in the data subdirectory relative to this file.
+    then in the data directory relative to this file.
     """
-    datadir = os.path.join(os.path.dirname(__file__), 'data')
+    datadir = os.path.join(os.path.dirname(__file__), '../../../data')
     files = []
     if 'SMI_ROOT' in os.environ:
         dirname = os.path.join(os.environ['SMI_ROOT'], 'data', 'deid')
