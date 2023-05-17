@@ -93,6 +93,12 @@ def find_deid_rules_files():
     return files
 
 
+def test_find_deid_rules_files():
+    files = find_deid_rules_files()
+    check = any([os.path.basename(f) == 'deid.dicom.smi' for f in files])
+    assert(check)
+
+
 def deid_dataset_to_DicomRectList(pydicom_dataset):
     """ Run the pydicom Dataset through a set of filters
     to determine any static rectangles which need to be redacted.
