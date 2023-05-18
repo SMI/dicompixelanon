@@ -60,6 +60,17 @@ from their directory without building and installing the library
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
 
+## Update
+
+```
+git pull
+cp data/ocr_allowlist_regex.txt $SMI_ROOT/data/dicompixelanon/
+cp data/deid.dicom.smi $SMI_ROOT/data/deid/
+cd src/library
+python3 ./setup.py bdist_wheel
+pip install $(ls dist/*whl|tail -1)
+```
+
 ## Run
 
 Now you can run the applications:
