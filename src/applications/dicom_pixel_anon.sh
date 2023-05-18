@@ -64,7 +64,7 @@ if [ $keep_rects -eq 1 -a -d "$output" ]; then
         echo "$rects_cols" > "$rects_file"
     fi
     sqlite3 -csv -separator , \
-        -cmd "select $rects_cols from DicomRects" \
+        -cmd "select $rects_cols from DicomRects where left != -1" \
         "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
 fi
 
