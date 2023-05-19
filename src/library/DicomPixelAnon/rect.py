@@ -80,6 +80,29 @@ class Rect:
         else:
             return Rect()
 
+    def similar(self, other_rect):
+        """ Check if this rect is almost identical to other_rect,
+        within 2 pixels, and if so change self dimensions to be the
+        larger of the two rectangles, and the longer of the text strings
+        so that other_rect can be ignored. Return True if so.
+        It is undefined if the two Rects are not of the same class.
+        """
+        t,b,l,r = self.get_rect()
+        T,B,L,R = other_rect.get_rect()
+        lim = 4 # was 2 but have seen examples in the wild needing 4
+        # Compare coordinates
+        if (abs(T-t) > lim) or (abs(L-l) > lim) or (abs(B-b) > lim) or (abs(R-r) > lim):
+            return False
+        return True
+
+    def make_mbr(self, other_rect):
+        """ Make the current rectangle the Minimum Bounding Rectangle
+        of itself with other_rect.
+        """
+        t,b,l,r = self.get_rect()
+        T,B,L,R = other_rect.get_rect()
+        self.set_rect(min(T,t), max(B,b), min(L,l), max(R,r))
+
 
 # ---------------------------------------------------------------------
 
@@ -124,6 +147,16 @@ class DicomRect(Rect):
         if not super().contains(x,y): rc = False
         return rc
 
+    def similar(self, other_rect : 'DicomRect'):
+        """ See Rect.similar(), this also checks that the two rectangles
+        have the same frame and overlay
+        """
+        if not super().similar(other_rect):
+            return False
+        if (self.F() != other_rect.F()) or (self.O() != other_rect.O()):
+            return False
+        return True
+
 
 # ---------------------------------------------------------------------
 
@@ -161,6 +194,46 @@ class DicomRectText(DicomRect):
         """ Returns a tuple (ocrengine, ocrtext, nerengine, nerpii)
         """
         return self.ocrengine, self.ocrtext, self.nerengine, self.nerpii
+
+    def similar(self, other_rect : 'DicomRectText'):
+        """ See DicomRect.similar() but this also checks that the two rectangles
+        have the same ocrtext, or very similar
+        """
+        if not super().similar(other_rect):
+            return False
+        sim_lim = 0.9 # text must be very similar to be same rectangle
+        _, txt, _, _ = self.text_tuple()
+        _, TXT, _, _ = other_rect.text_tuple()
+        from fastDamerauLevenshtein import damerauLevenshtein
+        txt_sim = damerauLevenshtein(txt, TXT, similarity=True)
+        if txt_sim < sim_lim:
+            return False
+        return True
+
+
+# ---------------------------------------------------------------------
+
+def test_similar():
+    r1 = Rect(10,20,30,40)
+    r2 = Rect(13,17,33,38)
+    r3 = Rect(13,17,33,35)
+    assert(r1.similar(r2) == True)
+    assert(r1.similar(r3) == False)
+    assert(r2.similar(r3) == True)
+    r4 = DicomRect(10,20,30,40,2,3)
+    r5 = DicomRect(11,21,31,41,2,3)
+    r6 = DicomRect(12,22,33,44,2,4)
+    assert(r4.similar(r5) == True)
+    assert(r4.similar(r6) == False)
+    assert(r5.similar(r6) == False)
+    r7 = DicomRectText(10,20,30,40,2,3,-1,'jane maclean')
+    r8 = DicomRectText(10,20,30,40,2,3,-1,'jane maclan')
+    r9 = DicomRectText(10,20,30,40,2,3,-1,'jane macla')
+    assert(r7.similar(r8) == True)
+    assert(r7.similar(r9) == False)
+    assert(r8.similar(r9) == True)
+    r4.make_mbr(r6)
+    assert(r4.get_rect() == (10,22,30,44))
 
 
 # ---------------------------------------------------------------------
@@ -266,6 +339,7 @@ def rect_exclusive_list(rectlist, width, height):
 
 
 # ---------------------------------------------------------------------
+
 def test_rect():
     r = Rect(1, 11, 2, 12) # T,B,L,R
     assert r.ltrb() == (2, 1, 12, 11)
