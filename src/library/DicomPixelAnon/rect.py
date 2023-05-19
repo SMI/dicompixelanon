@@ -137,7 +137,7 @@ class DicomRectText(DicomRect):
     pii_not_found = 0
     pii_possible = 1
 
-    def __init__(self, arect = None, dicomrect = None, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1):
+    def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1, arect = None, dicomrect = None):
         if dicomrect:
             super.__init__(dicomrect.T(), dicomrect.B(), dicomrect.L(), dicomrect.R(), dicomrect.F(), dicomrect.O())
         elif arect:
