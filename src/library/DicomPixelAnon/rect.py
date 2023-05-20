@@ -273,11 +273,19 @@ def filter_DicomRectText_list_by_fontsize(rectlist):
 
 # ---------------------------------------------------------------------
 
-def add_Rect_to_list(rectlist, addrect):
+def add_Rect_to_list(rectlist, addrect, coalesce_similar = False):
     """ Extend the given list of rectangles with the given rectangle.
     Handles overlaps to ensure that the list does not contain any
     rectangles which would lie inside a larger rectangle.
     Works with Rect or DicomRect or DicomRectText objects.
+    If coalesce_similar is True then a "similar" rectangle will not be
+    added to the list if one already exists, the existing one will be
+    enlarged to the minimum bounding rectangle of both, and the ocrtext
+    will be the longer of the two strings.
+    XXX doesn't check the frame/overlay because
+    we assume there's a different list for every frame/overlay
+    XXX doesn't check the ocrtext so will throw away text if it's
+    in a rectangle which is inside one that is already in the list.
     """
     # If new rectangle is empty then do nothing
     if not addrect.is_valid():
@@ -287,12 +295,27 @@ def add_Rect_to_list(rectlist, addrect):
         rect for rect in rectlist if
             not addrect.contains_rect(rect)
     ]
-    # Now add the new one if it's not smaller than an existing one
+    # Ignore if it's smaller than an existing one
     for rect in rectlist:
         # If a larger rectangle already exists then ignore this one
         if rect.contains_rect(addrect):
             return
+    # Modify an existing one if the new one is similar
+    if coalesce_similar:
+        for rect in rectlist:
+            if rect.similar(addrect):
+                rect.make_mbr(addrect)
+                return
     rectlist.append(addrect)
+
+
+def test_add_Rect_to_list():
+    l1 = []
+    add_Rect_to_list(l1, DicomRectText(10,20,30,40,1,2,-1,'jane macleod'), coalesce_similar = True)
+    add_Rect_to_list(l1, DicomRectText(100,200,300,400,1,2,-1,'jane macleod'), coalesce_similar = True)
+    add_Rect_to_list(l1, DicomRectText(8,19,28,42,1,2,-1,'jane mcleod'), coalesce_similar = True)
+    assert(str(l1) == 
+        '[<DicomRectText frame=1 overlay=2 28,8->42,20 -1="jane macleod" 0=-1>, <DicomRectText frame=1 overlay=2 300,100->400,200 -1="jane macleod" 0=-1>]')
 
 
 # ---------------------------------------------------------------------
@@ -416,5 +439,6 @@ def test_rect():
     for r in r_e_list:
         l,t,w,h = r.ltwh()
         ax.add_patch(Rectangle((l,t), w,h))
-    plt.show()
+    # XXX if you want to visually see the result then uncomment plt.show()
+    #plt.show()
 
