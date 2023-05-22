@@ -251,7 +251,9 @@ class DicomRectDB():
 
     def query_similar_rects(self, filename, metadata_dict, frame = -1, overlay = -1):
         """ Look for files in the DB (which are not the given filename!) that have
-        similar metadata, and return their rects
+        similar metadata, and return their rects.
+        Note that coalesce_similar is used to reduce the number of rectangles
+        returned by merging similar ones together.
         """
         assert 'Modality' in metadata_dict
         assert 'ImageType' in metadata_dict
@@ -267,7 +269,7 @@ class DicomRectDB():
         rect_list = []
         for row in rows:
             for rect in self.query_rects(row.filename, frame, overlay):
-                add_Rect_to_list(rect_list, rect)
+                add_Rect_to_list(rect_list, rect, coalesce_similar = True)
         logging.debug('Found suggested rectangles: %s' % (rect_list))
         return rect_list
 

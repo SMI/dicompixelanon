@@ -309,7 +309,7 @@ class App:
             # Convert Rect to DicomRect
             t, b, l, r = rect.get_rect()
             dicomrect = DicomRect(t, b, l, r, frame=frame, overlay=overlay)
-            add_Rect_to_list(self.possible_rects, dicomrect)
+            add_Rect_to_list(self.possible_rects, dicomrect, coalesce_similar = True)
         self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
         return
 

@@ -51,6 +51,8 @@ def result_coords_to_DicomRectList(result_coords, width = None, height = None):
     type 1 is a rectangle to keep, need to invert these.
     It processes all the 'keep' rectangles first then inverts them to
     get a set of rectangles to redact, then appends all the 'redact' ones.
+    Because it uses add_Rect_to_list it will remove smaller rectangles
+    hidden by larger ones and remove ones which are 'similar' to existing ones.
     Returns a DicomRect list where frame,overlay=-1 mean apply to all.
     """
     #print('Processing %s' % result_coords)
@@ -74,7 +76,7 @@ def result_coords_to_DicomRectList(result_coords, width = None, height = None):
                 keep_coord_list.append(coord_str_to_DicomRect(coord_str, width, height))
     rectlist = rect_exclusive_list(keep_coord_list, width, height)
     for rect in redact_coord_list:
-        add_Rect_to_list(rectlist, rect)
+        add_Rect_to_list(rectlist, rect, coalesce_similar = True)
     return rectlist
 
 
