@@ -169,15 +169,12 @@ class App:
         self.render_flag = False # indicate that window should be rendered at next idle time
         self.wait_flag = tkinter.IntVar(self.tk_app) # effectively the return code -1=exit 0=cancel 1=done image
 
-        self.app_button = tkinter.Button(self.tk_app, text="Help")
-        self.app_button.pack(side="left")
-        self.app_button.configure(command = self.help_button_pressed)
-
         # Add buttons (can have multiple, exactly like this)
         self.menu_button = tkinter.Menubutton(self.tk_app, text="Menu")
         self.menu_button.pack(side="left")
         self.menu = tkinter.Menu(self.menu_button)
         self.menu_button.config(menu=self.menu)
+        self.menu.add_command(label='Help [?]', command=lambda: self.help_button_pressed(None))
         self.menu.add_command(label='Redact [r]', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
         self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
@@ -402,7 +399,7 @@ class App:
             ("Burned In Annotation:", bia)
             ])
 
-    def help_button_pressed(self):
+    def help_button_pressed(self, event=None):
         """ Display a dialog with some help text.
         """
         tkinter.messagebox.showinfo(title="Help",
@@ -622,11 +619,9 @@ class App:
         if new_busy:
             self.app_image.configure(cursor="watch")
             self.tk_app.configure(cursor="watch")
-            self.app_button.configure(state="disabled")
         else:
             self.app_image.configure(cursor="")
             self.tk_app.configure(cursor="")
-            self.app_button.configure(state="normal")
         self.tk_app.update_idletasks()
 
     def render(self):
