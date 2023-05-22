@@ -129,14 +129,17 @@ class App:
 
 
     def __init__(self):
+        """ GUI constructor
+        """
+
         # Settings
         self.skip_marked_files = True
+
         # GUI
         self.tk_app = tkinter.Tk()
         self.tk_app.wm_title(("dcmaudit"))
         self.tk_app.wm_iconname(("dcmaudit"))
         self.tk_app.wm_protocol('WM_DELETE_WINDOW', self.quit)
-
 
         self.app_image = tkinter.Label(self.tk_app)
         self.app_image.pack(side="bottom")
@@ -155,6 +158,7 @@ class App:
         self.tk_app.bind("<Escape>", self.escape_file_event)
         self.tk_app.bind("<Shift-Escape>", self.prev_file_event)
         self.tk_app.bind("<t>", self.tag_file_event)
+        self.tk_app.bind("<c>", self.text_entry_event)
         self.tk_app.bind("<n>", self.next_frame_event)
         self.tk_app.bind("<N>", self.done_file_event)
         self.tk_app.bind("<p>", self.prev_frame_event)
@@ -186,10 +190,11 @@ class App:
         self.menu.add_command(label='Next file [Esc]', command=lambda: self.escape_file_event(None))
         self.menu.add_command(label='Prev file [P]', command=lambda: self.prev_file_event(None))
         self.menu.add_command(label='Tag file [t]', command=lambda: self.tag_file_event(None))
+        self.menu.add_command(label='Comment on file [c]', command=lambda: self.text_entry_event(None))
         self.menu.add_command(label='Undo file [Z]', command=lambda: self.undo_file_event(None))
         self.menu.add_command(label='Quit [q]', command=lambda: self.quit_event(None))
 
-        self.info_label = tkinter.Label(self.tk_app)
+        self.info_label = tkinter.Label(self.tk_app, justify="left")
         self.info_label.pack(side="left")
 
         # Screen size
@@ -310,6 +315,19 @@ class App:
         self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
         return
 
+    def text_entry_event(self, event=None):
+        filename = self.dcm.get_filename()
+        db = DicomRectDB()
+        marked, comment = db.query_tags(filename)
+        comment = tkinter.simpledialog.askstring("Input",
+            "Enter comment for this image:",
+            initialvalue=comment,
+            parent=self.tk_app)
+        if comment:
+            logging.debug('Comment file %s = \"%s\"' % (filename, comment))
+            db.add_tag(filename, marked, comment)
+            self.update_info_label()
+
     def redact_dicomrect(self, dicomrect):
         """ Add a white rectangle to the displayed image
         and call render() to show it on screen.
@@ -378,7 +396,7 @@ class App:
         db.remove_file(filename)
         self.prev_frame_event(None)
 
-    def info_file_event(self, event):
+    def info_file_event(self, event=None):
         """ Display a dialog showing the content of some DICOM tags.
         """
         man = str(self.dcm.get_tag('Manufacturer'))
@@ -700,7 +718,8 @@ class App:
         fileidx, numfiles = self.filelist.get_current_index()
         if overlay > -1:
             self.info_label.configure(text = "%sFile: %d/%d %s\nTags: %s\n%dx%d Overlay: %d / %d Frame: %d / %d %s" %
-                (marked_string, fileidx+1, numfiles, short_filename, dicom_text,
+                (marked_string, fileidx+1, numfiles, short_filename,
+                dicom_text,
                 self.image_width, self.image_height,
                 overlay+1, num_overlays,
                 frame+1, self.dcm.get_num_frames_in_overlays(overlay),
