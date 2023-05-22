@@ -114,7 +114,8 @@ class DicomRectDB():
         """
         # XXX need to select to get any existing value of comment if not specified in this call
         lastmod = datetime.datetime.now()
-        self.db.DicomTags.insert(filename=filename,
+        self.db.DicomTags.update_or_insert(self.db.DicomTags.filename == filename,
+            filename=filename,
             mark = mark, comment = comment,
             last_modified = lastmod, last_modified_by = self.username)
         self.db.commit()
