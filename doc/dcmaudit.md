@@ -75,16 +75,21 @@ Files can be tagged, meaning that this image needs further investigation.
 The tag is stored in a database so all tagged images can be reviewed later.
 Tags are shown as `[X]` before the filename.
 
+Comments can be added to the database, one per image, and are displayed
+alongside the frame/overlay number.
+
 Files can be marked as "done" when they have been fully inspected.
 You can mark rectangles, which are saved instantly in the database, but
 only when you explicitly mark the whole file as inspected will that
 flag be saved.  This allows you to come back later and review a file.
 Once a file has been marked as done then it won't be shown again
-(unless the `--review` option is used).
+unless the `--review` option is used. It should be noted that tagging
+or commenting on an image implicitly marks it as "done".
+
 Only files marked as done should be considered when making use of
 the redaction rectangles. Likewise only rectangles from images marked
 as done will be suggested as possible rectangles as the metadata
-for comparison is not written until images are marked as done.
+for comparison is not written until images are marked as "done".
 
 Display of frame/overlay:
 Images have multiple frames, but then after all the frames come the overlays, and
@@ -103,6 +108,7 @@ or all at once use the 'A' key.
 ### Keyboard shortcuts
 
 ```
+? - show help dialogue
 n - move to Next frame (or Next overlay frame)
 p - move to Previous frame (or Previous overlay frame)
 f - Fast-forward to next overlay (skip rest of current overlay frames)
@@ -114,11 +120,13 @@ o - Display the result of running OCR on the image
 r - redact the image within the rectangle and store this rectangle in the database
 A - apply all suggested rectangles to the current frame
 t - tag this image as needing further investigation and store the tag in the database.
+c - add a comment about this file to the database.
 q - quit
- N.B. if you quit, but haven't marked done with N, then any rectangles
- will be saved but the image itself will not be marked as done so will
- be shown again for editing next time.
 ```
+N.B. if you quit, but haven't marked done with N, then any rectangles
+will be saved but the image itself will not be marked as done so will
+be shown again for editing next time. However, adding a tag or comment
+does add an entry to the database which effectively marks it as done.
 
 ## Workflow
 
@@ -167,8 +175,6 @@ See the `dicomrectdb.md` document.
 ## Future work
 
 Add way to review all tagged images (i.e. find all those in the database which have been tagged as needing further review).
-
-Add UI for entering comments.
 
 The system should learn which image types have text in specific locations
 and suggest redaction rectangles based on previously taught images.
