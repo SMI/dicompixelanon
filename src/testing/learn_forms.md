@@ -34,6 +34,16 @@ options:
                         directory of validation images
 ```
 
+e.g. training on cats/dogs:
+```
+./learn_forms.py -e 100 -m ~/src/dogs_vs_cats/model_from_subset -t ~/src/dogs_vs_cats/train_subset -v ~/src/dogs_vs_cats/validate_subset
+```
+
+e.g. inference:
+```
+./learn_forms.py -e 0 -m ~/src/dogs_vs_cats/model_from_subset -t ~/src/dogs_vs_cats/train_subset -v ~/src/dogs_vs_cats/validate_subset -i $(find ~/src/dogs_vs_cats/train -type f | shuf -n 30)
+```
+
 ## Results
 
 Images in `$SMI_ROOT/MongoDbQueries/Scanned_Forms/img/`

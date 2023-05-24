@@ -30,6 +30,7 @@ parser.add_argument('-e', '--epochs', dest='epochs', action="store", help='numbe
 parser.add_argument('-m', '--model', dest='modelfile', action="store", help='filename to load/save trained model')
 parser.add_argument('-t', '--traindir', dest='traindir', action="store", help='directory of training images')
 parser.add_argument('-v', '--valdir', dest='valdir', action="store", help='directory of validation images')
+parser.add_argument('-i', '--image', dest='image', action="store", nargs='*', help='image to test (an image file or a DICOM file)')
 args = parser.parse_args()
 
 n_epochs = int(args.epochs) if args.epochs else 10
@@ -55,13 +56,14 @@ test_transforms = transforms.Compose([transforms.Resize((224,224)),
                                           std=[0.229, 0.224, 0.225],),
                                       ])
 
-# Datasets
-train_data = datasets.ImageFolder(traindir, transform=train_transforms)
-test_data = datasets.ImageFolder(testdir, transform=test_transforms)
+if n_epochs > 0:
+    # Datasets
+    train_data = datasets.ImageFolder(traindir, transform=train_transforms)
+    test_data = datasets.ImageFolder(testdir, transform=test_transforms)
 
-# Dataloaders
-trainloader = torch.utils.data.DataLoader(train_data, shuffle = True, batch_size=16)
-testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
+    # Dataloaders
+    trainloader = torch.utils.data.DataLoader(train_data, shuffle = True, batch_size=16)
+    testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
 
 # ----------------------------------------------------------------------
 # Define the neural network model
@@ -120,11 +122,11 @@ loss_fn = BCEWithLogitsLoss() #binary cross entropy with sigmoid, so no need to 
 
 # Optimizer
 optimizer = torch.optim.Adam(model.fc.parameters()) 
-print('Optimizer = %s' % optimizer)
+#print('Optimizer = %s' % optimizer)
 
 # Training step
 train_step = make_train_step(model, optimizer, loss_fn)
-print('Train step = %s' % train_step)
+#print('Train step = %s' % train_step)
 
 
 # ----------------------------------------------------------------------
@@ -236,36 +238,60 @@ def inference(test_data):
 #inference(test_data)
 
 # ----------------------------------------------------------------------
-# Check how the network performs on the whole dataset:
+# Check how the network performs on an input file(s), or the whole test dataset:
 
-import numpy as np
-correct = 0
-total = 0
-# since we're not training, we don't need to calculate the gradients for our outputs
-with torch.no_grad():
-    for data in testloader:
-        images, labels = data
-        # Show as image:
-        #img = images[0].cpu().numpy()
-        ## transpose image to fit plt input
-        #img = img.T
-        # Normalise image
-        #data_min = np.min(img, axis=(1,2), keepdims=True)
-        #data_max = np.max(img, axis=(1,2), keepdims=True)
-        #scaled_data = (img - data_min) / (data_max - data_min)
-        # Show image
-        #plt.imshow(scaled_data)
-        #plt.show()
-        # Convert into device space
-        images = images.to(device)
-        labels = labels.to(device)
-        # calculate outputs by running images through the network
-        outputs = model(images)
-        # Calculate how many correct
-        for idx, xx in enumerate(torch.sigmoid(outputs)):
-          vv = 0 if xx < 0.5 else 1
-          if vv == labels[idx]:
-            correct += 1
-        total += labels.size(0)
-        #correct += (predicted == labels).sum().item()
-print(f'Accuracy of the network on the test images: {100 * correct // total} % ({correct} out of {total})')
+if args.image:
+    from PIL import Image
+    import pydicom
+    from DicomPixelAnon.dicomimage import DicomImage
+    for filename in args.image:
+        try:
+            di = DicomImage(filename)
+            img = di.image(frame=0)
+        except:
+            img = Image.open(filename)
+        data_transforms = transforms.Compose([
+            transforms.Resize((224,224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # for RGB
+            #transforms.Normalize((0.5), (0.5)) # for Greyscale
+            ])
+        img = data_transforms(img).to(device)
+        output = model(img.unsqueeze(0)) # convert from 3D into 4D by adding a fake batch dimension
+        sig = torch.sigmoid(output)
+        if sig < 0.5:
+            print('cat %s (%s)' % (filename, sig[0][0]))
+        else:
+            print('dog %s (%s)' % (filename, sig[0][0]))
+else:
+    import numpy as np
+    correct = 0
+    total = 0
+    # since we're not training, we don't need to calculate the gradients for our outputs
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            # Show as image:
+            #img = images[0].cpu().numpy()
+            ## transpose image to fit plt input
+            #img = img.T
+            # Normalise image
+            #data_min = np.min(img, axis=(1,2), keepdims=True)
+            #data_max = np.max(img, axis=(1,2), keepdims=True)
+            #scaled_data = (img - data_min) / (data_max - data_min)
+            # Show image
+            #plt.imshow(scaled_data)
+            #plt.show()
+            # Convert into device space
+            images = images.to(device)
+            labels = labels.to(device)
+            # calculate outputs by running images through the network
+            outputs = model(images)
+            # Calculate how many correct
+            for idx, xx in enumerate(torch.sigmoid(outputs)):
+              vv = 0 if xx < 0.5 else 1
+              if vv == labels[idx]:
+                correct += 1
+            total += labels.size(0)
+            #correct += (predicted == labels).sum().item()
+    print(f'Accuracy of the network on the test images: {100 * correct // total} % ({correct} out of {total})')
