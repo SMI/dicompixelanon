@@ -10,11 +10,17 @@ inference by omitting the training step.
 
 ## Usage
 
+Download the base model (ResNet) from
+https://download.pytorch.org/models/resnet18-f37072fd.pth
+and copy it to `~/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth`
+
 For training the directory structure should be two directories,
 TRAINDIR and VALDIR, and inside both there should be directories
 for each class (two directories for binary classification).
 
-Test the model by running with `--epochs 0` to prevent training.
+Test the model by running with `--epochs 0` to prevent training;
+this will run the model through the validation images.
+Use -i to perform inference on your own images.
 
 Specify a model file to load when testing, or to save when training.
 
