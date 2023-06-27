@@ -6,10 +6,11 @@
 
 # Options
 output=""
+relative=""
 dbdir=""
 prog=$(basename $0)
-options="o:D:"
-usage="usage: $prog [-D db dir] -o output  input..."
+options="o:r:D:"
+usage="usage: $prog [-D db_dir] [-r relative_dir] -o output  input..."
 
 # Configuration, choose which OCR algorithm
 ocr_tool="easyocr"
@@ -18,6 +19,7 @@ keep_rects=1
 while getopts "$options" var; do
     case $var in
         o) output="$OPTARG";;
+        r) relative="--relative $OPTARG";;
         D) dbdir="$OPTARG";;
         ?) echo "$usage"; exit 1;;
     esac
@@ -46,14 +48,12 @@ echo "$(date) ${prog} Running OCR on $@"
 dicom_ocr.py --db "${dbdir}" --review --rects "$@"
 
 # Redact by reading the database
-for input in "$@"; do
-    echo "$(date) ${prog} Redacting $input"
-    dicom_redact.py --db "${dbdir}" \
-        --remove-ultrasound-regions \
-        --deid \
-        --dicom "${input}" \
-        --output "${output}"
-done
+echo "$(date) ${prog} Redacting $input"
+dicom_redact.py --db "${dbdir}" \
+    --remove-ultrasound-regions \
+    --deid \
+    --output "${output}" $relative \
+    --dicom "$@"
 
 # Append to a record of all rectangles
 # Only outputs limited columns (esp. not the ocrtext!)

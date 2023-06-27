@@ -554,6 +554,8 @@ def decode_rect_list_string(rect_str):
         frame = -1
         overlay = -1
         rect_elems = rect.split(',')
+        if len(rect_elems) < 4:
+            raise ValueError("A rectangle must have at least 4 comma-separated values")
         x0 = int(rect_elems[0])
         y0 = int(rect_elems[1])
         if '+' in rect_elems[2]:
@@ -646,14 +648,14 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose')
     parser.add_argument('--db', dest='db', action="store", help='database directory to read rectangles (needs --dicom)')
     parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
-    parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM filename to be redacted', default=None)
-    parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=None)
+    parser.add_argument('--dicom', dest='dicom', nargs='*', action="store", help='DICOM filename(s) to be redacted', default=None)
+    parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=[])
     parser.add_argument('--relative-path', dest='relative', action="store", help='Output DICOM dir will be relative to input but with this prefix removed from input path', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
     parser.add_argument('--remove-ultrasound-regions', action="store_true", help='remove around the stored ultrasound regions', default=False)
     parser.add_argument('--deid', action="store_true", help='Use deid-recipe rules to redact', default=False)
     parser.add_argument('--deid-rules', action="store", help='Path to file or directory containing deid recipe files (deid.dicom.*)', default=None)
-    parser.add_argument('-r', '--rect', dest='rects', nargs='*', default=[], help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
+    parser.add_argument('-r', '--rect', dest='rects', default=None, help='rectangles x0,y0,x1,y1 or x0,y0,+w,+h;...')
     args = parser.parse_args()
 
     if args.verbose:
@@ -661,32 +663,33 @@ if __name__ == '__main__':
 
     # Will be a map from filename to a list of DicomRect
     rect_list_map = {}
-    if args.dicom:
-        rect_list_map[args.dicom] = []
+    for filename in args.dicom:
+        rect_list_map[filename] = []
 
     # If we only want to remove the high bit overlays
     if args.dicom and args.remove_high_bit_overlays:
         if args.rects:
             logger.error('Sorry, cannot redact rectangles at the same time as removing high bit overlays (yet)')
             sys.exit(2)
-        infile = args.dicom
-        outfile = os.path.basename(infile) + ".nooverlays.dcm"
-        ds = pydicom.dcmread(infile)
-        remove_overlays_in_high_bits(ds)
-        ds.save_as(outfile)
-        sys.exit(0)
+        for infilename in args.dicom:
+            outfile = os.path.basename(infile) + ".nooverlays.dcm" # XXX should use create_output_filename(infilename, args.output, args.relative)
+            ds = pydicom.dcmread(infilename)
+            remove_overlays_in_high_bits(ds)
+            ds.save_as(outfile)
+            sys.exit(0)
 
     # If given a list of rectangles explicitly then it must be for a given filename
     if args.rects:
         if not args.dicom:
             logger.error('Must specify a DICOM file to go with the rectangles')
             sys.exit(1)
-        for rect_str in args.rects:
-            rect_list_map[args.dicom] += decode_rect_list_string(rect_str)
+        for filename in args.dicom:
+            rect_list_map[filename] += decode_rect_list_string(args.rects)
 
     # Get a list of rectangles surrounding the UltrasoundRegions
     if args.dicom and args.remove_ultrasound_regions:
-        rect_list_map[args.dicom] += ultrasound.read_DicomRectText_list_from_region_tags(filename = args.dicom)
+        for filename in args.dicom:
+            rect_list_map[filename] += ultrasound.read_DicomRectText_list_from_region_tags(filename = filename)
 
     # If given a database then we need a filename to search for
     if args.db:
@@ -696,19 +699,22 @@ if __name__ == '__main__':
         if not args.dicom:
             logger.error('Must specify a DICOM file to find in the database')
             sys.exit(1)
-        rect_list_map[args.dicom] += read_DicomRectText_list_from_database(db_dir = args.db, filename = args.dicom)
+        for filename in args.dicom:
+            rect_list_map[filename] += read_DicomRectText_list_from_database(db_dir = args.db, filename = filename)
 
     # If using deid recipes then find the recipe files and use them to add rectangles
     if args.deid:
         if args.deid_rules:
             logger.error('Sorry, specifying a deid rules file/directory is not yet implemented')
-        rect_list_map[args.dicom] += deidrules.detect(args.dicom)
+        for filename in args.dicom:
+            rect_list_map[filename] += deidrules.detect(filename)
 
     # If given a CSV file then we can process every DICOM in the file
-    # or just the single filename provided
+    # or just the filename(s) provided
     if args.csv:
         if args.dicom:
-            rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv, filename = args.dicom)
+            for filename in args.dicom:
+                rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv, filename = filename)
         else:
             rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv)
 

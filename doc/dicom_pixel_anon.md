@@ -18,6 +18,7 @@ new DICOM files.
 dicom_pixel_anon.py [-D db dir] -o output  input...
  -D database directory, optional, to persist rectangle locations
  -o output directory, optional, default same as input, or current dir
+ -r relative directory, optional, see `dicom_redact.py` for explanation
  input is one or more DICOM filenames.
 ```
 
@@ -30,7 +31,7 @@ When used as part of an anonymisation pipeline you should ensure that the
 database directory is not part of the extracted data hierarchy because it will
 contain OCR text extracted from the DICOM files and thus possibly PII.
 In fact, after anonymising a set of DICOM files the database directory can be
-removed.
+removed if you do not need it for future redactions.
 
 # Requirements
 
