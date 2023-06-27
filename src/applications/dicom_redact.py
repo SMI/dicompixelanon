@@ -572,6 +572,14 @@ def decode_rect_list_string(rect_str):
         rect_list.append(dr)
     return rect_list
 
+def test_decode_rect_list_string():
+    assert(decode_rect_list_string('1,2,3,4') == [DicomRect(2,4,1,3)])
+    assert(decode_rect_list_string('1,2,+3,+4') == [DicomRect(2,6,1,4)])
+    assert(decode_rect_list_string('1,2,+3,+4,5,6') == [DicomRect(2,6,1,4,5,6)])
+    assert(decode_rect_list_string('1,2,3,4;5,6,7,8') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)])
+    assert(decode_rect_list_string('(1,2,3,4) ; (5,6,7,8)') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)])
+
+
 # ---------------------------------------------------------------------
 
 def is_directory_writable(dirname):
@@ -587,12 +595,15 @@ def is_directory_writable(dirname):
         return False
 
 
-def create_output_filename(infilename, outfilename = None):
+def create_output_filename(infilename, outfilename = None, relative = None):
     """ Return a suitable output filename given an input filename
     and an optional output file name or directory.
     If outfilename is specified (and is not a directory) then use it.
     If outfilename is specified and is a directory then use
-    that directory.
+    that directory. If relative is specified then that part of the input
+    path will be removed and the output will be the same as the rest of
+    the input path but relative to the output directory. Intermediate
+    directories will be created as required.
     If outfilename is not specified then use the the same directory
     as the input unless it's read-only in which case use current dir.
     Output filename (if not specified) will be the infilename but
@@ -601,13 +612,30 @@ def create_output_filename(infilename, outfilename = None):
     infile = os.path.basename(infilename)
     if outfilename:
         if is_directory_writable(outfilename):
-            return os.path.join(outfilename, infile.replace('.dcm', '') + '.redacted.dcm')
+            if relative:
+                outfilename = os.path.join(outfilename, os.path.relpath(infilename, relative))
+                os.makedirs(os.path.dirname(outfilename), exist_ok = True)
+                return outfilename
+            else:
+                return os.path.join(outfilename, infile.replace('.dcm', '') + '.redacted.dcm')
         else:
             return outfilename
     dirname = os.path.dirname(infilename)
     if not is_directory_writable(dirname):
         dirname = '.'
     return os.path.join(dirname, infile.replace('.dcm', '') + '.redacted.dcm')
+
+
+def test_create_output_filename():
+    assert(create_output_filename('file') == 'file.redacted.dcm')
+    assert(create_output_filename('file.dcm') == 'file.redacted.dcm')
+    assert(create_output_filename('no_such_dir/file.dcm') == './file.redacted.dcm')
+    assert(create_output_filename('/tmp/file.dcm') == '/tmp/file.redacted.dcm')
+    assert(create_output_filename('file.dcm', 'newfile.dcm') == 'newfile.dcm')
+    assert(create_output_filename('file.dcm', '/tmp') == '/tmp/file.redacted.dcm')
+    assert(create_output_filename('file.dcm', '/bin') == '/bin') # XXX !!!
+    assert(create_output_filename('/path/to/my/file.dcm', '.', '/path/to') == './my/file.dcm')
+    assert(create_output_filename('/path/to/my/file.dcm', '/tmp', '/path/to') == '/tmp/my/file.dcm')
 
 
 # ---------------------------------------------------------------------
@@ -620,6 +648,7 @@ if __name__ == '__main__':
     parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
     parser.add_argument('--dicom', dest='dicom', action="store", help='DICOM filename to be redacted', default=None)
     parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=None)
+    parser.add_argument('--relative-path', dest='relative', action="store", help='Output DICOM dir will be relative to input but with this prefix removed from input path', default=None)
     parser.add_argument('--remove-high-bit-overlays', action="store_true", help='remove overlays in high-bits of image pixels', default=False)
     parser.add_argument('--remove-ultrasound-regions', action="store_true", help='remove around the stored ultrasound regions', default=False)
     parser.add_argument('--deid', action="store_true", help='Use deid-recipe rules to redact', default=False)
@@ -686,7 +715,7 @@ if __name__ == '__main__':
     # Redact 
     for infilename in rect_list_map.keys():
         rect_list = rect_list_map[infilename]
-        outfilename = create_output_filename(infilename, args.output)
+        outfilename = create_output_filename(infilename, args.output, args.relative)
         ds = pydicom.dcmread(infilename)
         redact_DicomRect_rectangles(ds, rect_list)
         ds.save_as(outfilename)

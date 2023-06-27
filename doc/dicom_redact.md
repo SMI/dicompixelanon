@@ -60,6 +60,8 @@ compression support can of course be added to this tool later.
   --csv CSV             CSV path to read rectangles (redacts all files in csv if --dicom not used)
   --dicom DICOM         DICOM path to be redacted
   -o OUTPUT, --output O Output DICOM dir or filename (created automatically if not specified)
+  --relative-path RELATIVE
+                        Output DICOM dir will be relative to input but with this prefix removed from input path
   --remove-high-bit-overlays
                         remove overlays in high-bits of image pixels
   --remove-ultrasound-regions
@@ -127,7 +129,17 @@ The output filename can be specified for a single input file.
 If not specified then the output filename is the same as the input
 filename but with `.dcm` removed and `.redacted.dcm` appended.
 If that directory is not writable then the current directory is used.
-The `--output` option can also refer to a directory.
+The `--output` option can also refer to a directory in which case
+the output files are written there, again with `.dcm` replaced with
+`.redacted.dcm`. A relative path can be specified with the `--relative`
+option which is best explained with an example:
+```
+input:     /beegfs/path/study/series/file.dcm
+--output   /path/to/output
+--relative /beegfs/path
+will create:
+/path/to/output/study/series/file.dcm
+```
 
 ### Removing only the high-bit overlays
 
