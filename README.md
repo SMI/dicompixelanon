@@ -163,6 +163,10 @@ Unpack the zip files and copy the `.pth` files into `$SMI_ROOT/data/easyocr`
 
 ## spacy
 
+You might need to specify a version when installing spacy because the most
+recent version on pypi (a dev version of 4.0.0) does not have the language
+models available yet. For example `pip install spacy==3.6.0`
+
 Inside your virtual environment run `python -m spacy download en_core_web_trf`
 
 ## tesseract
@@ -191,6 +195,25 @@ Note that this includes the CoreNLP Java software which needs Java 1.8
 Download the models from https://huggingface.co/stanfordnlp/stanza-en/resolve/v1.4.1/models/default.zip
 Unpack `default.zip` into `$SMI_ROOT/data/stanza/en/`
 
+## Windows installation
+
+```
+python -m venv c:\tmp\venv
+c:\tmp\venv\Scripts\activate.bat
+pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
+pip install pydicom pydal easyocr numpy Pillow opencv_python_headless spacy==3.6.0 flair pylibjpeg pylibjpeg_libjpeg
+python -m spacy download en_core_web_trf
+cd c:\tmp
+git clone https://github.com/SMI/SmiServices
+git clone https://github.com/SMI/dicompixelanon
+cd c:\tmp\SmiServices\src\common\Smi_Common_Python
+python .\setup.py install
+cd c:\tmp\dicompixelanon\src\library
+python .\setup.py install
+cd c:\tmp\dicompixelanon\src\applications
+set SMI_ROOT=c:\tmp\SmiServices
+python dcmaudit.py -i C:\tmp\SmiServices\tests\common\Smi.Common.Tests\TestData\*.dcm
+```
 
 # Workflow
 
