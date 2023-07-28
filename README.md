@@ -197,15 +197,25 @@ Unpack `default.zip` into `$SMI_ROOT/data/stanza/en/`
 
 ## Windows installation
 
+Notes:
+* you need a recent version of Python (3.6 probably too old)
+* if you get an error about module skbuild not found, try `pip install scikit-build`
+* if pip tries to install spacy v4 then `pip install spacy==3.6.0`
+* if pip tries to install source-code packages and you don't have a compiler
+then it's probably trying to install pre-release packages
+so use the `--prefer-binary` option (or `--only-binary :all:`)
+
 ```
 python -m venv c:\tmp\venv
 c:\tmp\venv\Scripts\activate.bat
 pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
-pip install pydicom pydal easyocr numpy Pillow opencv_python_headless spacy==3.6.0 flair pylibjpeg pylibjpeg_libjpeg
+pip install --prefer-binary pydicom pydal easyocr numpy Pillow spacy flair pylibjpeg pylibjpeg_libjpeg
 python -m spacy download en_core_web_trf
 cd c:\tmp
 git clone https://github.com/SMI/SmiServices
 git clone https://github.com/SMI/dicompixelanon
+pip install --prefer-binary -r c:\tmp\SmiServices\src\common\Smi_Common_Python\requirements.txt
+pip install --prefer-binary -r c:\tmp\dicompixelanon\src\library\requirements.txt
 cd c:\tmp\SmiServices\src\common\Smi_Common_Python
 python .\setup.py install
 cd c:\tmp\dicompixelanon\src\library
