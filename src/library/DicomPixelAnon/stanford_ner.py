@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 """ A wrapper around the Stanford NER engine, used by the NER class.
 """
 # Code taken from https://github.com/philipperemy/Stanford-NER-Python
@@ -33,8 +35,6 @@ Version:    2016-07-08
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-from __future__ import print_function
 
 import os
 import pickle
