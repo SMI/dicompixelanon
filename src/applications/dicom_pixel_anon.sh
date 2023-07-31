@@ -58,19 +58,22 @@ dicom_redact.py --db "${dbdir}" \
 # Append to a record of all rectangles
 # Only outputs limited columns (esp. not the ocrtext!)
 if [ $keep_rects -eq 1 -a -d "$output" ]; then
-	rects_file="$output/rectangles.csv"
-	rects_cols="filename,left,top,right,bottom,frame,overlay"
+    rects_file="$output/rectangles.csv"
+    rects_cols="filename,left,top,right,bottom,frame,overlay"
     if [ ! -f "$rects_file" ]; then
         echo "$rects_cols" > "$rects_file"
     fi
-    sqlite3 -csv -separator , \
-        -cmd "select $rects_cols from DicomRects where left != -1" \
-        "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
+    for dcm; do
+        echo sqlite3 -csv -separator , -cmd "select $rects_cols from DicomRects where left != -1 and filename = '$dcm'" "$dbdir/dcmaudit.sqlite.db" 
+        sqlite3 -csv -separator , \
+            -cmd "select $rects_cols from DicomRects where left != -1 and filename = '$dcm'" \
+            "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
+    done
 fi
 
 # Tidy up if necessary
 if [ "${tmpdir}" != "" ]; then
-	rm -fr "${tmpdir}"
+    rm -fr "${tmpdir}"
 fi
 
 exit 0
