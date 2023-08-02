@@ -63,12 +63,12 @@ if [ $keep_rects -eq 1 -a -d "$output" ]; then
     if [ ! -f "$rects_file" ]; then
         echo "$rects_cols" > "$rects_file"
     fi
-    for dcm; do
-        echo sqlite3 -csv -separator , -cmd "select $rects_cols from DicomRects where left != -1 and filename = '$dcm'" "$dbdir/dcmaudit.sqlite.db" 
-        sqlite3 -csv -separator , \
-            -cmd "select $rects_cols from DicomRects where left != -1 and filename = '$dcm'" \
-            "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
-    done
+    filename_arr=( "$@" )
+    join_with_sep() { local d=$1 s=$2; shift 2 && printf %s "$s${@/#/$d}"; }
+    filenames=$(join_with_sep "','" "${filename_arr[@]}")
+    sqlite3 -csv -separator , \
+        -cmd "select $rects_cols from DicomRects where left != -1 and filename in ('$filenames')" \
+        "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
 fi
 
 # Tidy up if necessary
