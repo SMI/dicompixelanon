@@ -105,6 +105,13 @@ using a rectangle with a cross through it. These suggested rectangles can be
 applied to the current image one at a time by right-clicking on the rectangle
 or all at once use the 'A' key.
 
+Redaction rectangles applied to the image will simply turn all
+enclosed pixels black. If the background is already black you won't
+see the rectangle of course. You can toggle the redaction using the
+plus and minus keys. This is useful when displaying images which
+already have rectangles in a database (maybe as a result of running
+dicom_ocr) if you want to verify what was redacted.
+
 ### Keyboard shortcuts
 
 ```
@@ -117,6 +124,8 @@ Esc - move to next image, do not mark current image as done
 P - move to the previous image, do not mark current image as done
 i - Display some DICOM tag information
 o - Display the result of running OCR on the image
+Minus - Display without redaction
+Plus - Display with redaction
 r - redact the image within the rectangle and store this rectangle in the database
 A - apply all suggested rectangles to the current frame
 t - tag this image as needing further investigation and store the tag in the database.

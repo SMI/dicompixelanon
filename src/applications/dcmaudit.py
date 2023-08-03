@@ -165,6 +165,8 @@ class App:
         self.tk_app.bind("<P>", self.prev_file_event)
         self.tk_app.bind("<f>", self.ffwd_frame_event)
         self.tk_app.bind("<i>", self.info_file_event)
+        self.tk_app.bind("<minus>", self.display_without_rects)
+        self.tk_app.bind("<plus>", self.display_with_rects)
         self.tk_app.bind("<o>", self.ocr_frame_event)
         self.tk_app.bind("<r>", self.redact_event)
         self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
@@ -179,9 +181,11 @@ class App:
         self.menu = tkinter.Menu(self.menu_button)
         self.menu_button.config(menu=self.menu)
         self.menu.add_command(label='Help [?]', command=lambda: self.help_button_pressed(None))
-        self.menu.add_command(label='Redact [r]', command=lambda: self.redact_event(None))
+        self.menu.add_command(label='Redact [r] the chosen rect', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
         self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
+        self.menu.add_command(label='Display redacted [+]', command=lambda: self.display_with_rects(None))
+        self.menu.add_command(label='Display unredacted [-]', command=lambda: self.display_without_rects(None))
         self.menu.add_command(label='Apply all suggested rects [A]', command=lambda: self.apply_all_possible_rects_event(None))
         self.menu.add_command(label='Next frame [n]', command=lambda: self.next_frame_event(None))
         self.menu.add_command(label='Fast forward frames [f]', command=lambda: self.ffwd_frame_event(None))
@@ -416,6 +420,13 @@ class App:
             ("Software:", swv),
             ("Burned In Annotation:", bia)
             ])
+
+    def display_without_rects(self, event=None):
+        self.update_image()
+
+    def display_with_rects(self, event=None):
+        self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
+
 
     def help_button_pressed(self, event=None):
         """ Display a dialog with some help text.
