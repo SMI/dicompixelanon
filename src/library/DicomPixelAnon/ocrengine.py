@@ -141,6 +141,9 @@ class OCR:
                         bottom = res['top'][rec] + res['height'][rec])
                 })
         elif self.engine == OCREnum.EasyOCREngine:
+            # Define whether you want to try all rotations [90,180,270]
+            # or just use None which does detect rotated text but maybe not decode it well
+            rotates = [90, 180, 270]
             # Convenience function to convert easyocr results into our format
             def easyocr_to_list(ocr_res, img_scale, results_list):
                 """ ocr_res is as returned from readtext()
@@ -167,8 +170,8 @@ class OCR:
                 img = numpy.divide(img, (max+256)/256).astype(numpy.uint8)
             # First OCR the full size image
             # (but be aware easyocr scales down if > 2560 anyway!)
-            res = self.easyreader.readtext(img, paragraph=True)
-            easyocr_to_list(res, 1, results)
+            res = self.easyreader.readtext(img, paragraph=True, rotation_info=rotates)
+            easyocr_to_list(res, img_scale=1, results_list=results)
             if OCR.easy_reduce:
                 # Scale down to catch text made from spaced-out dot pixels
                 # hopefully only spaced by a single pixel,
@@ -176,9 +179,9 @@ class OCR:
                 img_half = cv2.resize(img,
                     dsize = (img.shape[1]//2, img.shape[0]//2),
                     interpolation = cv2.INTER_AREA)
-                res = self.easyreader.readtext(img_half, paragraph=True)
+                res = self.easyreader.readtext(img_half, paragraph=True, rotation_info=rotates)
                 # Append, even though rectangles may overlap, safer this way
-                easyocr_to_list(res, 2, results)
+                easyocr_to_list(res, img_scale=2, results_list=results)
         else:
             raise RuntimeError('unsupported OCR engine')
         self.ocr_data = results
