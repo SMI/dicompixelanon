@@ -227,7 +227,17 @@ python dcmaudit.py -i C:\tmp\SmiServices\tests\common\Smi.Common.Tests\TestData\
 
 # Workflow
 
-A suggested workflow might be:
+A suggested workflow for producing rules to anonymise a consistent set of DICOM files:
+* identify all your DICOM files
+* optionally sort into different directories by Manufacturer, SoftwareVersions, dimensions, etc.
+* run `dcm_audit.py` and redact the PII in one of the images, it will be saved in the database
+* visually check all the others - that rectangle should be suggested on all similar DICOMs,
+check that it's correct, adjust it (reset the file and draw it again if necessary), or add others
+* run `dbrects_to_deid_rules.py` to create deid rules which will automatically redact all DICOM
+files which match the Manufacturer etc rules.
+* put the deid file in the correct place to be used by `dicom_redact.py`, you won't need the database.
+
+A suggested workflow for testing OCR on a whole Modality:
 * Get a list of filenames to examine
   - extract_BIA to extract a modality from MongoDB
   - randomly sample from the output file
@@ -237,3 +247,4 @@ A suggested workflow might be:
 * dcmaudit.py to review the results
 * dbtagged.sh to go back over the ones you tagged in dcmaudit
 * dicom_redact.py to actually redact images
+* dicom_pixel_anon.sh to perform OCR and redaction together for checking
