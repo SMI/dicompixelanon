@@ -155,14 +155,19 @@ class OCR:
                 for (bbox, txt) in ocr_res:
                     if len(txt) < OCR.min_string_length:
                         continue
-                    results_list.append( {
+                    res = {
                         'text': txt,
                         'conf': 1.0, # XXX see above
                         'rect': Rect(left = bbox[0][0] * img_scale,
                             right = bbox[2][0] * img_scale,
                             top = bbox[0][1] * img_scale,
                             bottom = bbox[2][1] * img_scale)
-                    })
+                    }
+                    # Might already be there from a different scale.
+                    # XXX should really compare coords rounded up
+                    # otherwise might not match exactly due to scale.
+                    if res not in results_list:
+                        results_list.append(res)
 
             # cv2 cannot handle 4-byte grayscale so reduce to uint8
             if img.itemsize > 1:
