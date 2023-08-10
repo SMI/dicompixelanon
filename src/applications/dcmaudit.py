@@ -39,6 +39,7 @@ from DicomPixelAnon.rect import Rect, DicomRect, add_Rect_to_list
 from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon import deidrules
+from DicomPixelAnon import ultrasound
 
 
 # =====================================================================
@@ -853,21 +854,37 @@ class App:
                 (filename, self.dcm.get_num_frames(),
                 self.dcm.get_num_overlays(),
                 self.dcm.get_num_frames_in_overlays()))
-            # Find out whether it's been redacted
+
+            # Find out whether it's been redacted already by querying database
             frame, overlay = self.dcm.get_current_frame_overlay()
             self.redacted_rects = db.query_rects(filename, frame=frame, overlay=overlay,
                 ignore_allowlisted = True, ignore_summaries = True)
-            # Look for similar files in the database
+            #logging.debug('RECTS database: %s' % self.redacted_rects)
+
+            # Look for similar files in the database and get their rectangles
             # Keep a copy of them so user can Apply them later
             self.possible_rects = db.query_similar_rects(filename, self.dcm.get_selected_metadata(), frame=frame, overlay=overlay)
-            # Add the list of rectangles from the deid recipes
-            # (XXX add them to suggested rectangles, or redacted rectangles?)
-            deid_rects = deidrules.detect(self.dcm.get_dataset())
-            self.redacted_rects.extend(deid_rects)
+            #logging.debug('RECTS similar file: %s' % self.possible_rects)
+
+            # Get a list of rectangles which may apply to this file from the deid recipes
+            self.deid_rects = deidrules.detect(self.dcm.get_dataset())
+            #logging.debug('RECTS deid rules: %s' % self.deid_rects)
+
+            # Get a list of rectangles from the ultrasound region tags
+            self.us_rects = ultrasound.read_DicomRectText_list_from_region_tags(ds = self.dcm.get_dataset())
+            #logging.debug('RECTS ultrasound: %s' % self.us_rects)
+            logging.debug('RECTS %d from database, %d from similar files, %d from deid rules, (%d from ultrasound not used)' %
+                (len(self.redacted_rects), len(self.possible_rects), len(self.deid_rects), len(self.us_rects)))
+
+            # Add deid rects to the list to be redacted.
+            # XXX should add to suggested rectangles list instead?
+            self.redacted_rects.extend(self.deid_rects)
+
             # Resize to fit screen and apply rectangles, trigger window refresh
             self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
             # Update the info label
             self.update_info_label()
+
             # Enter the GUI loop
             rc = self.gui_loop()
             if rc == App.RC_QUIT:
