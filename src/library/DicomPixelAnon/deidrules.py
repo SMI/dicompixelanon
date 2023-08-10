@@ -93,6 +93,7 @@ def find_deid_rules_files():
             datadir = dirname
     if os.path.isdir(datadir):
         files = glob.glob(os.path.join(datadir, 'deid.dicom.*'))
+    logging.getLogger(__name__).debug('deid files: %s from %s' % (files, datadir))
     return files
 
 
