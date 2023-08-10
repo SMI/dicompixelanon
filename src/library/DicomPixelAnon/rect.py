@@ -253,6 +253,10 @@ def rect_is_huge_font(rect):
     (E,text,N,P) = rect.text_tuple()
     if not text:
         return False
+    # Longer text is most likely genuine and widely spaced
+    # due to the use of paragraph=True in easyocr
+    if len(text) > 5:
+        return False
     if (rect.R() - rect.L()) * (rect.B() - rect.T()) > 3000 * len(text):
         #print('ignore rect with text %s' % text)
         return True
