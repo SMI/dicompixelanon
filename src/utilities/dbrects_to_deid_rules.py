@@ -30,7 +30,8 @@ def read_Manufacturer_tags(filename):
     ManufacturerModelName = ds.get('ManufacturerModelName', None)
     SecondaryCaptureDeviceManufacturer = ds.get('SecondaryCaptureDeviceManufacturer', None)
     SecondaryCaptureDeviceManufacturerModelName = ds.get('SecondaryCaptureDeviceManufacturerModelName', None)
-    return Manufacturer, ManufacturerModelName, SecondaryCaptureDeviceManufacturer, SecondaryCaptureDeviceManufacturerModelName
+    SoftwareVersions = ds.get('SoftwareVersions', None)
+    return Manufacturer, ManufacturerModelName, SecondaryCaptureDeviceManufacturer, SecondaryCaptureDeviceManufacturerModelName, SoftwareVersions
 
 
 # First parameter can be a filename or directory containing a database
@@ -57,7 +58,7 @@ for row in drdb.db(drdb.db.DicomRects.filename == drdb.db.DicomTags.filename).se
     ):
     # Read real Manufacturer etc from the file
     if os.path.isfile(row.DicomTags.filename):
-        Manufacturer, ManufacturerModelName, SecondaryCaptureDeviceManufacturer, SecondaryCaptureDeviceManufacturerModelName = read_Manufacturer_tags(row.DicomTags.filename)
+        Manufacturer, ManufacturerModelName, SecondaryCaptureDeviceManufacturer, SecondaryCaptureDeviceManufacturerModelName, SoftwareVersions = read_Manufacturer_tags(row.DicomTags.filename)
 
     # Create dictionary key
     bits_to_group_by = (row.DicomTags.Modality,
@@ -66,7 +67,8 @@ for row in drdb.db(drdb.db.DicomRects.filename == drdb.db.DicomTags.filename).se
         Manufacturer,
         ManufacturerModelName,
         SecondaryCaptureDeviceManufacturer,
-        SecondaryCaptureDeviceManufacturerModelName)
+        SecondaryCaptureDeviceManufacturerModelName,
+        SoftwareVersions)
 
     # Construct a rectangle tuple
     rect = (row.DicomRects.left, row.DicomRects.top, row.DicomRects.right, row.DicomRects.bottom)
@@ -92,6 +94,8 @@ for key in rectlist_dict:
         print('  + contains SecondaryCaptureDeviceManufacturer %s' % SecondaryCaptureDeviceManufacturer)
     if SecondaryCaptureDeviceManufacturerModelName:
         print('  + contains SecondaryCaptureDeviceManufacturerModelName %s' % SecondaryCaptureDeviceManufacturerModelName)
+    if SoftwareVersions:
+        print('  + contains SoftwareVersions %s' % SoftwareVersions)
     print('  + equals Rows %s' % Rows)
     print('  + equals Columns %s' % Columns)
     for rect in rectlist_dict[key]:
