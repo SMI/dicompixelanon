@@ -127,6 +127,8 @@ class App:
         DRAG_C:  'fleur'}
     redact_colour = 0xff # white
     outline_colour = 0xff # white
+    deid_rect_colour = 'green' # deid rules
+    us_rect_colour = 'yellow'  # ultrasound regions
 
 
     def __init__(self):
@@ -135,6 +137,8 @@ class App:
 
         # Settings
         self.skip_marked_files = True
+        self.highlight_deid_rects = False
+        self.highlight_ultrasound_rects = False
 
         # GUI
         self.tk_app = tkinter.Tk()
@@ -751,31 +755,58 @@ class App:
         by scaling it if necessary, calculating an xor mask,
         redacting rectangles from dicomrectlist
         (must be applicable to this frame, not checked here)
+        drawing suggested rectangles from dicomtransrectlist,
         and calling render() to plot the image with the drag handles on top.
         """
         # Already a contrast-stretched 8-bit image, do we need to convert to 'L'?
-        self.image = (self.raw_image.convert('L'))
+        self.image = (self.raw_image.convert('L')) # .convert('RGB')
         # Update the rect back to default
         # XXX should we default to the previous rect? Or set of rectangles?
         #self.t, self.b = self.fix(0, self.h, self.h, self.round_y, self.rotation in (3, 8))
         #self.l, self.r = self.fix(0, self.w, self.w, self.round_x, self.rotation in (3, 6))
         self.rect_t = self.rect_l = 0
         self.rect_b = self.rect_r = 256
+
         # Prepare the image
         self.image_width, self.image_height = self.image.size
         self.image_scale = max(1, (self.image_width-1)//self.screen_width_max+1)
         self.image_scale = max(self.image_scale, (self.image_height-1)//self.screen_height_max+1)
+
         # Redact known regions
         draw = ImageDraw.Draw(self.image)
         for dicomrect in dicomrectlist:
-            logging.debug('redacting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+            #logging.debug('PLOT redacting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
             draw.rectangle((dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()), fill=App.redact_colour)
+
+        # Define a simple function to draw an outline rectangle
+        def plot_highlight_rect(dicomrect, colour):
+            draw.rectangle((dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()), outline=colour)
+            draw.line([dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()], fill=colour)
+            draw.line([dicomrect.R(), dicomrect.T(), dicomrect.L(), dicomrect.B()], fill=colour)
+
         # Highlight suggested rectangles
         for dicomrect in dicomtransrectlist:
-            logging.debug('highlighting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
-            draw.rectangle((dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()), outline=App.outline_colour)
-            draw.line([dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()], fill=App.outline_colour)
-            draw.line([dicomrect.R(), dicomrect.T(), dicomrect.L(), dicomrect.B()], fill=App.outline_colour)
+            #logging.debug('PLOT highlighting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+            plot_highlight_rect(dicomrect, App.outline_colour)
+
+        # Highlight rectangles from the deid rules, but these will already
+        # have been added to the redacted list in dicomrectlist so this is
+        # not necessary but it can help you to see which rects are from deid.
+        # XXX using a class member not a function parameter.
+        if self.highlight_deid_rects:
+            for dicomrect in self.deid_rects:
+                #logging.debug('PLOT deid_rects %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+                plot_highlight_rect(dicomrect, App.deid_rect_colour)
+
+        # Highlight rectangles from the ultrasound regions, but these will
+        # have been added to the redacted list in dicomrectlist so this is
+        # not necessary but it can help you to see which rects are from ultrasound.
+        # XXX using a class member not a function parameter.
+        if self.highlight_ultrasound_rects:
+            for dicomrect in self.us_rects:            
+                #logging.debug('PLOT us_rects %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+                plot_highlight_rect(dicomrect, App.us_rect_colour)
+
         # Create a scaled (smaller) image to fit on screen
         resized_image = self.image.copy()
         resized_image.thumbnail((self.image_width//self.image_scale, self.image_height//self.image_scale))
