@@ -59,8 +59,9 @@ optional arguments:
 
 When the image is displayed it will automatically have rectangles redacted if
 * the database contains rectangles for this filename
-* the metadata tags match some deid rules (see dicom_redact for details)
-* but note that Ultrasound regions are not automatically redacted
+* the metadata tags match some deid rules
+(see [dicom_redact](dicom_redact.md) and [deid rules](deidrules.md) documents)
+* Ultrasound regions are only redacted when defined in deid rules.
 
 A set of suggested rectangles may be displayed if the metadata matches
 a similar file in the database, typically same Manufacturer, Model, and
@@ -151,8 +152,10 @@ does add an entry to the database which effectively marks it as done.
 
 ## Debugging
 
+Add the `-d` option to see what the program is doing.
+
 To see the database use the `--dump-database` option. The output is in JSON format
-with an array of rects and an array of tags.
+with an array of rects and an array of tags. Also see the `dbrects_to_deid_rules.py` script.
 
 List the completed images:
 ```
