@@ -7,7 +7,7 @@ from DicomPixelAnon.ocrenum import OCREnum
 
 # ---------------------------------------------------------------------
 
-def read_DicomRectText_list_from_region_tags(filename):
+def read_DicomRectText_list_from_region_tags(filename = None, ds = None):
     """ Read the DICOM tags which define the usable region in an image
     and construct a list of rectangles which redact all parts outside.
     Only applicable to Ultrasound images, as it reads the tag
@@ -15,10 +15,11 @@ def read_DicomRectText_list_from_region_tags(filename):
     Returns a list of DicomRect object, or [] if none found.
     Note that the frame number will always be 0 (and overlay -1)
     and the ocr engine will be set to ultrasoundregions as the source.
-    XXX in future could accept a pydicom dataset instead of filename.
+    Accepts a filename or a FileDataset object from pydicom.dcmread().
     """
     rect_list = []
-    ds = pydicom.dcmread(filename)
+    if filename:
+        ds = pydicom.dcmread(filename)
     if 'SequenceOfUltrasoundRegions' in ds:
         keep_list = []
         width = int(ds['Columns'].value)
