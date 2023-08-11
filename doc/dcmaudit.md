@@ -54,7 +54,7 @@ optional arguments:
   --dump-database       show database content in JSON format
   --review              review files already marked as done
   -i [INFILES [INFILES ...]] list of DICOM filenames, or a
-     CSV filename to get the filenames from the DicomFilePath column
+     CSV filename to get the filenames from the DicomFilePath or filename column
 ```
 
 When the image is displayed it will automatically have rectangles redacted if
