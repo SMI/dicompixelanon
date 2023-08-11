@@ -139,6 +139,7 @@ class App:
         self.skip_marked_files = True
         self.highlight_deid_rects = False
         self.highlight_ultrasound_rects = False
+        self.starting_directory = os.environ.get('PACS_ROOT', '.')
 
         # GUI
         self.tk_app = tkinter.Tk()
@@ -185,7 +186,15 @@ class App:
         self.menu_button.pack(side="left")
         self.menu = tkinter.Menu(self.menu_button)
         self.menu_button.config(menu=self.menu)
+        # Add a help option as the first menu item
         self.menu.add_command(label='Help [?]', command=lambda: self.help_button_pressed(None))
+        # Create the Open menu as the second menu item
+        self.openmenu = tkinter.Menu(self.menu)
+        self.menu.add_cascade(label = 'Open', menu = self.openmenu)
+        self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
+        self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
+        self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        # Add other top-level menu items
         self.menu.add_command(label='Redact [r] the chosen rect', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
         self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
@@ -249,6 +258,30 @@ class App:
         self.skip_marked_files = newval
 
     # User interface events
+
+    def open_files_event(self, event):
+        filenames = tkinter.filedialog.askopenfilenames(title='Select files', initialdir=self.starting_directory, multiple=True)
+        if not filenames:
+            return
+        self.starting_directory = os.path.dirname(os.path.abspath(filenames[0]))
+        print(filenames)
+        self.set_image_list(FileList(list(filenames)))
+        print(self.filelist)
+        self.load_next_file()
+
+    def open_directory_event(self, event, recursive = False):
+        directory = tkinter.filedialog.askdirectory(title='Select directory', initialdir=self.starting_directory)
+        if not directory:
+            return
+        self.starting_directory = directory
+        if recursive:
+            filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
+        else:
+            filenames = [os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+        print(filenames)
+        self.set_image_list(FileList(filenames))
+        print(self.filelist)
+        self.load_next_file()
 
     def tag_file_event(self, event):
         logging.debug('Tag file')
