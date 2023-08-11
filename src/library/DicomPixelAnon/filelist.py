@@ -49,17 +49,19 @@ class FileList:
                         elif 'DicomFilePath' in row:
                             cfile = row['DicomFilePath']
                         else:
-                            print('not sure which column in CSV holds filename')
+                            logging.getLogger(__name__).error('set_list(%s) is not sure which column in CSV holds filename' % file)
                             break
                         if os.path.isabs(cfile):
                             self.files.extend(glob.glob(cfile))
                         else:
                             for prefix in self.prefixes:
+                                # XXX should use realpath to check this file not already added
                                 self.files.extend(glob.glob(os.path.join(prefix, cfile)))
             elif os.path.isabs(file):
                 self.files.extend(glob.glob(file))
             else:
                 for prefix in self.prefixes:
+                    # XXX should use realpath to check this file not already added
                     self.files.extend(glob.glob(os.path.join(prefix, file)))
         self.idx = -1
 
