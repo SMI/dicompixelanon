@@ -827,20 +827,6 @@ class App:
         """
         self.filelist = filelist
 
-    def open_file_dialog(self):
-        """ Gets a list of DICOM filenames,
-        calls set_image_list(),
-        calls load_next_file().
-        """
-        filenames = tkinter.filedialog.askopenfilenames(master=app,
-            defaultextension=".dcm", multiple=1, parent=app,
-            filetypes=(
-                    (_("All files"), "*"),
-                ),
-                title=_("Select DICOM files"))
-        self.set_image_list(FileList(filenames))
-        self.load_next_file()
-
     def gui_loop(self):
         """ Returns -1 (close = quit) or 0 (cancel = next image) or 1 (done)
         """
