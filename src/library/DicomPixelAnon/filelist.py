@@ -10,6 +10,11 @@ import os
 class FileList:
     """ A list of filenames to process.
     Was going to do clever stuff but at the moment is basically a list.
+    Can be initialised from:
+    * a list of filenames,
+    * filenames can include wildcards that are expanded,
+    * filenames can include a CSV file which is read for filename or DicomFilePath column
+    * filenames which are relative to current directory or to $PACS_ROOT
     """
     def __init__(self, filelist):
         self.files = []
@@ -17,6 +22,9 @@ class FileList:
         if os.environ.get('PACS_ROOT', None):
             self.set_prefix(os.environ.get('PACS_ROOT'))
         self.set_list(filelist)
+
+    def __repr__(self):
+        return '<FileList at %d %s>' % (self.idx, self.files)
 
     def set_prefix(self, prefix):
         """ Adds a path to be used as a prefix to find files
