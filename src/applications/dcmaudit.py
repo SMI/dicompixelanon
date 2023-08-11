@@ -264,9 +264,7 @@ class App:
         if not filenames:
             return
         self.starting_directory = os.path.dirname(os.path.abspath(filenames[0]))
-        print(filenames)
         self.set_image_list(FileList(list(filenames)))
-        print(self.filelist)
         self.load_next_file()
 
     def open_directory_event(self, event, recursive = False):
@@ -278,9 +276,7 @@ class App:
             filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
         else:
             filenames = [os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-        print(filenames)
         self.set_image_list(FileList(filenames))
-        print(self.filelist)
         self.load_next_file()
 
     def tag_file_event(self, event):
