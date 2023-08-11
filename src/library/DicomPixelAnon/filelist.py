@@ -65,6 +65,11 @@ class FileList:
                     self.files.extend(glob.glob(os.path.join(prefix, file)))
         self.idx = -1
 
+    def is_exhausted(self):
+        if (self.idx+1) >= len(self.files):
+            return True
+        return False
+
     def next(self):
         """ Return the next filename, or None
         """
