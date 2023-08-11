@@ -956,11 +956,14 @@ class App:
 
     def run(self):
         while True:
+            if self.filelist.is_exhausted():
+                rc = self.gui_loop() # wait for Open menu
+                if rc == App.RC_QUIT:
+                    break
             ok = self.load_next_file()
             if not ok:
                 break
             logging.debug('finished with this file')
-        self.gui_loop()
         logging.debug('finished all files, exit')
         return
 
