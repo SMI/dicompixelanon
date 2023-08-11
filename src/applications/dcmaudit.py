@@ -964,6 +964,7 @@ class App:
             if not ok:
                 break
             logging.debug('finished with this file')
+        self.gui_loop()
         logging.debug('finished all files, exit')
         return
 
