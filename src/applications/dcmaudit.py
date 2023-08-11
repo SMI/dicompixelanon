@@ -930,8 +930,8 @@ class App:
             ok = self.load_next_file()
             if not ok:
                 break
-            logging.debug('XXX done with file')
-        logging.debug('XXX done all files, exit')
+            logging.debug('finished with this file')
+        logging.debug('finished all files, exit')
         return
 
 
