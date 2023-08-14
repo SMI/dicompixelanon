@@ -135,19 +135,20 @@ class App:
         """ GUI constructor
         """
 
-        # Settings
-        self.skip_marked_files = True
-        self.skip_untagged_files = False
-        self.highlight_deid_rects = False
-        self.highlight_ultrasound_rects = False
-        self.starting_directory = os.environ.get('PACS_ROOT', '.')
-
         # GUI
         self.tk_app = tkinter.Tk()
         self.tk_app.wm_title(("dcmaudit"))
         self.tk_app.wm_iconname(("dcmaudit"))
         self.tk_app.wm_protocol('WM_DELETE_WINDOW', self.quit)
 
+        # Settings (have to be set after creating root window)
+        self.skip_marked_files = tkinter.BooleanVar(value = True)
+        self.skip_untagged_files = tkinter.BooleanVar(value = False)
+        self.highlight_deid_rects = False
+        self.highlight_ultrasound_rects = False
+        self.starting_directory = os.environ.get('PACS_ROOT', '.')
+
+        # Main window contains an image
         self.app_image = tkinter.Label(self.tk_app)
         self.app_image.pack(side="bottom")
         self.app_image.bind("<Button-1>", self.press_event)
@@ -161,6 +162,8 @@ class App:
         self.app_image.bind("<ButtonRelease-2>", self.apply_possible_rect_event)
         self.app_image.bind("<ButtonRelease-3>", self.apply_possible_rect_event)
         #self.app_image.bind("<Configure>", self.on_resize)
+
+        # Main window keyboard shortcuts
         #self.tk_app.bind("<Return>", self.done_file_event)
         self.tk_app.bind("<Escape>", self.escape_file_event)
         self.tk_app.bind("<Shift-Escape>", self.prev_file_event)
@@ -179,6 +182,8 @@ class App:
         self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
         self.tk_app.bind("<q>", self.quit_event)
         self.tk_app.bind("<Z>", self.undo_file_event)
+
+        # Internal settings
         self.render_flag = False # indicate that window should be rendered at next idle time
         self.wait_flag = tkinter.IntVar(self.tk_app) # effectively the return code -1=exit 0=cancel 1=done image
 
@@ -195,6 +200,11 @@ class App:
         self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        # Create an Options menu
+        self.optmenu = tkinter.Menu(self.menu)
+        self.menu.add_cascade(label = 'Options', menu = self.optmenu)
+        self.optmenu.add_checkbutton(label = 'Ignore files already marked as done', variable = self.skip_marked_files, onvalue = True, offvalue = False)
+        self.optmenu.add_checkbutton(label = 'Only view files which have been tagged', variable = self.skip_untagged_files, onvalue = True, offvalue = False)
         # Add other top-level menu items
         self.menu.add_command(label='Redact [r] the chosen rect', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
@@ -256,14 +266,24 @@ class App:
         return self.ocr_tess_loader_thread.join()
 
     def set_skip_marked_files(self, newval):
-        self.skip_marked_files = newval
+        """ Manully set this option.
+        NB this is not called when menu is used. """
+        self.skip_marked_files.set(newval)
+        logging.debug('skip_marked_files = %s' % self.skip_marked_files.get())
 
     def set_skip_untagged_files(self, newval):
-        self.skip_untagged_files = newval
+        """ Manully set this option.
+        NB this is not called when menu is used. """
+        self.skip_untagged_files.set(newval)
+        logging.debug('skip_untagged_files = %s' % self.skip_untagged_files.get())
 
     # User interface events
 
     def open_files_event(self, event):
+        """ Pop up a file dialog box asking for one or more files.
+        Start in same directory as last time it was used.
+        Clears the existing list and adds these file to list.
+        """
         filenames = tkinter.filedialog.askopenfilenames(title='Select files', initialdir=self.starting_directory, multiple=True)
         if not filenames:
             return
@@ -272,6 +292,11 @@ class App:
         self.load_next_file()
 
     def open_directory_event(self, event, recursive = False):
+        """ Pop up a file dialog box asking for a directory.
+        Start in same directory as last time it was used.
+        Clears the existing list and add all these files to list.
+        Option to add all files recursively.
+        """
         directory = tkinter.filedialog.askdirectory(title='Select directory', initialdir=self.starting_directory)
         if not directory:
             return
@@ -284,6 +309,8 @@ class App:
         self.load_next_file()
 
     def tag_file_event(self, event):
+        """ Toggle the tag for a file
+        """
         logging.debug('Tag file')
         # Add to database
         filename = self.dcm.get_filename()
@@ -315,6 +342,9 @@ class App:
         return
 
     def ocr_frame_event(self, event):
+        """ Run two types of OCR, display the results in a window, and
+        add the rectangles as suggested rects onto the image.
+        """
         logging.debug('OCR frame')
         # Create a popup window and put a progress bar inside it
         popup = tkinter.Toplevel()
@@ -358,6 +388,8 @@ class App:
         return
 
     def text_entry_event(self, event=None):
+        """ Ask for a comment to be added to the database for this image
+        """
         filename = self.dcm.get_filename()
         db = DicomRectDB()
         marked, comment = db.query_tags(filename)
@@ -460,9 +492,13 @@ class App:
             ])
 
     def display_without_rects(self, event=None):
+        """ Update the display without the redaction rectangles
+        """
         self.update_image()
 
     def display_with_rects(self, event=None):
+        """ Update the display with the redaction rectangles
+        """
         self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
 
 
@@ -880,10 +916,10 @@ class App:
             filename = self.filelist.next()
             if not filename:
                 return False
-            if self.skip_marked_files and db.file_marked_done(filename):
+            if self.skip_marked_files.get() and db.file_marked_done(filename):
                 logging.info('Ignore file already done: %s' % filename)
                 continue
-            if self.skip_untagged_files and not db.file_tagged(filename):
+            if self.skip_untagged_files.get() and not db.file_tagged(filename):
                 logging.info('Ignore file not tagged: %s' % filename)
                 continue
             break
