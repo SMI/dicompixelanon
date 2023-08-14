@@ -137,6 +137,7 @@ class App:
 
         # Settings
         self.skip_marked_files = True
+        self.skip_untagged_files = False
         self.highlight_deid_rects = False
         self.highlight_ultrasound_rects = False
         self.starting_directory = os.environ.get('PACS_ROOT', '.')
@@ -256,6 +257,9 @@ class App:
 
     def set_skip_marked_files(self, newval):
         self.skip_marked_files = newval
+
+    def set_skip_untagged_files(self, newval):
+        self.skip_untagged_files = newval
 
     # User interface events
 
@@ -867,7 +871,7 @@ class App:
 
     def load_next_file(self):
         """ Load the next file from the list and loop through all frames/overlays.
-        Returns False if the user wants to quit.
+        Returns False if the user wants to quit or when all files viewed.
         Returns True when the user has finished with this file.
         """
         # Loop over files already processed until we get a new file
@@ -876,11 +880,13 @@ class App:
             filename = self.filelist.next()
             if not filename:
                 return False
-            if not self.skip_marked_files:
-                break
-            if not db.file_marked_done(filename):
-                break
-            logging.info('Ignore file already done: %s' % filename)
+            if self.skip_marked_files and db.file_marked_done(filename):
+                logging.info('Ignore file already done: %s' % filename)
+                continue
+            if self.skip_untagged_files and not db.file_tagged(filename):
+                logging.info('Ignore file not tagged: %s' % filename)
+                continue
+            break
 
         try:
             self.dcm = DicomImage(filename)
@@ -979,6 +985,7 @@ if __name__=='__main__':
     parser.add_argument('--dump-database', action="store_true", help='show database content')
     parser.add_argument('--db', action="store", help='database directory')
     parser.add_argument('--review', action="store_true", help='review files already marked as done')
+    parser.add_argument('--tagged', action="store_true", help='only view files with a tag')
     parser.add_argument('-i', dest='infiles', nargs='*', help='list of DICOM files, or a filename.csv (for DicomFilePath)', default=[]) # can use: -i *.txt
     args = parser.parse_args()
     if args.debug:
@@ -1007,4 +1014,6 @@ if __name__=='__main__':
     app.set_image_list(FileList(args.infiles))
     if args.review:
         app.set_skip_marked_files(False)
+    if args.tagged:
+        app.set_skip_untagged_files(True)
     app.run()

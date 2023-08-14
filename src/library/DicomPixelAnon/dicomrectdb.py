@@ -145,6 +145,16 @@ class DicomRectDB():
         self.db.commit()
         logging.debug('tag now %s for %s' % (tag_val, filename))
 
+    def file_tagged(self, filename):
+        """ A file is tagged (as distinct from being marked inspected)
+        only if its 'mark' property is True.
+        """
+        tag_val = False
+        row = self.db(self.db.DicomTags.filename == filename).select()
+        if row:
+            tag_val = row[0].mark
+        return tag_val
+
     def mark_inspected(self, filename, metadata_dict = None):
         """ Simply add a blank entry to db showing that this file was inspected.
         If metadata_dict is passed it must contain entries named the same as

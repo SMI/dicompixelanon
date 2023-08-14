@@ -53,6 +53,7 @@ optional arguments:
   --db directory        database directory
   --dump-database       show database content in JSON format
   --review              review files already marked as done
+  --tagged              only view files which have been tagged
   -i [INFILES [INFILES ...]] list of DICOM filenames, or a
      CSV filename to get the filenames from the DicomFilePath or filename column
 ```
