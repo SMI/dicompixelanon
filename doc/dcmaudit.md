@@ -57,6 +57,16 @@ optional arguments:
      CSV filename to get the filenames from the DicomFilePath or filename column
 ```
 
+## Display of frame/overlay
+
+Images have multiple frames, but then after all the frames come the overlays, and
+each overlay can have multiple frames.
+The overlay number is not shown until you have stepped through all the frames first.
+
+![screenshot](../resources/images/dcmaudit.png)
+
+## Marking rectangles for redaction
+
 When the image is displayed it will automatically have rectangles redacted if
 * the database contains rectangles for this filename
 * the metadata tags match some deid rules
@@ -72,32 +82,10 @@ If you drag from the middle of the rectangle it will stick inside the image.
 When the rectangle covers the area where text might be found it can be
 marked as such and the information stored in a database.
 
-Files can be tagged, meaning that this image needs further investigation.
-The tag is stored in a database so all tagged images can be reviewed later.
-Tags are shown as `[X]` before the filename.
-
-Comments can be added to the database, one per image, and are displayed
-alongside the frame/overlay number.
-
-Files can be marked as "done" when they have been fully inspected.
-You can mark rectangles, which are saved instantly in the database, but
-only when you explicitly mark the whole file as inspected will that
-flag be saved.  This allows you to come back later and review a file.
-Once a file has been marked as done then it won't be shown again
-unless the `--review` option is used. It should be noted that tagging
-or commenting on an image implicitly marks it as "done".
-
-Only files marked as done should be considered when making use of
-the redaction rectangles. Likewise only rectangles from images marked
-as done will be suggested as possible rectangles as the metadata
-for comparison is not written until images are marked as "done".
-
-Display of frame/overlay:
-Images have multiple frames, but then after all the frames come the overlays, and
-each overlay can have multiple frames.
-The overlay number is not shown until you have stepped through all the frames first.
-
-![screenshot](../resources/images/dcmaudit.png)
+Note that rectangles apply to a specific frame (or overlay frame) in
+an image. Different frames/overlays may have different rectangles.
+A rectangle marked on an image frame does not automatically apply to
+any overlays.
 
 To ease the process of defining redaction rectangles, when an image is
 displayed the database is queried to find other images with similar metadata.
@@ -113,7 +101,31 @@ plus and minus keys. This is useful when displaying images which
 already have rectangles in a database (maybe as a result of running
 dicom_ocr) if you want to verify what was redacted.
 
-### Keyboard shortcuts
+## Marking whole files
+
+Files can be tagged, meaning that this image needs further investigation.
+The tag is stored in a database so all tagged images can be reviewed later.
+Tags are shown as `[X]` before the filename.
+
+Comments can be added to the database, one per image, and are displayed
+alongside the frame/overlay number.
+
+Files can be marked as "done" when they have been fully inspected.
+When rectangles are marked they are saved instantly in the database, but
+only when you explicitly mark the whole file as inspected will that
+flag be saved.  This allows you to come back later and review a file
+at any point until it is marked "done" after which it will not longer be
+shown (unless you are explicitly reviewing all the "done" files).
+Once a file has been marked as done then it won't be shown again
+unless the `--review` option is used. It should be noted that tagging
+or commenting on an image implicitly marks it as "done".
+
+Only files marked as done should be considered when making use of
+the redaction rectangles. Likewise only rectangles from images marked
+as done will be suggested as possible rectangles as the metadata
+for comparison is not written until images are marked as "done".
+
+## Keyboard shortcuts
 
 ```
 ? - show help dialogue
@@ -185,8 +197,6 @@ usage: pydicom_images.py [-v] [-x] [-i] [-f FORMAT] files...
 See the `dicomrectdb.md` document.
 
 ## Future work
-
-Add way to review all tagged images (i.e. find all those in the database which have been tagged as needing further review).
 
 The system should learn which image types have text in specific locations
 and suggest redaction rectangles based on previously taught images.
