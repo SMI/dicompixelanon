@@ -111,8 +111,13 @@ class DicomRectDB():
     def add_tag(self, filename, mark : bool, comment = None):
         """ Add a tag to a file in the database, being True or False,
         with an optional comment.
+        Existing comment (if any) is preserved if not specified.
         """
-        # XXX need to select to get any existing value of comment if not specified in this call
+        # Get any existing value of comment if not specified in this call
+        if not comment:
+            row = self.db(self.db.DicomTags.filename == filename).select()
+            if row:
+                comment = row[0].comment
         lastmod = datetime.datetime.now()
         self.db.DicomTags.update_or_insert(self.db.DicomTags.filename == filename,
             filename=filename,
