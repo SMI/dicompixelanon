@@ -1,7 +1,8 @@
 ## Pre-publishable version. Please report bugs/errors to gkaur001@dundee.ac.uk
 
 ## Library used for extracting DICOM tags
-require("oro.dicom")
+install.packages("oro.dicom")
+library(oro.dicom)
 
 ## Invisible DICOM reading and plotting machinery powering functions DIplot(), DItag() & DIcheck()
 plot.mech = function(itc = i) {
@@ -22,17 +23,17 @@ plot.mech = function(itc = i) {
       imageData = readBin(fraw[(skip+((frame-1)*framesize)):fsize], "integer", n = length/mf, size = bytes, signed = signed, endian = "little")
       imageData = array(imageData[c(seq(1, length/mf, rgb), seq(2, length/mf, rgb), seq(3, length/mf, rgb))], c(columns, rows, rgb))
       imageData = aperm(imageData, c(2, 1, 3))
-      plot(as.raster(imageData / 255))
+      plot(as.raster(imageData/255))
       if (mf > 1) {print(paste("Frame#: ", frame, "/", mf))}
     } 
   } else {
     x = readDICOMFile(itc, flipud = F)
-    if (mf == 1) {plot(as.raster(x$img / ifelse(signed, 255, max(x$img))))
+    if (mf == 1) {plot(as.raster(x$img/ifelse(signed, 255, max(x$img))))
     } else {
       for (frame in 1:mf) {
         y = x$img[,,frame]
-        plot(as.raster(y/255))
         print(paste("Frame#: ", frame, "/", mf))
+        plot(as.raster(y/ifelse(signed, 255, max(x$img))))
       }
     }
   }
@@ -70,105 +71,116 @@ DIplot = function(DICOMdir, # Root folder containing DICOMs or vector of relativ
   }
 }
 
+## divvy(): To divide cohort into blocks for easy work division/allocation
+## Example usage:
+## DICOMdir = "//nimble//1718-0316//1718-0316//DX_SeriesInstanceUID_chest_10000_redacted//dicom//"
+## saveDir = "//nimble//work//1718-0316//DX_SeriesInstanceUID_chest_10000_redacted_tags//"
+## divvy(DICOMdir, saveDir)
+## Output: n tagfiles will be created in the SaveDir folder
+
+divvy = function(DICOMdir, saveDir, n = 10, recursive = T) {
+  f = list.files(DICOMdir, full.names = T, recursive = recursive)
+  f = f[endsWith(f, ".dcm")]
+  f = split(f, 1:n)
+  for (i in 1:n) {
+    write.csv(data.frame(PK = f[[i]], Label = NA, Label_datetime = NA), paste(saveDir, "tagfile", i, ".csv", sep = ""), row.names = F)
+  }
+}
+
 
 ## DItag(): plotting and tagging DICOMs in specified folder location. Output is a tagfile in .csv format
-## Usage: tags = DItag(DICOMdir = "C:\\Users\\gkaur\\Desktop\\US_Anon") to save and retrieve output within R environment as tags in addition to tagfile on disk
-DItag = function(DICOMdir, # Folder containing DICOMs to be labelled. A folder named "DONE" will be created within this location
-                 resume = F, # TRUE if resuming previous task (example returning from a system crash)
+## Usage: DItag(filename = "tagfile2", saveDir = "/nimble/work/1718-0316/test/")
+DItag = function(filename = "tagfile", # Only name part of tagfile to be used, it will be suffixed by .csv by default
+                 saveDir = "/nimble/work/1718-0316/test/", # Directory where output tagfile is saved
                  DefaultTag = "No PII", # The most frequently expected tag
-                 prompt = paste("Press Enter if", DefaultTag, "or type p for PII or type comment: ", sep = " "), 
-                 saveToDir = DICOMdir, # Directory where output tagfile should be saved
-                 filename = "tagfile", # Only name part of output file, it will be suffixed by .csv by default
-                 random = F, # Should the DICOMs be plotted in random order?
+                 prompt = "next",
                  progress = T, # "Are we there yet?"-prompt
-                 interval = 10, # Progress prompt after how many DICOMs? To be used with progress = T else ignore
+                 interval = 50, # Progress prompt after how many DICOMs? To be used with progress = T else ignore
                  user = "Your Name", # username to be printed for signed datetime
                  back = "<") # Reserved input for going back iteration(s) eg. < for 1, << for 2 and so on.
 {
-  f = list.files(normalizePath(DICOMdir), full.names = T, recursive = F) 
-  if (resume) {etagfile = read.csv(f[endsWith(f, paste("/", filename, ".csv", sep = ""))])}
-  f = f[endsWith(f, ".dcm")]
-  if (random) {f = sample(f)}
-  doneDir = paste(DICOMdir, "DONE", sep = "/")
-  dir.create(doneDir)
-  print(paste(length(f), "DICOMs found... Begin image labelling :)", sep = " "))
-  label = rep(NA, length(f))
-  label_datetime = rep(NA, length(f))
-  l = ""
-  for (i in f) {
-    if (l != "" && unique(strsplit(l, "")[[1]]) == back) {
-      fb = f[(which(f == i) - nchar(l) - 1):(which(f == i))]
+  tagfile = read.csv(normalizePath(paste(saveDir, "/", filename, ".csv", sep = "")), stringsAsFactors = F)
+  print(paste(length(tagfile$PK[is.na(tagfile$Label)]), "DICOMs remaining...", sep = " "))
+  while(any(is.na(tagfile$Label))) {
+    i = tagfile$PK[is.na(tagfile$Label)][1]
+    plot.mech(i); mtext(which(tagfile$PK == i), cex = 2)
+    l = readline(prompt)
+    if (unique(strsplit(l, "")[[1]]) == back && l != "") {
+      fb = tagfile$PK[(which(tagfile$PK == i) - nchar(l)):(which(tagfile$PK == i) - 1)]
       for (j in fb) {
-        file.copy(from = paste(paste(strsplit(fb[fb == j], "/")[[1]][1], "\\DONE", sep = ""), 
-                               strsplit(fb[fb == j], "/")[[1]][2], sep = "/"), 
-                  to = DICOMdir)
-        plot.mech(j); mtext(label[f == j], cex = 2)
-        l = readline(prompt)
-        label[f == j] = ifelse(l == "", DefaultTag, ifelse(unique(strsplit(l, "")[[1]]) == back, NA, l))
-        label_datetime[f == j] = paste("Tagged by", user, "at", Sys.time(), sep = " ")
-        file.copy(from = j, to = doneDir, overwrite = T); file.remove(j)
-      }  
-    } else { 
-      plot.mech(i); mtext(which(f == i), cex = 2)
-      l = readline(prompt) 
-      label[f == i] = ifelse(l == "", DefaultTag, ifelse(unique(strsplit(l, "")[[1]]) == back, NA, l))
-      label_datetime[f == i] = paste("Tagged by", user, Sys.time(), sep = " ")
-      file.copy(from = i, to = doneDir, overwrite = T); file.remove(i)
+        tagfile = read.csv(normalizePath(paste(saveDir, "/", filename, ".csv", sep = "")), stringsAsFactors = F)
+        m = tagfile$Label[tagfile$PK == j]
+        plot.mech(j); mtext(paste(m, " (", which(tagfile$PK == j), ")", sep = ""), cex = 2)
+        b = readline("back")
+        tagfile$Label[tagfile$PK == j] = ifelse(b == "", m, b)
+        tagfile$Label_datetime[tagfile$PK == j] = paste("Tagged by", user, Sys.time(), sep = " ")
+        write.csv(tagfile, normalizePath(paste(saveDir, "/", filename, ".csv", sep = "")), row.names = F)
+      }
+    } else {
+      tagfile$Label[tagfile$PK == i] = ifelse(l == "", DefaultTag, l)
+      tagfile$Label_datetime[tagfile$PK == i] = paste("Tagged by", user, Sys.time(), sep = " ")
+      write.csv(tagfile, normalizePath(paste(saveDir, "/", filename, ".csv", sep = "")), row.names = F)
     }
-    tagfile = data.frame(PK = f[!is.na(label)],
-                         Label = label[!is.na(label)],
-                         Label_datetime = label_datetime[!is.na(label)])
-    if (resume) {tagfile = rbind.data.frame(etagfile[,-1], tagfile)}
-    write.csv(tagfile, paste(saveToDir, "/", filename, ".csv", sep = ""))
-    if (progress && nrow(tagfile) %% interval == 0) 
-    {print(paste(nrow(tagfile), "/", length(f), "... ", round(nrow(tagfile)/(length(f))*100), "%", sep = ""))}
+    if (progress && sum(!is.na(tagfile$Label)) %% interval == 0) 
+    {print(paste(sum(!is.na(tagfile$Label)), "/", nrow(tagfile), "... ", round(sum(!is.na(tagfile$Label))/(nrow(tagfile))*100), "%", sep = ""))}
   }
   t = table(tagfile$Label, dnn = "Exit Summary:")
   print(t)
   barplot(t, main = "Exit Summary")
   return(tagfile)
 }
-
 ## DIcheck(): Function for plotting and validating output from DItag() 
-DIcheck = function(DICOMdir, #Location of the Tagged DICOMs/folder
-                   tagfile = read.csv(paste(DICOMdir, "tagfile.csv", sep = "/")), # or object in global environment can also be called 
+DIcheck = function(tagfilePath, #path to tagfile from DItag() 
                    resume = F, # TRUE if returning from system crash or interval
-                   startFrom = which(is.na(tagfile$Check_datetime))[1], #To be used with resume = T else ignore. Resumes from the first NA in Check_datetime by default
                    back = "<", # Reserved input for going back iteration(s)
-                   user = "Your Name") # username to be printed for signed datetime
+                   user = "Your Name", # username to be printed for signed datetime
+                   tagCol = T, # coloured printing corresponding to tags for better cognition, recommended to be used if unique tags < 10, black if tagCol = F  
+                   subset = F) # subset by label like "O" or c("O", "P")
+  
 {
+  tagfile = read.csv(tagfilePath, stringsAsFactors = F)
   if (is.object(tagfile) && is.data.frame(tagfile) && c("PK", "Label") %in% names(tagfile)) {
     if (resume && "Check_datetime" %in% names(tagfile)) {print("Using existing tag file...")} else {
       tagfile$Check_datetime = rep(NA, nrow(tagfile)) }
-    lf = list.files(normalizePath(DICOMdir), full.names = T, recursive = T)
-    lf = lf[endsWith(lf, ".dcm")]
+    if (tagCol) {col = rainbow(length(unique(tagfile$Label)))[as.integer(factor(tagfile$Label))]}
     correction = ""
-    for (i in tagfile$PK[ifelse(useExistingTagfile, startFrom, 1):length(tagfile$PK)]) {
-      sid = strsplit(i, "/")[[1]][2]
-      k = lf[endsWith(lf, sid)][1]
+    for (i in ifelse(subset != F, tagfile$PK[is.na(tagfile$Check_datetime)], tagfile$PK[tagfile$Label %in% subset])) {
       if (correction != "" && unique(strsplit(correction, "")[[1]]) == back) {
         fb = tagfile$PK[(which(tagfile$PK == i) - nchar(correction) - 1):(which(tagfile$PK == i))]
         for (j in fb) {
-          bsid = strsplit(j, "/")[[1]][2]
-          j = lf[endsWith(lf, bsid)][1]
           plot.mech(j)
-          mtext(tagfile$Label[endsWith(tagfile$PK, bsid)], cex = 2)
+          mtext(tagfile$Label[tagfile$PK == j], cex = 2)
           correction = readline("Enter for next or type in correction: ")
-          tagfile$Label[endsWith(tagfile$PK, bsid)] = ifelse(correction == "" || unique(strsplit(correction, "")[[1]]) == back, 
-                                                             tagfile$Label[endsWith(tagfile$PK, bsid)], correction)
-          tagfile$Check_datetime[endsWith(tagfile$PK, bsid)] = paste("Checked by", user, Sys.time(), sep = " ")
-          write.csv(tagfile, paste(DICOMdir, "tagfile.csv", sep = "/"), row.names = F)
+          tagfile$Label[tagfile$PK == j] = ifelse(correction == "" || unique(strsplit(correction, "")[[1]]) == back, 
+                                                  tagfile$Label[tagfile$PK == j], correction)
+          tagfile$Check_datetime[tagfile$PK == j] = paste("Checked by", user, Sys.time(), sep = " ")
         }
       } else {
-        plot.mech(k)
-        mtext(tagfile$Label[tagfile$PK == i], cex = 2)
+        plot.mech(i)
+        mtext(tagfile$Label[tagfile$PK == i], cex = 2, col = ifelse(tagCol, col[tagfile$PK == i], "black"))
         correction = readline("Enter for next or type in correction: ")
         tagfile$Label[tagfile$PK == i] = ifelse(correction == "" || unique(strsplit(correction, "")[[1]]) == back, 
                                                 tagfile$Label[tagfile$PK == i], correction)
         tagfile$Check_datetime[tagfile$PK == i] = paste("Checked by", user, Sys.time(), sep = " ")
-        write.csv(tagfile, paste(DICOMdir, "tagfile.csv", sep = "/"), row.names = F)
       }
+      write.csv(tagfile, tagfilePath, row.names = F)
     }
     return(tagfile)} else {print("Invalid tagfile input")}
 }
 
+## Function to collate blocks of tagfiles 
+## Output: A master tagfile will be created with the filename specified within the folder containing original tagfiles
+DIbind = function(saveDir = "/nimble/work/1718-0316/CR_SeriesInstanceUID_chest_10000_redacted_tags/", # where blocks of tagfiles are kept
+                  filename = "tagfile_master") # filename of the collated tagfile 
+                  {
+  f = list.files(saveDir, full.names = T)
+  f = f[endsWith(f, ".csv")]
+  t = data.frame(PK = character(), Label = character(), Label_datetime = character())
+  for (i in f) {
+    x = read.csv(i, stringsAsFactors = F)
+    x = x[, which(colnames(x) %in% c("PK", "Label", "Label_datetime"))]
+    t = rbind.data.frame(t, x)
+  }
+  write.csv(t, suppressWarnings(normalizePath(paste(saveDir, "/", filename, ".csv", sep = ""))), row.names = F)
+  print(paste(filename, ".csv is saved in ", normalizePath(saveDir), sep = ""))
+}
