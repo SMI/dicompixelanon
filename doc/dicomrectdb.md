@@ -50,8 +50,9 @@ These files are simply table descriptions created by the python database layer `
 
 
 The tables are defined as below.
-Rectangles are defined by top, bottom, left, right, and the number of the overlay frame if applicable.  There can be many rectangles defined for any one file.
-The DicomTags table holds a mark (if an image has been tagged for closer inspection) or a comment. It will only hold the other DICOM tags (modality, etc) once the image has been marked as fully inspected (to save space).
+Rectangles are defined by top, bottom, left, right, and the number of the overlay frame if applicable. There can be many rectangles defined for any one file.
+The DicomTags table holds a mark (if an image has been tagged for closer inspection) or a comment.
+Note that the imagetype column holds the string value of the DICOM tag, which includes start and end double quotes, and separators with forward slashes, e.g. "ORIGINAL/PRIMARY" where the quotes are actually included in the table.
 
 ```
 CREATE TABLE "DicomRects"(
