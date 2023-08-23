@@ -10,6 +10,7 @@ import sys
 import time
 from pydal import DAL, Field
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, add_Rect_to_list
+from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerenum import NEREnum
 
 
@@ -40,22 +41,30 @@ class DicomRectDB():
             logging.warning('Database path does not exist: %s (will use current directory)' % DicomRectDB.db_path)
             DicomRectDB.db_path = ''
         self.db=DAL('sqlite://dcmaudit.sqlite.db', folder = DicomRectDB.db_path, attempts=60) # debug=True
-        self.db.define_table('DicomRects', Field('filename'),
-            Field('top', type='integer'), Field('bottom', type='integer'),
-            Field('left', type='integer'), Field('right', type='integer'),
-            Field('frame', type='integer', default=-1), Field('overlay', type='integer', default=-1),
+        self.db.define_table('DicomRects',
+            Field('filename'),
+            Field('top', type='integer'),
+            Field('bottom', type='integer'),
+            Field('left', type='integer'),
+            Field('right', type='integer'),
+            Field('frame', type='integer', default=-1),
+            Field('overlay', type='integer', default=-1),
             Field('ocrengine', type='integer', default=-1),    # one of the ocrengine enums
             Field('ocrtext'),                                  # text extracted by OCR
             Field('nerengine', type='integer', default=-1),    # one of the nerengine enums
             Field('nerpii', type='integer', default=-1),       # -1 (unknown), 0 (false), 1 (true)
             Field('last_modified', type='datetime'),
             Field('last_modified_by'))
-        self.db.define_table('DicomTags', Field('filename', unique=True),
-            Field('mark', type='boolean'), Field('comment'),
-            Field('Modality'), Field('ImageType'),
+        self.db.define_table('DicomTags',
+            Field('filename', unique=True),
+            Field('mark', type='boolean'),
+            Field('comment'),
+            Field('Modality'),
+            Field('ImageType'), # must be string, with double quotes, and forward slashes
             Field('ManufacturerModelName'),
             Field('BurnedInAnnotation'),
-            Field('Rows', type='integer'), Field('Columns', type='integer'),
+            Field('Rows', type='integer'),
+            Field('Columns', type='integer'),
             Field('last_modified', type='datetime'),
             Field('last_modified_by'))
         self.username = getpass.getuser() # os.getlogin fails when in a GUI
@@ -281,6 +290,39 @@ class DicomRectDB():
                 add_Rect_to_list(rect_list, rect, coalesce_similar = True)
         logging.debug('Found suggested rectangles: %s' % (rect_list))
         return rect_list
+
+
+def test_DicomRectDB(tmpdir):
+    logging.basicConfig(level = logging.DEBUG)
+    DicomRectDB.set_db_path(tmpdir)
+    db = DicomRectDB()
+    db.add_rect('file1', DicomRect(10,20,10,20, 0,-1))
+    db.add_rect('file2', DicomRectText(10,30,10,30, 0,-1, OCREnum.EasyOCREngine, '10/11/23', NEREnum.allowlist, 1))
+    rc = db.query_rects('file1')
+    assert(str(rc) == '[<DicomRectText frame=0 overlay=-1 10,10->20,20 -1="" -1=-1>]')
+    metadata_dict = { "Modality": "CT",
+        "ImageType": '"ORIGINAL/PRIMARY"',
+        "ManufacturerModelName": "",
+        "BurnedInAnnotation": "YES",
+        "Rows": 1024,
+        "Columns": 1024
+    }
+    # Add a file with one rectangle and tag=True
+    db.add_rect('file3', DicomRect(10,40,10,40, 0,-1))
+    db.add_tag('file3', mark = True, metadata_dict = metadata_dict)
+    # A a file with one rectangle and tag=False meaning file marked as done
+    db.add_rect('file4', DicomRect(10,50,10,50, 0,-1))
+    db.mark_inspected('file4', metadata_dict = metadata_dict)
+    # Check file3
+    rc = db.query_tags('file3')
+    assert(rc == (True, None))
+    # Check file4
+    rc = db.query_tags('file4')
+    assert(rc == (False, None)) # XXX also the case if file not in DB, need to fix
+    # Check that file3,file4 rects are returned coalesced
+    rc = db.query_similar_rects('random_filename', metadata_dict)
+    assert(str(rc) == '[<DicomRectText frame=0 overlay=-1 10,10->50,50 -1="" -1=-1>]')
+
 
 
 if __name__ == '__main__':
