@@ -315,7 +315,8 @@ class App:
         # Add to database
         filename = self.dcm.get_filename()
         db = DicomRectDB()
-        db.toggle_tag(filename)
+        db.toggle_tag(filename,
+            metadata_dict = self.dcm.get_selected_metadata())
         self.update_info_label()
 
     def next_frame_event(self, event):
@@ -399,7 +400,8 @@ class App:
             parent=self.tk_app)
         if comment:
             logging.debug('Comment file %s = \"%s\"' % (filename, comment))
-            db.add_tag(filename, marked, comment)
+            db.add_tag(filename, marked, comment,
+                metadata_dict = self.dcm.get_selected_metadata())
             self.update_info_label()
 
     def redact_dicomrect(self, dicomrect):

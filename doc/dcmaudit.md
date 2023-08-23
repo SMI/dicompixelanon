@@ -118,8 +118,16 @@ flag be saved.  This allows you to come back later and review a file
 at any point until it is marked "done" after which it will not longer be
 shown (unless you are explicitly reviewing all the "done" files).
 Once a file has been marked as done then it won't be shown again
-unless the `--review` option is used. It should be noted that tagging
-or commenting on an image implicitly marks it as "done".
+unless the `--review` option is used or chosen in the menu.
+
+It should be noted that tagging or commenting on an image implicitly
+marks it as "done" because files can be in these states in the database:
+* having rectangles defined (in the DicomRects table) only means that
+some rectangles have been defined but the file may still need more review
+* having an entry in the DicomTags table which is tagged/marked
+means that the file explicitly needs further review
+* having an entry in the DicomTags table which is unmarked (not tagged)
+means that the file has been fully reviewed (marked as "done")
 
 Only files marked as done should be considered when making use of
 the redaction rectangles. Likewise only rectangles from images marked
