@@ -108,7 +108,7 @@ class DicomRectDB():
                 raise(e)
         return
 
-    def add_tag(self, filename, mark : bool, comment = None):
+    def add_tag(self, filename, mark : bool, comment = None, metadata_dict = None):
         """ Add a tag to a file in the database, being True or False,
         with an optional comment.
         Existing comment (if any) is preserved if not specified.
@@ -121,11 +121,12 @@ class DicomRectDB():
         lastmod = datetime.datetime.now()
         self.db.DicomTags.update_or_insert(self.db.DicomTags.filename == filename,
             filename=filename,
+            **metadata_dict,
             mark = mark, comment = comment,
             last_modified = lastmod, last_modified_by = self.username)
         self.db.commit()
 
-    def toggle_tag(self, filename):
+    def toggle_tag(self, filename, metadata_dict = None):
         """ Toggle the tag for a given file in the database.
         Preserves the comment but updates the last_modified time and user.
         """
@@ -140,6 +141,7 @@ class DicomRectDB():
         lastmod = datetime.datetime.now()
         self.db.DicomTags.update_or_insert(self.db.DicomTags.filename == filename,
             filename=filename,
+            **metadata_dict,
             mark = tag_val, comment = comment_val,
             last_modified = lastmod, last_modified_by = self.username)
         self.db.commit()
@@ -163,16 +165,7 @@ class DicomRectDB():
         row = self.db(self.db.DicomTags.filename == filename).select()
         if not row:
             logging.debug('tag as inspected %s' % filename)
-            self.add_tag(filename, False)
-        # Ensure full DICOM metadata is now stored
-        # (no point doing this earlier as it wastes space unless image will be useful)
-        if metadata_dict:
-            lastmod = datetime.datetime.now()
-            self.db.DicomTags.update_or_insert(self.db.DicomTags.filename == filename,
-                **metadata_dict,
-                last_modified = lastmod, last_modified_by = self.username)
-            self.db.commit()
-            #logging.debug(self.db._timings)
+            self.add_tag(filename, mark = False, metadata_dict = metadata_dict)
 
     def file_marked_done(self, filename):
         """ A file is marked as done if it contains a tag which is False
