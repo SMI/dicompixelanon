@@ -58,6 +58,17 @@ optional arguments:
      CSV filename to get the filenames from the DicomFilePath or filename column
 ```
 
+A set of files can also be loaded by starting the program and using the
+`Open` menu to open:
+* Files - select a set of DICOM files, or a CSV file which contains a list of filenames in the DicomFilePath or filename column
+* Directory - select a directory which contains DICOM files
+* Directory recursive - as above but looks for DICOM files in any subdirectory too
+
+The `Options` menu can be used to refine which of the set of images is displayed.
+The menu options mirror the `--review` and `--tagged` command line options,
+to show all images including `done` ones, and to show only those which have been tagged
+as needed further inspection. See below for details.
+
 ## Display of frame/overlay
 
 Images have multiple frames, but then after all the frames come the overlays, and
@@ -162,14 +173,16 @@ does add an entry to the database which effectively marks it as done.
 ## Workflow
 
 * Select a set of images, keep their filenames
-* Start `dcmaudit.py -i $(cat filenames)`
-* Use `n` to step through all the frames
+* Start `dcmaudit.py -i $(cat filenames)` or just `dcmaudit.py` and open a CSV file or DICOM files
+* Use `n` to step through all the frames and overlay frames
 * If you see any PII then move the redaction rectangle to cover it and press `r`
 * If you see any crossed rectangles which cover possible PII then right-click on them (or use `A` if there's a lot)
 * At the last frame, if you are happy with all redactions, press `N` to finish this image
-* If you have any concerns about this image then press `t` to tag it for future inspection
+* If you have any concerns about this image then press `t` to tag it for future inspection, then `Esc` or `N`
 * If there are hundreds of frames and no possibility of PII then use `f` to fast-forward
 * When you reach the last image press `q` to quit.
+* Run `dcmaudit.py` again to view only the tagged images which required a second look
+* Examine the database to get the rectangles, or to get the tagged filenames, or to determine a set of rules
 
 ## Debugging
 
