@@ -936,7 +936,18 @@ class App:
 
         # Loop through each frame/overlay in this file
         while True:
-            self.raw_image = self.dcm.next_image()
+            try:
+                self.raw_image = self.dcm.next_image()
+            except:
+                logging.warning('Cannot load DICOM image/overlay frame from file "%s"' % filename)
+                rc = tkinter.messagebox.showerror(title="Help",
+                    message='Cannot load DICOM image/overlay from file "%s"' % filename,
+                    type=tkinter.messagebox.OKCANCEL)
+                # Cancel means abort all frames in this file, move to next file
+                if rc == 'cancel':
+                    return True
+                # ok means try next frame
+                continue
             if not self.raw_image:
                 #logging.error('ERROR: no image extracted from file')
                 return True
