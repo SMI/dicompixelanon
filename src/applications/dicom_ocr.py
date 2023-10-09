@@ -213,12 +213,17 @@ def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, outp
 
     # Save all the frames
     for idx in range(dicomimg.get_total_frames()):
-        img = dicomimg.next_image()
+        msg(" extracting frame %d from %s" % (idx, filename))
+        try:
+            img = dicomimg.next_image()
+        except Exception as e:
+            err('Cannot extract frame %d from %s (%s)' % (idx, filename, e))
+            continue
         frame, overlay = dicomimg.get_current_frame_overlay()
         if ignore_overlays and overlay != -1:
             continue
         if not img:
-            logging.error('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
+            err('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
             continue
         process_image(np.asarray(img), filename=filename, frame=frame, overlay=overlay, **meta)
     return
