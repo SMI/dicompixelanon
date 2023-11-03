@@ -200,6 +200,7 @@ class App:
         self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        self.openmenu.add_separator()
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
         self.openmenu.add_command(label='Export database of tagged files as CSV', command=lambda: self.save_db_csv_event(None, rects=False, tags=True))

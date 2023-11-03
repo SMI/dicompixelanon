@@ -59,7 +59,7 @@ optional arguments:
 ```
 
 A set of files can also be loaded by starting the program and using the
-`Open` menu to open:
+`File` menu to open:
 * Files - select a set of DICOM files, or a CSV file which contains a list of filenames in the DicomFilePath or filename column
 * Directory - select a directory which contains DICOM files
 * Directory recursive - as above but looks for DICOM files in any subdirectory too
@@ -214,9 +214,15 @@ usage: pydicom_images.py [-v] [-x] [-i] [-f FORMAT] files...
                         output format png or tiff
 ```
 
-## Database schema
+## Database
 
-See the `dicomrectdb.md` document.
+The database file is called `dcmaudit.sqlite.db`. It can be stored in any directory
+and you can choose the location on the command line or using the menu.
+
+The contents of the database can be exported as CSV files, one file for the 
+list of tagged filenames and one file for the list of rectangles.
+
+For the database schema please see the `dicomrectdb.md` document.
 
 ## Future work
 
