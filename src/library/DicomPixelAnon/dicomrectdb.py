@@ -1,6 +1,7 @@
 """ The DicomRectDB maintains a database of DicomRect and DicomRectText objects.
 """
 
+import csv
 import datetime
 import getpass # for getuser
 import json
@@ -193,6 +194,32 @@ class DicomRectDB():
         self.db.commit()
         self.db(self.db.DicomRects.filename == filename).delete()
         self.db.commit()
+
+
+    def query_all_csv(self, fd = sys.stdout, query_rects = False, query_tags = False):
+        """ Only for debugging, prints all rectangles and comments in the DB.
+        Sorts by last_modified so most recent is at the end.
+        Output is in CSV format.
+        If you only want rects or tags then set the other query_X=False.
+        Remember you must open the fd using open(filename, newline='')
+        """
+        csv_writer = csv.writer(fd)
+        if query_rects:
+            first = True
+            for row in self.db(self.db.DicomRects).select(orderby = self.db.DicomRects.last_modified):
+                rowdict = row.as_dict()
+                if first:
+                    csv_writer.writerow(rowdict.keys())
+                csv_writer.writerow(rowdict.values())
+                first = False
+        if query_tags:
+            first = True
+            for row in self.db(self.db.DicomTags).select(orderby = self.db.DicomTags.last_modified):
+                rowdict = row.as_dict()
+                if first:
+                    csv_writer.writerow(rowdict.keys())
+                csv_writer.writerow(rowdict.values())
+                first = False
 
 
     def query_all(self, fd = sys.stdout, query_rects = True, query_tags = True):

@@ -196,11 +196,13 @@ class App:
         self.menu.add_command(label='Help [?]', command=lambda: self.help_button_pressed(None))
         # Create the Open menu as the second menu item
         self.openmenu = tkinter.Menu(self.menu)
-        self.menu.add_cascade(label = 'Open', menu = self.openmenu)
+        self.menu.add_cascade(label = 'File', menu = self.openmenu)
         self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
+        self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
+        self.openmenu.add_command(label='Export database of tagged files as CSV', command=lambda: self.save_db_csv_event(None, rects=False, tags=True))
         # Create an Options menu
         self.optmenu = tkinter.Menu(self.menu)
         self.menu.add_cascade(label = 'Options', menu = self.optmenu)
@@ -323,8 +325,22 @@ class App:
                 type=tkinter.messagebox.OKCANCEL)
             if rc == 'cancel':
                 return
-        print('found %s' % os.path.join(directory, 'dcmaudit.sqlite.db'))
         DicomRectDB.set_db_path(directory)
+
+    def save_db_csv_event(self, event, rects = False, tags = False):
+        """ Pop up a file dialog box asking for a CSV filename.
+        Start in same directory as last time it was used.
+        Saves the database to the CSV file.
+        """
+        filename = tkinter.filedialog.asksaveasfilename(title='Select CSV filename', initialdir=self.starting_directory)
+        if not filename:
+            return
+        self.starting_directory = os.path.dirname(os.path.abspath(filename))
+        fd = open(filename, 'w', newline='')
+        db = DicomRectDB()
+        db.query_all_csv(fd = fd, query_rects = rects, query_tags = tags)
+        fd.close()
+
 
     def tag_file_event(self, event):
         """ Toggle the tag for a file
