@@ -195,27 +195,35 @@ class DicomRectDB():
         self.db.commit()
 
 
-    def query_all(self):
+    def query_all(self, fd = sys.stdout, query_rects = True, query_tags = True):
         """ Only for debugging, prints all rectangles and comments in the DB.
         Sorts by last_modified so most recent is at the end.
         Output is in JSON format, { "rects":[], "tags":[] }
+        If you only want rects or tags then set the other query_X=False.
         """
-        rc = '{"rects":[\n'
-        first = True
-        for row in self.db(self.db.DicomRects).select(orderby = self.db.DicomRects.last_modified):
-            rc += '%s%s\n' % (('' if first else ','), row.as_json())
-            first = False
-        rc += '],"tags":[\n'
-        first = True
-        for row in self.db(self.db.DicomTags).select(orderby = self.db.DicomTags.last_modified):
-            imagetype = row['ImageType']
-            if imagetype:
-                # handle old-format databases where string was Python not JSON
-                row['ImageType'] = json.loads(imagetype.replace("'", '"'))
-            rc += '%s%s\n' % (('' if first else ','), row.as_json())
-            first = False
-        rc += ']\n}\n'
-        print(rc)
+        rc = '{'
+        if query_rects:
+            rc += '"rects":[\n'
+            first = True
+            for row in self.db(self.db.DicomRects).select(orderby = self.db.DicomRects.last_modified):
+                rc += '%s%s\n' % (('' if first else ','), row.as_json())
+                first = False
+            rc += ']'
+        if query_rects and query_tags:
+            rc += ','
+        if query_tags:
+            rc += '"tags":[\n'
+            first = True
+            for row in self.db(self.db.DicomTags).select(orderby = self.db.DicomTags.last_modified):
+                imagetype = row['ImageType']
+                if imagetype:
+                    # handle old-format databases where string was Python not JSON
+                    row['ImageType'] = json.loads(imagetype.replace("'", '"'))
+                rc += '%s%s\n' % (('' if first else ','), row.as_json())
+                first = False
+            rc += ']\n'
+        rc += '}\n'
+        print(rc, file=fd)
         return rc
 
     def query_rect_filenames(self):
