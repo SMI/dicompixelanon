@@ -200,6 +200,7 @@ class App:
         self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         # Create an Options menu
         self.optmenu = tkinter.Menu(self.menu)
         self.menu.add_cascade(label = 'Options', menu = self.optmenu)
@@ -307,6 +308,23 @@ class App:
             filenames = [os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
         self.set_image_list(FileList(filenames))
         self.load_next_file()
+
+    def open_db_directory_event(self, event):
+        """ Pop up a file dialog box asking for a directory.
+        Use this as the new database directory.
+        """
+        directory = tkinter.filedialog.askdirectory(title='Select directory containing dcmaudit.sqlite.db', initialdir=self.starting_directory)
+        if not directory:
+            return
+        if not os.path.isfile(os.path.join(directory, 'dcmaudit.sqlite.db')):
+            rc = tkinter.messagebox.showerror(title="No database",
+                message='That directory does not contain dcmaudit.sqlite.db'
+                    'Do you want to create a new database in this directory?',
+                type=tkinter.messagebox.OKCANCEL)
+            if rc == 'cancel':
+                return
+        print('found %s' % os.path.join(directory, 'dcmaudit.sqlite.db'))
+        DicomRectDB.set_db_path(directory)
 
     def tag_file_event(self, event):
         """ Toggle the tag for a file
