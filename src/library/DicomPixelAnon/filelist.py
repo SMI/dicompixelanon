@@ -5,6 +5,7 @@ It was intended to do more than this, but it's quite simple right now.
 
 import csv
 import glob
+import logging
 import os
 
 class FileList:
