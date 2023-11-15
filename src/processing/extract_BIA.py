@@ -13,7 +13,7 @@ import bson.json_util
 import pymongo
 
 # List of modalities in the image_OTHER collection:
-other_collection = [ "PX" ]
+other_collection = [ "PX", "IO" ]
 
 modalities = [
   "PX",
