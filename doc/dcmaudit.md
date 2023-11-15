@@ -83,13 +83,24 @@ When the image is displayed it will automatically have rectangles redacted if
 * the database contains rectangles for this filename
 * the metadata tags match some deid rules
 (see [dicom_redact](dicom_redact.md) and [deid rules](deidrules.md) documents)
-* Ultrasound regions are only redacted when defined in deid rules.
+* Ultrasound regions taken from tags in the DICOM file.
+These redactions are controlled by options that can be changed in the menu.
+Typically US regions are already redacted because of a rule in the deid
+configuration so the separate US region option is not needed in this case.
+
+Rectangles with a cross through them indicate possible redaction regions.
+There are several types:
+* those found for this filename in the database,
+* those which match a similar file in the database,
+* those which are derived from a rule in the deid configuration,
+* those which are taken from Ultrasound Region tags in the DICOM file.
+The display of these rectangles are controlled by options that can be changed in the menu.
 
 A set of suggested rectangles may be displayed if the metadata matches
 a similar file in the database, typically same Manufacturer, Model, and
 image dimensions, because you've just edited one previously.
 
-A rectangle is displayed and can be dragged around the image.
+A rectangle with drag-corner boxes is displayed and can be dragged around the image.
 If you drag from the middle of the rectangle it will stick inside the image.
 When the rectangle covers the area where text might be found it can be
 marked as such and the information stored in a database.
