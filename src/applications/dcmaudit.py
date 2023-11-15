@@ -144,8 +144,12 @@ class App:
         # Settings (have to be set after creating root window)
         self.skip_marked_files = tkinter.BooleanVar(value = True)
         self.skip_untagged_files = tkinter.BooleanVar(value = False)
-        self.highlight_deid_rects = False
-        self.highlight_ultrasound_rects = False
+        self.highlight_rects = tkinter.BooleanVar(value = False)
+        self.highlight_suggested_rects = tkinter.BooleanVar(value = True)
+        self.highlight_deid_rects = tkinter.BooleanVar(value = False)
+        self.highlight_ultrasound_rects = tkinter.BooleanVar(value = False)
+        self.redact_deid_rects = tkinter.BooleanVar(value = True)
+        self.redact_us_rects = tkinter.BooleanVar(value = False)
         self.starting_directory = os.environ.get('PACS_ROOT', '.')
 
         # Main window contains an image
@@ -209,6 +213,14 @@ class App:
         self.menu.add_cascade(label = 'Options', menu = self.optmenu)
         self.optmenu.add_checkbutton(label = 'Ignore files already marked as done', variable = self.skip_marked_files, onvalue = True, offvalue = False)
         self.optmenu.add_checkbutton(label = 'Only view files which have been tagged', variable = self.skip_untagged_files, onvalue = True, offvalue = False)
+        self.optmenu.add_separator()
+        self.optmenu.add_checkbutton(label = 'Redact deid-rules regions', variable = self.redact_deid_rects, onvalue = True, offvalue = False)
+        self.optmenu.add_checkbutton(label = 'Redact ultrasound regions (DICOM tags)', variable = self.redact_us_rects, onvalue = True, offvalue = False)
+        self.optmenu.add_separator()
+        self.optmenu.add_checkbutton(label = 'Highlight redacted rectangles (database)', variable = self.highlight_rects, onvalue = True, offvalue = False)
+        self.optmenu.add_checkbutton(label = 'Highlight suggested rectangles (similar images)', variable = self.highlight_suggested_rects, onvalue = True, offvalue = False)
+        self.optmenu.add_checkbutton(label = 'Highlight deid-rules rectangles', variable = self.highlight_deid_rects, onvalue = True, offvalue = False)
+        self.optmenu.add_checkbutton(label = 'Highlight ultrasound rectangles (DICOM tags)', variable = self.highlight_ultrasound_rects, onvalue = True, offvalue = False)
         # Add other top-level menu items
         self.menu.add_command(label='Redact [r] the chosen rect', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
@@ -890,16 +902,23 @@ class App:
             draw.line([dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()], fill=colour)
             draw.line([dicomrect.R(), dicomrect.T(), dicomrect.L(), dicomrect.B()], fill=colour)
 
+        # Highlight redacted rectangles
+        if self.highlight_rects.get():
+            for dicomrect in dicomrectlist:
+                logging.debug('PLOT highlighting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+                plot_highlight_rect(dicomrect, 0*App.outline_colour)
+
         # Highlight suggested rectangles
-        for dicomrect in dicomtransrectlist:
-            #logging.debug('PLOT highlighting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
-            plot_highlight_rect(dicomrect, App.outline_colour)
+        if self.highlight_suggested_rects.get():
+            for dicomrect in dicomtransrectlist:
+                #logging.debug('PLOT highlighting %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
+                plot_highlight_rect(dicomrect, App.outline_colour)
 
         # Highlight rectangles from the deid rules, but these will already
         # have been added to the redacted list in dicomrectlist so this is
         # not necessary but it can help you to see which rects are from deid.
         # XXX using a class member not a function parameter.
-        if self.highlight_deid_rects:
+        if self.highlight_deid_rects.get():
             for dicomrect in self.deid_rects:
                 #logging.debug('PLOT deid_rects %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
                 plot_highlight_rect(dicomrect, App.deid_rect_colour)
@@ -908,7 +927,7 @@ class App:
         # have been added to the redacted list in dicomrectlist so this is
         # not necessary but it can help you to see which rects are from ultrasound.
         # XXX using a class member not a function parameter.
-        if self.highlight_ultrasound_rects:
+        if self.highlight_ultrasound_rects.get():
             for dicomrect in self.us_rects:            
                 #logging.debug('PLOT us_rects %s %s %s %s' % (dicomrect.L(), dicomrect.T(), dicomrect.R(), dicomrect.B()))
                 plot_highlight_rect(dicomrect, App.us_rect_colour)
@@ -1011,10 +1030,13 @@ class App:
             #logging.debug('RECTS ultrasound: %s' % self.us_rects)
             logging.debug('RECTS %d from database, %d from similar files, %d from deid rules, (%d from ultrasound not used)' %
                 (len(self.redacted_rects), len(self.possible_rects), len(self.deid_rects), len(self.us_rects)))
+            if self.redact_us_rects.get():
+                self.redacted_rects.extend(self.us_rects)
 
             # Add deid rects to the list to be redacted.
             # XXX should add to suggested rectangles list instead?
-            self.redacted_rects.extend(self.deid_rects)
+            if self.redact_deid_rects.get():
+                self.redacted_rects.extend(self.deid_rects)
 
             # Resize to fit screen and apply rectangles, trigger window refresh
             self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
