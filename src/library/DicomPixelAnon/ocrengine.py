@@ -152,7 +152,7 @@ class OCR:
                 XXX with paragraph=False the tuple would include conf too.
                 We will assume it's done its own threshold and set conf=1.
                 """
-                for (bbox, txt) in ocr_res:
+                for (bbox, txt, *conf) in ocr_res:
                     if len(txt) < OCR.min_string_length:
                         continue
                     res = {
@@ -175,7 +175,8 @@ class OCR:
                 img = numpy.divide(img, (max+256)/256).astype(numpy.uint8)
             # First OCR the full size image
             # (but be aware easyocr scales down if > 2560 anyway!)
-            res = self.easyreader.readtext(img, paragraph=True, rotation_info=rotates)
+            parm = { 'paragraph': False, 'rotation_info': rotates, }
+            res = self.easyreader.readtext(img, **parm)
             easyocr_to_list(res, img_scale=1, results_list=results)
             if OCR.easy_reduce:
                 # Scale down to catch text made from spaced-out dot pixels
@@ -184,7 +185,7 @@ class OCR:
                 img_half = cv2.resize(img,
                     dsize = (img.shape[1]//2, img.shape[0]//2),
                     interpolation = cv2.INTER_AREA)
-                res = self.easyreader.readtext(img_half, paragraph=True, rotation_info=rotates)
+                res = self.easyreader.readtext(img_half, **parm)
                 # Append, even though rectangles may overlap, safer this way
                 easyocr_to_list(res, img_scale=2, results_list=results)
         else:
