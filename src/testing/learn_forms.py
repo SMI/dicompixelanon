@@ -18,6 +18,7 @@
 #     dog
 
 import argparse
+import os
 import sys
 import torch
 import torchvision
@@ -64,6 +65,10 @@ if n_epochs > 0:
     # Dataloaders
     trainloader = torch.utils.data.DataLoader(train_data, shuffle = True, batch_size=16)
     testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
+else:
+    test_data = datasets.ImageFolder(testdir, transform=test_transforms)
+    testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
+
 
 # ----------------------------------------------------------------------
 # Define the neural network model
