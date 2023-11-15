@@ -39,6 +39,7 @@ model_file = args.modelfile if args.modelfile else 'learn_forms_model.pytorch.pt
 traindir = args.traindir if args.traindir else '/nfs/smi/home/smi/MongoDbQueries/Scanned_Forms/img/training'
 testdir  = args.valdir   if args.valdir   else '/nfs/smi/home/smi/MongoDbQueries/Scanned_Forms/img/validation'
 
+load_as_rgb = True
 
 # ----------------------------------------------------------------------
 # PyTorch mechanisms
@@ -250,19 +251,32 @@ if args.image:
     import pydicom
     from DicomPixelAnon.dicomimage import DicomImage
     for filename in args.image:
+        # Try to load it as a DICOM file, if it fails load normal image
         try:
             di = DicomImage(filename)
             img = di.image(frame=0)
         except:
-            img = Image.open(filename)
+            if load_as_rgb:
+                img = Image.open(filename).convert('RGB')
+            else:
+                img = Image.open(filename)
+        if load_as_rgb:
+            xform = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # for RGB
+        else:
+            xform = transforms.Normalize((0.5), (0.5)) # for Greyscale
         data_transforms = transforms.Compose([
             transforms.Resize((224,224)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # for RGB
-            #transforms.Normalize((0.5), (0.5)) # for Greyscale
+            xforms,
             ])
         img = data_transforms(img).to(device)
-        output = model(img.unsqueeze(0)) # convert from 3D into 4D by adding a fake batch dimension
+        # Save a debug image
+        torchvision.transforms.ToPILImage()(img).save(os.path.basename(filename) + '.png')
+        # Run the model
+        if load_as_rgb:
+            output = model(img.unsqueeze(0)) # convert from 3D into 4D by adding a fake batch dimension
+        else:
+            output = model(img)
         sig = torch.sigmoid(output)
         if sig < 0.5:
             print('cat %s (%s)' % (filename, sig[0][0]))
