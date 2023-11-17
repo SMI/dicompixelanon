@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 
+# Requirements:
+#  tqdm, torch, torchvision [matplotlib]
+# You will need "https://download.pytorch.org/models/resnet18-f37072fd.pth"
+# in "/home/arb/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth"
+# (it will be downloaded automatically if not already present).
+
+# Usage:
+#  create a CSV file containing two columns, class (integer) and filename
+#  The filenames can be relative as a root_dir may be specified.
+#  There should only be two classes 0 and 1 (but you can use more?)
+#  All files should be DICOM, only first frame is used, it is converted
+#  to greyscale when loaded (although training is done using a model
+#  trained on RGB so greyscale is converted to RGB internally).
+
+# References:
 # Binary image classification:
 #  https://towardsdatascience.com/binary-image-classification-in-pytorch-5adf64f8c781
 # Uses dataset https://www.kaggle.com/datasets/biaiscience/dogs-vs-cats
@@ -9,36 +24,36 @@
 # which references this (1-channel mono images):
 #  https://pytorch.org/tutorials/recipes/recipes/defining_a_neural_network.html
 
-# create directories:
-#   training
-#     cat
-#     dog
-#   validation
-#     cat
-#     dog
-
 import argparse
+import csv
 import os
+import random
 import sys
 import torch
 import torchvision
 from torchvision import datasets, transforms
+from DicomPixelAnon.dicomimage import DicomImage
 
 # Command line parameters
 parser = argparse.ArgumentParser(description='Detect scanned forms vs clinical images')
 parser.add_argument('-d', '--debug', action="store_true", help='debug')
-parser.add_argument('-e', '--epochs', dest='epochs', action="store", help='number of epoch runs during training')
-parser.add_argument('-m', '--model', dest='modelfile', action="store", help='filename to load/save trained model')
-parser.add_argument('-t', '--traindir', dest='traindir', action="store", help='directory of training images')
-parser.add_argument('-v', '--valdir', dest='valdir', action="store", help='directory of validation images')
+parser.add_argument('-e', '--epochs', dest='epochs', action="store", default='10', help='number of epoch runs during training, or 0 to run only testing inference')
+parser.add_argument('-m', '--model', dest='modelfile', action="store", default='learn_forms_model.pytorch.pth', help='filename to load/save trained model')
+parser.add_argument('-r', '--rootdir', dest='rootdir', action="store", help='directory prefix for images')
+parser.add_argument('-t', '--traincsv', dest='traincsv', action='store', help='CSV of training images')
+parser.add_argument('-v', '--valcsv', dest='valcsv', action="store", help='CSV of validation images')
 parser.add_argument('-i', '--image', dest='image', action="store", nargs='*', help='image to test (an image file or a DICOM file)')
 args = parser.parse_args()
 
-n_epochs = int(args.epochs) if args.epochs else 10
-model_file = args.modelfile if args.modelfile else 'learn_forms_model.pytorch.pth'
-traindir = args.traindir if args.traindir else '/nfs/smi/home/smi/MongoDbQueries/Scanned_Forms/img/training'
-testdir  = args.valdir   if args.valdir   else '/nfs/smi/home/smi/MongoDbQueries/Scanned_Forms/img/validation'
+n_epochs = int(args.epochs)
+model_file = args.modelfile
+split_csv_for_testing = (args.traincsv == args.valcsv)
 
+# If no training data then assume only test/inference
+if not args.traincsv:
+    n_epochs = 0
+
+# Original model was trained on RGB images so we should fine-tune/test it using RGB
 load_as_rgb = True
 
 # ----------------------------------------------------------------------
@@ -58,18 +73,67 @@ test_transforms = transforms.Compose([transforms.Resize((224,224)),
                                           std=[0.229, 0.224, 0.225],),
                                       ])
 
+class DicomDataset(torch.utils.data.Dataset):
+    """ Read a CSV file of class,filename.
+    If you want the same CSV to serve as both training and testing then
+    pass it with a percentage e.g. 80 or 20 and random rows will be selected.
+    Secret option: if you set is_dicom then the csv_file is actually just a
+    single DICOM filename, and given a class of 0, which is only useful for
+    inference not training of course.
+    """
+
+    def __init__(self, csv_file, root_dir = None, transform = None, percent = 100, is_dicom = False):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.file_list = list() # list of {class,filename}
+        if percent > 1:
+            percent = percent / 100.0
+        if is_dicom:
+            self.file_list.append( { 'class':0, 'filename': csv_file } )
+            return
+        fd = open(csv_file)
+        rdr = csv.DictReader(fd)
+        for row in rdr:
+            if random.random() < percent:
+                self.file_list.append(row)
+        fd.close()
+        if not self.file_list:
+            raise Exception('Samping %f percent from %s returned no rows' % (percent*100.0, csv_file))
+
+    def __len__(self):
+        return len(self.file_list)
+
+    def __getitem__(self, idx):
+        item = self.file_list[idx]
+        item_class = int(item['class'])
+        item_path = item['filename']
+        if self.root_dir:
+            item_path = os.path.join(self.root_dir, item_path)
+        # Read DICOM file
+        item_dicom = DicomImage(item_path)
+        # Extract greyscale image from the first frame, then convert to RGB
+        img = item_dicom.image(frame = 0).convert('RGB')
+        # Convert to tensor
+        if self.transform:
+            img = self.transform(img)
+        return (img, item_class)
+
+# Tell DicomDataset to only load a certain random amount of rows
+percent_train = 80 if split_csv_for_testing else 100
+percent_test  = 20 if split_csv_for_testing else 100
+
+# Only load training data if needed
 if n_epochs > 0:
-    # Datasets
-    train_data = datasets.ImageFolder(traindir, transform=train_transforms)
-    test_data = datasets.ImageFolder(testdir, transform=test_transforms)
-
-    # Dataloaders
+    train_data = DicomDataset(args.traincsv, root_dir = args.rootdir,
+        transform = train_transforms,
+        percent = percent_train)
     trainloader = torch.utils.data.DataLoader(train_data, shuffle = True, batch_size=16)
-    testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
-else:
-    test_data = datasets.ImageFolder(testdir, transform=test_transforms)
-    testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
 
+# Load test data
+test_data = DicomDataset(args.valcsv, root_dir = args.rootdir,
+    transform = test_transforms,
+    percent = percent_test)
+testloader = torch.utils.data.DataLoader(test_data, shuffle = True, batch_size=16)
 
 # ----------------------------------------------------------------------
 # Define the neural network model
@@ -91,6 +155,7 @@ def make_train_step(model, optimizer, loss_fn):
         optimizer.zero_grad()
         #optimizer.cleargrads()
         return loss
+    # Return the new function
     return train_step
 
 # Don’t write a network from scratch, adapt a pre-trained model by adding a head composed of other dense layers.
@@ -254,7 +319,7 @@ if args.image:
         # Try to load it as a DICOM file, if it fails load normal image
         try:
             di = DicomImage(filename)
-            img = di.image(frame=0)
+            img = di.image(frame=0).convert('RGB')
         except:
             if load_as_rgb:
                 img = Image.open(filename).convert('RGB')
@@ -267,7 +332,7 @@ if args.image:
         data_transforms = transforms.Compose([
             transforms.Resize((224,224)),
             transforms.ToTensor(),
-            xforms,
+            xform,
             ])
         img = data_transforms(img).to(device)
         # Save a debug image
@@ -279,9 +344,9 @@ if args.image:
             output = model(img)
         sig = torch.sigmoid(output)
         if sig < 0.5:
-            print('cat %s (%s)' % (filename, sig[0][0]))
+            print('class 0 %s (%s)' % (filename, sig[0][0]))
         else:
-            print('dog %s (%s)' % (filename, sig[0][0]))
+            print('class 1 %s (%s)' % (filename, sig[0][0]))
 else:
     import numpy as np
     correct = 0
