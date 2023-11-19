@@ -8,6 +8,7 @@
 """
 
 from copy import deepcopy
+from fastDamerauLevenshtein import damerauLevenshtein
 
 
 class Rect:
@@ -204,7 +205,6 @@ class DicomRectText(DicomRect):
         sim_lim = 0.9 # text must be very similar to be same rectangle
         _, txt, _, _ = self.text_tuple()
         _, TXT, _, _ = other_rect.text_tuple()
-        from fastDamerauLevenshtein import damerauLevenshtein
         txt_sim = damerauLevenshtein(txt, TXT, similarity=True)
         if txt_sim < sim_lim:
             return False
