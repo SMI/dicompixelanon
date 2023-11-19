@@ -9,9 +9,11 @@ Save the results to CSV format or to a database.
 ```
 usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
                          [--csv filename.csv or "stdout"]
-                         [--db database_dir or "default"]
+                         [--db database_dir or "default"] [--review]
                          [--csv-header/--no-csv-header]
                          [--rects] [--no-overlays]
+                         [--use-ultrasound-regions]
+                         [--except-ultrasound-regions]
                          files...
 
  -v, --verbose         more verbose (show INFO messages)
@@ -21,8 +23,12 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
                        (add ,model if needed)
  --use-ultrasound-regions
                        collect rectangles from Ultrasound region tags
+ --except-ultrasound-regions
+                       ignore OCR inside rectangles from Ultrasound region tags
  --db database_dir     output to database in directory, or use "default" for the default directory
+ --review              Ignore database and perform OCR again
  --csv file.csv        output to CSV filename, or use "stdout" for stdout
+ --csv-header          output CSV header when using --csv
  --rects               Output each OCR rectangle separately with coordinates
  --no-overlays         Do not process any DICOM overlays (default processes overlays)
 ```

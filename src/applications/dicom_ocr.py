@@ -85,6 +85,7 @@ def process_image(img, filename = None,
         ocr_engine: OCR = None, nlp_engine: NER = None,
         output_rects = False,
         us_regions = False,
+        except_us_regions = False,
         imagetype = '', manufacturer = '', bia = '',
         csv_writer = None, db_writer: DicomRectDB = None):
     """ OCR the image (numpy array) extracted from a DICOM
@@ -95,6 +96,10 @@ def process_image(img, filename = None,
     db_writer must be an instance of DicomRectDB() or None.
     frame, overlay are integers (-1 if NA).
     us_regions=True will add rectangles from Ultrasound tags.
+    except_us_regions=True will ignore text found within
+    rectangles from Ultrasound tags (so there's no duplication,
+    if you're redacting US regions anyway, and so you can check
+    if the US regions are sufficient by looking for text outside).
     output_rects=True will output each OCR rectangle individually.
     imagetype, manufacturer, bia are the dicom tag string,
     although manufacturer may be specially crafted (see elsewhere).
@@ -112,6 +117,9 @@ def process_image(img, filename = None,
     # to avoid adding rectangles with every other frame/overlay?
     if us_regions:
         ocr_rectlist = read_DicomRectText_list_from_region_tags(filename = filename)
+
+    if except_us_regions:
+        us_rectlist = read_DicomRectText_list_from_region_tags(filename = filename)
 
     # Run OCR
     debug('OCR(%s,%s) %s (%d,%d)' % (ocr_engine_name, nlp_engine_name, filename, frame, overlay))
@@ -142,6 +150,13 @@ def process_image(img, filename = None,
     # Filter out huge rectangles
     ocr_rectlist = filter_DicomRectText_list_by_fontsize(ocr_rectlist)
 
+    # Filter out text inside US regions if required
+    if except_us_regions:
+        def rect_within_rectlist(rect, rectlist):
+            return any([r.contains_rect(rect) for r in rectlist])
+        ocr_retlist = [ rect for rect in ocr_rectlist if not rect_within_rectlist(rect, us_rectlist) ]
+
+
     # Output in CSV format
     if csv_writer:
         for rect in ocr_rectlist:
@@ -166,7 +181,7 @@ def process_image(img, filename = None,
 
 # ---------------------------------------------------------------------
 # OCR every image and overlay in a DICOM file
-def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, output_rects = False, ignore_overlays = False, us_regions = False, csv_writer = None, db_writer: DicomRectDB = None):
+def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, output_rects = False, ignore_overlays = False, us_regions = False, except_us_regions = False, csv_writer = None, db_writer: DicomRectDB = None):
 
     # Attempt to read and parse as DICOM
     try:
@@ -201,6 +216,7 @@ def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, outp
     # Additional parameters passes to process_image()
     meta = {
         'us_regions':    us_regions,
+        'except_us_regions':    except_us_regions,
         'ocr_engine':    ocr_engine,
         'nlp_engine':    nlp_engine,
         'output_rects':  output_rects,
@@ -241,6 +257,7 @@ if __name__ == "__main__":
     parser.add_argument('--no-csv-header', action="store_true", help='do not output CSV header when using --csv', default=False)
     parser.add_argument('--pii', action='store', help='Check OCR output for PII using "spacy" or "flair" or "stanford" or "stanza" (add ,model if needed)', default=None)
     parser.add_argument('--use-ultrasound-regions', action='store_true', help='collect rectangles from Ultrasound region tags', default=False)
+    parser.add_argument('--except-ultrasound-regions', action='store_true', help='ignore OCR inside rectangles from Ultrasound region tags', default=False)
     parser.add_argument('--rects', action="store_true", help='Output each OCR rectangle separately with coordinates', default=False)
     parser.add_argument('--no-overlays', action="store_true", help='Do not process any DICOM overlays', default=False)
     parser.add_argument('--review', action="store_true", help='Ignore database and perform OCR again', default=False)
@@ -318,4 +335,5 @@ if __name__ == "__main__":
         process_dicom(file, ocr_engine = ocr_engine, nlp_engine = nlp_engine,
             output_rects = args.rects, ignore_overlays = args.no_overlays,
             us_regions = args.use_ultrasound_regions,
+            except_us_regions = args.except_ultrasound_regions,
             csv_writer = csv_writer, db_writer = db_writer)
