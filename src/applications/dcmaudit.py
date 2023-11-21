@@ -299,12 +299,22 @@ class App:
         """ Pop up a file dialog box asking for one or more files.
         Start in same directory as last time it was used.
         Clears the existing list and adds these file to list.
+        Can be a CSV file, or even a database (not the same database
+        as the one which will be used to record new tags/rectangles).
         """
         filenames = tkinter.filedialog.askopenfilenames(title='Select files', initialdir=self.starting_directory, multiple=True)
         if not filenames:
             return
         self.starting_directory = os.path.dirname(os.path.abspath(filenames[0]))
-        self.set_image_list(FileList(list(filenames)))
+        dicomfilelist = FileList(list(filenames))
+        # If you select a database then all files with rects or tags are added to the list
+        for fn in filenames:
+            if DicomRectDB.db_filename in fn:
+                tmpdb = DicomRectDB(filename = fn)
+                dicomfilelist = FileList(tmpdb.query_rect_filenames() + tmpdb.query_tag_filenames())
+        # Any of the selected files can be a CSV file which will be read
+        # and the filename or DicomFilePath column will be added to the list
+        self.set_image_list(dicomfilelist)
         self.load_next_file()
 
     def open_directory_event(self, event, recursive = False):
@@ -328,12 +338,12 @@ class App:
         """ Pop up a file dialog box asking for a directory.
         Use this as the new database directory.
         """
-        directory = tkinter.filedialog.askdirectory(title='Select directory containing dcmaudit.sqlite.db', initialdir=self.starting_directory)
+        directory = tkinter.filedialog.askdirectory(title='Select directory containing '+DicomRectDB.db_filename, initialdir=self.starting_directory)
         if not directory:
             return
-        if not os.path.isfile(os.path.join(directory, 'dcmaudit.sqlite.db')):
+        if not os.path.isfile(os.path.join(directory, DicomRectDB.db_filename)):
             rc = tkinter.messagebox.showerror(title="No database",
-                message='That directory does not contain dcmaudit.sqlite.db'
+                message='That directory does not contain '+DicomRectDB.db_filename+'. '
                     'Do you want to create a new database in this directory?',
                 type=tkinter.messagebox.OKCANCEL)
             if rc == 'cancel':

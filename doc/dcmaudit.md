@@ -60,7 +60,10 @@ optional arguments:
 
 A set of files can also be loaded by starting the program and using the
 `File` menu to open:
-* Files - select a set of DICOM files, or a CSV file which contains a list of filenames in the DicomFilePath or filename column
+* Files - select a set of DICOM files from
+  - manually select one or more DICOM filenames
+  - or a CSV file which contains a list of filenames in the DicomFilePath or filename column
+  - or a database where the filenames are taken from both DicomRects and DicomTags tables
 * Directory - select a directory which contains DICOM files
 * Directory recursive - as above but looks for DICOM files in any subdirectory too
 
