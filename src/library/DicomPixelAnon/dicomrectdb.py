@@ -24,6 +24,7 @@ class DicomRectDB():
     # Class static variable holding path to database, needs trailing slash.
     # Set the value using set_db_path('dir/') or DicomRectDB.db_path = 'dir/'
     db_path = ''
+    db_filename = 'dcmaudit.sqlite.db'
 
     @staticmethod
     def set_db_path(path):
@@ -32,16 +33,24 @@ class DicomRectDB():
         """
         DicomRectDB.db_path = path
 
-    def __init__(self):
+    def __init__(self, filename = None):
         """ Construct a DicomRectDB in the path set by set_db_path()
         with the filename dcmaudit.sqlite.db, and open a connection to this
         database which will be kept open (not exclusively) while this object exists.
+        If the filename is given then it's used instead of the class vars
+        but this is not the expected way to construct this object.
         """
         # default to current directory if given path doesn't exist
         if DicomRectDB.db_path and not os.path.isdir(DicomRectDB.db_path):
             logging.warning('Database path does not exist: %s (will use current directory)' % DicomRectDB.db_path)
             DicomRectDB.db_path = ''
-        self.db=DAL('sqlite://dcmaudit.sqlite.db', folder = DicomRectDB.db_path, attempts=60) # debug=True
+        if filename:
+            dbdir = os.path.dirname(filename)
+            dbfile = os.path.basename(filename)
+        else:
+            dbdir = DicomRectDB.db_path
+            dbfile = DicomRectDB.db_filename
+        self.db=DAL('sqlite://'+dbfile, folder = dbdir, attempts=60) # debug=True
         self.db.define_table('DicomRects',
             Field('filename'),
             Field('top', type='integer'),
@@ -182,7 +191,7 @@ class DicomRectDB():
         because True means it needs to be reviewed again.
         """
         row = self.db(self.db.DicomTags.filename == filename).select()
-        if row and row[0].mark == False:
+        if row and not row[0].mark:
             return True
         return False
 
