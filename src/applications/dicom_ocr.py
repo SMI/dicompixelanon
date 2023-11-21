@@ -7,21 +7,20 @@ import argparse
 import csv
 import glob
 import logging
-import numpy as np
 import os
 import pydicom
 import sys
-from PIL import Image
+import numpy as np
 from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon.dicomrectdb import DicomRectDB
-from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText
-from DicomPixelAnon.rect import rect_exclusive_list, filter_DicomRectText_list_by_fontsize
+from DicomPixelAnon.rect import DicomRectText
+from DicomPixelAnon.rect import filter_DicomRectText_list_by_fontsize
 from DicomPixelAnon.ultrasound import read_DicomRectText_list_from_region_tags
-import DicomPixelAnon.torchmem
+import DicomPixelAnon.torchmem # ignore W0611 unused-import
 
 
 # ---------------------------------------------------------------------
