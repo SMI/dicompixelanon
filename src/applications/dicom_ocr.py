@@ -133,7 +133,7 @@ def process_image(img, filename = None,
                 ocr_text += item['text'] + ' '
                 is_sensitive = check_for_pii(nlp_engine, item['text'])
                 ocr_rectlist.append( DicomRectText(arect = item['rect'],
-                    frame=frame, overlay=overlay, 
+                    frame=frame, overlay=overlay,
                     ocrengine=ocr_engine_enum, ocrtext=item['text'],
                     nerengine=nlp_engine_enum, nerpii=is_sensitive) )
         # Now append the whole string with a null rectangle
@@ -153,7 +153,7 @@ def process_image(img, filename = None,
     if except_us_regions:
         def rect_within_rectlist(rect, rectlist):
             return any([r.contains_rect(rect) for r in rectlist])
-        ocr_retlist = [ rect for rect in ocr_rectlist if not rect_within_rectlist(rect, us_rectlist) ]
+        ocr_rectlist = [ rect for rect in ocr_rectlist if not rect_within_rectlist(rect, us_rectlist) ]
 
 
     # Output in CSV format
