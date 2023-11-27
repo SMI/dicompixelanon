@@ -1041,7 +1041,9 @@ class App:
             self.possible_rects = db.query_similar_rects(filename, self.dcm.get_selected_metadata(), frame=frame, overlay=overlay)
             #logging.debug('RECTS similar file: %s' % self.possible_rects)
 
-            # Get a list of rectangles which may apply to this file from the deid recipes
+            # Get a list of suggested rectangles which may apply to this file from the deid recipes
+            # XXX only do this if self.highlight_suggested_rects.get() ?
+            # that would be faster but if options menu turned on then list would be empty
             self.deid_rects = deidrules.detect(self.dcm.get_dataset())
             #logging.debug('RECTS deid rules: %s' % self.deid_rects)
 
