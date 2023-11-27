@@ -306,12 +306,7 @@ class App:
         if not filenames:
             return
         self.starting_directory = os.path.dirname(os.path.abspath(filenames[0]))
-        dicomfilelist = FileList(list(filenames))
-        # If you select a database then all files with rects or tags are added to the list
-        for fn in filenames:
-            if DicomRectDB.db_filename in fn:
-                tmpdb = DicomRectDB(filename = fn)
-                dicomfilelist = FileList(tmpdb.query_rect_filenames() + tmpdb.query_tag_filenames())
+        dicomfilelist = self.construct_FileList(list(filenames))
         # Any of the selected files can be a CSV file which will be read
         # and the filename or DicomFilePath column will be added to the list
         self.set_image_list(dicomfilelist)
@@ -664,6 +659,21 @@ class App:
         self.wait_flag.set(App.RC_PREVIMAGE)
 
     # Internal functionality
+
+    @staticmethod
+    def construct_FileList(file_list):
+        """ Given a list() of filenames construct a FileList object.
+        The special feature of this function is that it checks for a
+        database and pulls out the filenames from it. """
+        dicomfilelist = FileList(file_list)
+        # If you select a database then all files with rects or tags are added to the list
+        for fn in file_list:
+            if DicomRectDB.db_filename in fn:
+                tmpdb = DicomRectDB(filename = fn)
+                # Go via a set() to remove duplicates
+                db_file_list = list(set(tmpdb.query_rect_filenames() + tmpdb.query_tag_filenames()))
+                dicomfilelist = FileList(db_file_list)
+        return dicomfilelist
 
     def fix_rect_bounds(self, a, b, lim):
         """
@@ -1127,7 +1137,7 @@ if __name__=='__main__':
         exit(0)
 
     app = App()
-    app.set_image_list(FileList(args.infiles))
+    app.set_image_list(app.construct_FileList(args.infiles))
     if args.review:
         app.set_skip_marked_files(False)
     if args.tagged:
