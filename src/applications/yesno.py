@@ -8,9 +8,8 @@
 # containing a list of filenames, or a CSV file.
 # To do:
 #  proper command line arguments, esp. -i input -o output
-#  allow Prev button or Undo button
+#  allow Undo button
 #  allow reading DICOM files
-#  scale image to fit screen
 #  contrast adjustment
 #  custom buttons
 #  multi-frame images
@@ -37,18 +36,33 @@ if len(image_list) < 2:
 
 # Initialise list pointer
 current_image = 0
+image_data = None
+
+def refresh_photo(photo):
+    label['image'] = photo
+    label.photo = photo
 
 def change_image(delta):
-    global current_image, image_list
+    global current_image, image_list, image_data
     if not (0 <= current_image + delta < len(image_list)):
-        messagebox.showinfo('End', 'No more image.')
+        messagebox.showinfo('End', 'No more images.')
         return
     current_image += delta
     print('%d/%d   \r' % (current_image,len(image_list)), file=sys.stderr)
-    image = Image.open(image_list[current_image])
-    photo = ImageTk.PhotoImage(image)
-    label['image'] = photo
-    label.photo = photo
+    root.title(os.path.basename(image_list[current_image]))
+    image_data = Image.open(image_list[current_image])
+    max_width = root.winfo_screenwidth() - 150
+    max_height = root.winfo_screenheight() - 150
+    if image_data.width > max_width or image_data.height > max_height:
+        image_data.thumbnail((max_width, max_height), Image.ANTIALIAS)
+    photo = ImageTk.PhotoImage(image_data)
+    refresh_photo(photo)
+
+def resize_image(event_data):
+    if not image_data:
+        return
+    photo = image_data.resize((event_data.width, event_data.height))
+    refresh_photo(photo)
 
 def answer(classification : int):
     print('%d,"%s"' % (classification, image_list[current_image]))
@@ -61,14 +75,21 @@ def no(event_data):
     answer(0)
     change_image(+1)
 
+def prev(event_data):
+    change_image(-1)
+
 # Construct the GUI
 #  root window accepts keyboard shortcuts
 root = tkinter.Tk()
+root.title('yesno')
+#root.geometry('400x400')
 root.bind("<n>", no)
 root.bind("<y>", yes)
+root.bind("<p>", prev)
 #  image is displayed in a 'label' widget
 label = tkinter.Label(root, compound=tkinter.TOP)
 label.pack()
+#label.bind('<Configure>', resize_image)
 frame = tkinter.Frame(root)
 frame.pack()
 #  buttons along the bottom
