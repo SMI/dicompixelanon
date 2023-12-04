@@ -110,7 +110,11 @@ class DicomDataset(torch.utils.data.Dataset):
         if self.root_dir:
             item_path = os.path.join(self.root_dir, item_path)
         # Read DICOM file
-        item_dicom = DicomImage(item_path)
+        try:
+            item_dicom = DicomImage(item_path)
+        except Exception as e:
+            print('ERROR: cannot read %s' % item_path, file=sys.stderr)
+            raise e
         # Extract greyscale image from the first frame, then convert to RGB
         img = item_dicom.image(frame = 0).convert('RGB')
         # Convert to tensor
