@@ -70,15 +70,22 @@ e.g. inference:
 
 ## Results
 
-Images in `$SMI_ROOT/MongoDbQueries/Scanned_Forms/img/`
 
+In `$SMI_ROOT/MongoDbQueries/Scanned_Forms/2023-12-00` see `README.txt`.
+
+Create `scanned_forms.txt` as a set of filenames that contain scanned forms
+manually curated.
+
+Create `clinical.txt` as a set of filenames that contain clinical images but make sure no forms. Use `collect_clinical.sh` to run `random_combinations` on the `filepos` extractions.
+
+Create `input_classes.csv` containing columns `class,filename` being a concatenation of `clinical.txt` with a class of 0 and `scanned_forms.txt` with a class of 1.
+
+Run `learn_forms.py -d -m learn_forms_model.pytorch.pth -t input_classes.csv -v input_classes.csv`
+
+Output:
 ```
-...
-Epoch : 214, train loss : 0.1429
-Epoch : 214, val loss : 0.2859
-Epoch : 215, train loss : 0.1333
-Epoch : 215, val loss : 0.0188
-Terminating: early stopping
-Saving model to forms_model_pytorch_500epochs.pth
-Accuracy of the network on the test images: 75% (30 out of 40)
+Epoch 4 train loss 0.05108
+Epoch 4 val loss 0.017233
+Terminating as loss < 0.03
+Accuracy of the network on the test images = 98% (433 out of 440)
 ```
