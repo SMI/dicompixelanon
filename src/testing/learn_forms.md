@@ -89,3 +89,7 @@ Epoch 4 val loss 0.017233
 Terminating as loss < 0.03
 Accuracy of the network on the test images = 98% (433 out of 440)
 ```
+
+Run `test_forms.py` to do an independent test without training first.
+Use the `-v` option to pass a CSV file as above,
+or the `-i` option for image/DICOM filenames.
