@@ -15,14 +15,25 @@ then run the python script to train a model, then you can run
 inference by omitting the training step.
 
 The new approach uses a CSV file listing all the filenames with their
-class (column headers 'class' of integers 0,1 and 'filename').
+class. Column headers are 'class' of integers 0,1 and 'filename'.
+Filenames can be absolute, or relative to a specified root directory.
+
+Internally the DICOM images are converted to greyscale and enhanced
+in the same way as done for OCR and dcmaudit, then converted to RGB
+because the ML model is best used with RGB images.
+
+## Requirements
+
+Requirements: tqdm, torch, torchvision, PIL, maybe matplotlib
+Remember to specifically download the CPU version of PyTorch if
+you don't have a GPU.
+
+You will need ResNet from https://download.pytorch.org/models/resnet18-f37072fd.pth
+in `~/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth`
+It will be downloaded automatically if not already present,
+or set `TORCH_HOME` to the directory which contains `hub/...`.
 
 ## Usage
-
-Download the base model (ResNet) from
-https://download.pytorch.org/models/resnet18-f37072fd.pth
-and copy it to `~/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth`
-(or set `TORCH_HOME` to the directory which contains `hub/...`).
 
 If using a CSV file the prepare two files, one with filenames for
 training and one with filenames for validation. Or use the same
@@ -41,7 +52,7 @@ Specify a model file to load when testing, or to save when training.
 
 
 ```
-usage: learn_forms.py [-h] [-d] [-e EPOCHS] [-m MODELFILE] [-r ROOTDIR] [-t TRAINCSV] [-v VALCSV] [-i [IMAGE ...]]
+usage: learn_forms.py [-h] [-d] [-e EPOCHS] [-m MODELFILE] [-r ROOTDIR] [-t TRAINCSV] [-v VALCSV]
 
 options:
   -e EPOCHS, --epochs EPOCHS
@@ -53,19 +64,7 @@ options:
   -t TRAINCSV, --traincsv TRAINCSV
                         CSV of training images
   -v VALCSV, --valcsv VALCSV
-                        CSV of validation images
-  -i [IMAGE ...], --image [IMAGE ...]
-                        image to test (an image file or a DICOM file)
-```
-
-e.g. training on cats/dogs:
-```
-./learn_forms.py -e 100 -m ~/src/dogs_vs_cats/model_from_subset -t ~/src/dogs_vs_cats/train_subset -v ~/src/dogs_vs_cats/validate_subset
-```
-
-e.g. inference:
-```
-./learn_forms.py -e 0 -m ~/src/dogs_vs_cats/model_from_subset -t ~/src/dogs_vs_cats/train_subset -v ~/src/dogs_vs_cats/validate_subset -i $(find ~/src/dogs_vs_cats/train -type f | shuf -n 30)
+                        CSV of validation images, can be same as traincsv for auto 80/20 split
 ```
 
 ## Results
@@ -90,6 +89,17 @@ Terminating as loss < 0.03
 Accuracy of the network on the test images = 98% (433 out of 440)
 ```
 
-Run `test_forms.py` to do an independent test without training first.
+Run `test_forms.py` to do an independent test (no training).
 Use the `-v` option to pass a CSV file as above,
 or the `-i` option for image/DICOM filenames.
+
+# References
+
+Binary image classification:
+https://towardsdatascience.com/binary-image-classification-in-pytorch-5adf64f8c781
+uses dataset https://www.kaggle.com/datasets/biaiscience/dogs-vs-cats
+
+Alternatively, training for 10 classes with RGB images from CIFAR
+https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
+which references this (1-channel mono images):
+https://pytorch.org/tutorials/recipes/recipes/defining_a_neural_network.html
