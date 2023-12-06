@@ -1,4 +1,13 @@
-# Class and functions for managing DICOM images in PyTorch
+# Classes and functions for managing DICOM images in PyTorch
+
+# Class ScannedFormDetector is a simple binary classification class
+# so not actually specific to scanned forms. It can be trained given
+# a list of filenames, which can be DICOM files not just images, and
+# it can run inference to classify a list of filenames.
+
+# Class DicomDataset is a replacement for the pytorch ImageFolder class.
+# Instead of requiring a specific directory structure this one can take
+# a list of filenames.
 
 import csv
 import logging
@@ -94,7 +103,13 @@ class DicomDataset(torch.utils.data.Dataset):
 # ---------------------------------------------------------------------
 
 class ScannedFormDetector:
-    """
+    """ A simple binary classifier which can train from a list of image
+    files or DICOM files and which can classify (infer) from a list.
+    Instantiate it for training with a save_model_path or for
+    inference with a load_model_path. Then call train_* or test_* with
+    either a list of files (images or DICOMs) or a CSV file that contains
+    two columns 'class' and 'filename'. Class should be 0 or 1. Filename
+    can be relative to a specified root_dir if necessary (e.g. PACS_ROOT).
     """
 
     # Class variable for transforming RGB image into tensor
@@ -113,6 +128,11 @@ class ScannedFormDetector:
         self.batch_size = 16
         self.load_model_path = load_model_path
         self.save_model_path = save_model_path
+        # To be available externally after a successful run:
+        self.training_loss = 999
+        self.infer_accuracy = 0
+        self.infer_num_correct = 0
+        self.infer_num_total = 0
 
         # Determine GPU device
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -236,16 +256,16 @@ class ScannedFormDetector:
                     cum_loss += loss/len(self.loader)
                     val_losses.append(val_loss.item())
 
+                prev_best_loss = min(epoch_test_losses + [999])
                 epoch_test_losses.append(cum_loss)
-                print('Epoch : {}, val loss : {}'.format(epoch+1, cum_loss))  
-            
                 best_loss = min(epoch_test_losses)
-            
+                print('Epoch : {}, val loss : {}'.format(epoch+1, cum_loss))  
+
                 # Save best model
                 if cum_loss <= best_loss:
-                    print('keeping this model as loss %f < %f' % (cum_loss, best_loss))
+                    print(' Keeping this model as loss %f < %f' % (cum_loss, prev_best_loss))
                     best_model_wts = self.model.state_dict()
-            
+
                 # Early stopping
                 early_stopping_counter = 0
                 if cum_loss > best_loss:
