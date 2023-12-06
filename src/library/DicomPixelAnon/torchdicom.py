@@ -291,7 +291,9 @@ class ScannedFormDetector:
     def __infer(self):
         """ Run inference on the model using the images which have been
         loaded into self.loader by test_image_list() or test_csv_file().
-        Returns a list of { class, filename } dicts.
+        Returns a list of { class, orig_class, sigmoid, filename } dicts.
+        You can decide if sigmoid is too close to 0.5 that result has
+        less confidence that if it's very close to 0 or 1.
         """
         correct = 0
         total = 0
@@ -308,12 +310,18 @@ class ScannedFormDetector:
                 outputs = self.model(images)
                 # Calculate how many correct
                 for idx, sigm in enumerate(torch.sigmoid(outputs)):
+                  orig_class = int(labels[idx])
+                  pred_class = 0 if float(sigm) < 0.5 else 1
                   if self.debug: print('idx %s label should be %s got sigm %s (%s)' % (idx,labels[idx],sigm,item_path[idx]))
-                  vv = 0 if sigm < 0.5 else 1
-                  return_list.append( { 'class':vv, 'filename':item_path[idx] } )
-                  if vv == labels[idx]:
+                  return_list.append( {
+                    'filename': item_path[idx],
+                    'class': pred_class,
+                    'class_orig': orig_class,
+                    'sigmoid': float(sigm)
+                  } )
+                  if pred_class == orig_class:
                     correct += 1
-                  if self.debug: print('predicted class %s for %s' % (vv, item_path[idx]))
+                  if self.debug: print('predicted class %s for %s' % (pred_class, item_path[idx]))
                   #if self.debug: __show_img(images[idx])
                 total += labels.size(0)
         self.infer_accuracy = 100 * correct // total
