@@ -109,7 +109,7 @@ class ScannedFormDetector:
     def __init__(self, load_model_path = None, save_model_path = None):
         # Determine static variables within this class instance
         self.debug = False
-        self.shuffle = False
+        self.shuffle = True
         self.batch_size = 16
         self.load_model_path = load_model_path
         self.save_model_path = save_model_path
