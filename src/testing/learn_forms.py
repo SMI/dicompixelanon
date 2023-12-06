@@ -45,4 +45,4 @@ model_file = args.modelfile
 
 det = ScannedFormDetector(save_model_path = model_file)
 rc = det.train_csv_file(train_csv_file = args.traincsv, test_csv_file = args.valcsv, n_epochs = n_epochs)
-print('Training finished with accuracy %s %% on test images' % rc)
+print('Training finished with accuracy %s %% on test images (%s/%s)' % (rc, det.infer_num_correct, det.infer_num_total))
