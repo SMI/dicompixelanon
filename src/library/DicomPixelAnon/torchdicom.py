@@ -42,10 +42,10 @@ class DicomDataset(torch.utils.data.Dataset):
     def __valid_dicom(self, filename):
         try:
             ds = DicomImage(filename)
-            return true
+            return True
         except:
             logger.warn('not a valid DICOM: %s' % filename)
-            return false
+            return False
 
 
     def __init__(self, filename, root_dir = None, transform = None, percent = 100, is_dicom = False, return_path = False, skip_checks = False):
