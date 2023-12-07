@@ -50,6 +50,8 @@ Use -i to perform inference on your own images.
 
 Specify a model file to load when testing, or to save when training.
 
+The default path (for loading) is `$SMI_ROOT/data/dicompixelanon/scannedforms_model.pth`
+(there is no default when saving).
 
 ```
 usage: learn_forms.py [-h] [-d] [-e EPOCHS] [-m MODELFILE] [-r ROOTDIR] [-t TRAINCSV] [-v VALCSV]

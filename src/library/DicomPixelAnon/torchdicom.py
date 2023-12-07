@@ -60,6 +60,7 @@ class DicomDataset(torch.utils.data.Dataset):
         # If a single filename or a list of filenames
         if is_dicom:
             if isinstance(filename, list):
+                logger.debug('ScannedFormDetector DicomDataset(files %s)' % filename)
                 for file in filename:
                     # Randomly select from list
                     # A single filename is added as class=0
@@ -67,10 +68,12 @@ class DicomDataset(torch.utils.data.Dataset):
                         self.file_list.append( { 'class':0, 'filename': file } )
             else:
                 # A single filename is added as class=0
+                logger.debug('ScannedFormDetector DicomDataset(image %s)' % filename)
                 self.file_list.append( { 'class':0, 'filename': filename } )
             return
         # If a CSV filename
         with open(filename) as fd:
+            logger.debug('ScannedFormDetector DicomDataset(csv %s)' % filename)
             rdr = csv.DictReader(fd)
             for row in rdr:
                 # Randomly select from rows
@@ -138,6 +141,9 @@ class ScannedFormDetector:
         self.debug = False
         self.shuffle = True
         self.batch_size = 16
+        # Parameters
+        if not load_model_path and not save_model_path:
+            load_model_path = os.path.join(os.environ.get('SMI_ROOT', '.'), 'data', 'dicompixelanon', 'scannedforms_model.pth')
         self.load_model_path = load_model_path
         self.save_model_path = save_model_path
         # To be available externally after a successful run:
@@ -149,6 +155,8 @@ class ScannedFormDetector:
         # Determine GPU device
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device_loc = torch.device(self.device)
+        logger.debug('ScannedFormDetector(load %s, save %s, dev %s, shuf %s, batch %s)' %
+            load_model_path, save_model_path, self.device, self.shuffle, self.batch_size)
 
         # If debugging you might want deterministic behaviour
         if self.debug:
