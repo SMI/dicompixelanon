@@ -11,7 +11,9 @@
 
 import csv
 import logging
+import os
 import random
+import tempfile # for pytest
 from tqdm import tqdm
 from PIL import Image
 from DicomPixelAnon.dicomimage import DicomImage
@@ -113,6 +115,29 @@ class DicomDataset(torch.utils.data.Dataset):
         if self.return_path:
             return (img, item_class, item_path)
         return (img, item_class)
+
+
+def test_DicomDataset():
+    tmpfile = tempfile.NamedTemporaryFile().name # CSV file
+    tmpimg1 = tempfile.NamedTemporaryFile().name # first image
+    tmpimg2 = tempfile.NamedTemporaryFile().name # second image
+    tmpimg1filename = os.path.basename(tmpimg1)
+    tmpimg2filename = os.path.basename(tmpimg2)
+    root_dir = os.path.dirname(tmpimg1)
+    with open(tmpimg1, 'w') as fd:
+        fd.write('P5 1 1 255\n255\n') # ASCII PGM image
+    with open(tmpimg2, 'w') as fd:
+        fd.write('P5 1 1 255\n255\n') # ASCII PGM image
+    with open(tmpfile, 'w') as fd:
+        print('class,filename\n0,%s\n1,%s\n' %
+            (tmpimg1filename, tmpimg2filename), file=fd)
+    dd = DicomDataset(tmpfile, root_dir=root_dir, return_path = True, check_valid = False)
+    dd_out = [x for x in dd]
+    #for img,classif,fn in dd_out:
+    assert(dd_out[0][2] == tmpimg1)
+    assert(dd_out[1][2] == tmpimg2)
+    assert(dd_out[0][1] == 0)
+    assert(dd_out[1][1] == 1)
 
 
 # ---------------------------------------------------------------------
