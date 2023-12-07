@@ -140,6 +140,25 @@ def test_DicomDataset():
     assert(dd_out[1][1] == 1)
 
 
+class SingleImageDataset(torch.utils.data.Dataset):
+    """ Holds only a single image of type PIL Image
+    """
+    def __init__(self, img, transform = None, return_path = False):
+        self.img = img
+        self.transform = transform
+        self.return_path = return_path
+
+    def __len__(self):
+        return 1
+
+    def __getitem__(self, idx):
+        if self.transform:
+            img = self.transform(self.img)
+        if self.return_path:
+            return (img, 0, 'internal')
+        return (img, 0)
+
+
 # ---------------------------------------------------------------------
 
 class ScannedFormDetector:
@@ -415,3 +434,15 @@ class ScannedFormDetector:
         test_data = DicomDataset(csv_file, root_dir = root_dir, transform = ScannedFormDetector.rgb_transforms, return_path = True)
         self.loader = torch.utils.data.DataLoader(test_data, shuffle = self.shuffle, batch_size = self.batch_size)
         return self.__infer()
+
+    def test_Image(self, img):
+        """ Test a single PIL Image """
+        test_data = SingleImageDataset(img, transform = ScannedFormDetector.rgb_transforms, return_path = True)
+        self.loader = torch.utils.data.DataLoader(test_data, shuffle = self.shuffle, batch_size = self.batch_size)
+        return self.__infer()
+
+def internal_test():
+    det = ScannedFormDetector(load_model_path = '/home/arb/src/SMI/dicompixelanon/src/testing/new.pth')
+    img = Image.open('/home/arb/src/dogs_vs_cats/test/9999.jpg')
+    rc = det.test_Image(img)
+    assert(rc[0]['class_orig'] == 0)
