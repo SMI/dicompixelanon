@@ -34,9 +34,9 @@ class DicomDataset(torch.utils.data.Dataset):
     inference not training of course.
     Normally a dataset returns a tuple of (list_of_img, list_of_classes)
     but if you pass return_path=True then the image pathname is also returned.
-    If you pass skip_checks=True then it trusts all filenames are valid
-    image/DICOM files without checking, in which case an invalid one will
-    throw an error during training which would be inconvenient.
+    If you pass check_valid=True then it checks all filenames are valid
+    image/DICOM files so you get pre-warning about invalid ones before
+    running the slow training process.
     """
 
     def __valid_dicom(self, filename):
@@ -48,7 +48,7 @@ class DicomDataset(torch.utils.data.Dataset):
             return False
 
 
-    def __init__(self, filename, root_dir = None, transform = None, percent = 100, is_dicom = False, return_path = False, skip_checks = False):
+    def __init__(self, filename, root_dir = None, transform = None, percent = 100, is_dicom = False, return_path = False, check_valid = False):
         self.debug = False
         self.root_dir = root_dir
         self.transform = transform
@@ -63,7 +63,7 @@ class DicomDataset(torch.utils.data.Dataset):
                 for file in filename:
                     # Randomly select from list
                     # A single filename is added as class=0
-                    if (random.random() < percent) and (not skip_checks) and self.__valid_dicom(file):
+                    if (random.random() < percent) and (not check_valid or self.__valid_dicom(file)):
                         self.file_list.append( { 'class':0, 'filename': file } )
             else:
                 # A single filename is added as class=0
@@ -74,7 +74,7 @@ class DicomDataset(torch.utils.data.Dataset):
             rdr = csv.DictReader(fd)
             for row in rdr:
                 # Randomly select from rows
-                if (random.random() < percent) and (not skip_checks) and self.__valid_dicom(row['filename']):
+                if (random.random() < percent) and (not check_valid or self.__valid_dicom(row['filename'])):
                     self.file_list.append(row)
         if not self.file_list:
             raise Exception('Samping %f percent from %s returned no rows' % (percent*100.0, csv_file))
