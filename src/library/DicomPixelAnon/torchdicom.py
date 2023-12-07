@@ -181,7 +181,7 @@ class ScannedFormDetector:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device_loc = torch.device(self.device)
         logger.debug('ScannedFormDetector(load %s, save %s, dev %s, shuf %s, batch %s)' %
-            load_model_path, save_model_path, self.device, self.shuffle, self.batch_size)
+            (load_model_path, save_model_path, self.device, self.shuffle, self.batch_size))
 
         # If debugging you might want deterministic behaviour
         if self.debug:
