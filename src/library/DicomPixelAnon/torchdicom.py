@@ -419,6 +419,7 @@ class ScannedFormDetector:
         """ Define a list of images which can be used for training or inference.
         The filenames can be absolute or relative to root_dir.
         Files can be DICOM image files, or normal images (PNG/JPEG).
+        Returns a list of { class, orig_class, sigmoid, filename } dicts.
         """
         test_data = DicomDataset(img_list, root_dir = root_dir, transform = ScannedFormDetector.rgb_transforms, return_path = True, is_dicom = True)
         self.loader = torch.utils.data.DataLoader(test_data, shuffle = self.shuffle, batch_size = self.batch_size)
@@ -430,13 +431,16 @@ class ScannedFormDetector:
         The CSV file must have a 'filename' column, filenames can be absolute or
         relative to root_dir, and can be DICOM or normal PNG/JPEG image.
         For training a 'class' column is required, values 0 or 1.
+        Returns a list of { class, orig_class, sigmoid, filename } dicts.
         """
         test_data = DicomDataset(csv_file, root_dir = root_dir, transform = ScannedFormDetector.rgb_transforms, return_path = True)
         self.loader = torch.utils.data.DataLoader(test_data, shuffle = self.shuffle, batch_size = self.batch_size)
         return self.__infer()
 
     def test_Image(self, img):
-        """ Test a single PIL Image """
+        """ Test a single PIL Image.
+        Returns a list of a single { class, orig_class, sigmoid, filename } dict.
+        """
         test_data = SingleImageDataset(img, transform = ScannedFormDetector.rgb_transforms, return_path = True)
         self.loader = torch.utils.data.DataLoader(test_data, shuffle = self.shuffle, batch_size = self.batch_size)
         return self.__infer()
