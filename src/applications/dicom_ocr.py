@@ -5,11 +5,10 @@
 
 import argparse
 import csv
-import glob
 import logging
 import os
-import pydicom
 import sys
+import pydicom
 import numpy as np
 from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.ocrenum import OCREnum
@@ -19,6 +18,7 @@ from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon.dicomrectdb import DicomRectDB
 from DicomPixelAnon.rect import DicomRectText
 from DicomPixelAnon.rect import filter_DicomRectText_list_by_fontsize
+from DicomPixelAnon.torchdicom import ScannedFormDetector
 from DicomPixelAnon.ultrasound import read_DicomRectText_list_from_region_tags
 import DicomPixelAnon.torchmem # ignore W0611 unused-import
 
@@ -79,30 +79,77 @@ def check_for_pii(nlp_engine : NER, text) -> int:
 
 
 # ---------------------------------------------------------------------
+
+def check_for_scanned_form(img):
+    """ Use a PyTorch model to see if this image is a scanned form.
+    """
+    det = ScannedFormDetector()
+    rc = det.test_Image(img)
+    return (rc[0]['class'] == 1)
+
+
+# ---------------------------------------------------------------------
+def save_rects(filename, frame, overlay, meta, ocr_rectlist : list, csv_writer = None, db_writer: DicomRectDB = None):
+    """ Save the list of rectangles to the CSV file and/or database.
+    """
+    # Output in CSV format
+    if csv_writer:
+        for rect in ocr_rectlist:
+            ocrenum, ocrtext, nerenum, is_sensitive = rect.text_tuple()
+            csv_writer.writerow([
+                filename, frame, overlay,
+                meta.get('ImageType', ''),
+                meta.get('ManufacturerModelName'),
+                meta.get('BurnedInAnnotation', ''),
+                OCREnum().name(ocrenum),
+                rect.L(), rect.T(), rect.R(), rect.B(),
+                ocrtext,
+                NEREnum().name(nerenum),
+                is_sensitive
+            ])
+
+    # Output to database
+    if db_writer:
+        for dicomrect in ocr_rectlist:
+            db_writer.add_rect(filename, dicomrect)
+    return
+
+
+# ---------------------------------------------------------------------
 def process_image(img, filename = None,
         frame = -1, overlay = -1,
-        ocr_engine: OCR = None, nlp_engine: NER = None,
-        output_rects = False,
-        us_regions = False,
-        except_us_regions = False,
-        imagetype = '', manufacturer = '', bia = '',
-        csv_writer = None, db_writer: DicomRectDB = None):
-    """ OCR the image (numpy array) extracted from a DICOM
+        options : dict = None,
+        meta : dict = None):
+    """ OCR the image (PIL image) extracted from a DICOM
     and optionally run NLP. Store the results in CSV and/or database.
-    ocr_engine must be an instance of OCR().
-    nlp_engine must be an instance of NER() or None.
-    csv_writer must be an instance of csv.writer() or None.
-    db_writer must be an instance of DicomRectDB() or None.
     frame, overlay are integers (-1 if NA).
-    us_regions=True will add rectangles from Ultrasound tags.
-    except_us_regions=True will ignore text found within
-    rectangles from Ultrasound tags (so there's no duplication,
-    if you're redacting US regions anyway, and so you can check
-    if the US regions are sufficient by looking for text outside).
-    output_rects=True will output each OCR rectangle individually.
-    imagetype, manufacturer, bia are the dicom tag string,
-    although manufacturer may be specially crafted (see elsewhere).
+    options dict must contain:
+      ocr_engine must be an instance of OCR().
+      nlp_engine must be an instance of NER() or None.
+      csv_writer must be an instance of csv.writer() or None.
+      db_writer must be an instance of DicomRectDB() or None.
+      us_regions=True will add rectangles from Ultrasound tags.
+      except_us_regions=True will ignore text found within
+      rectangles from Ultrasound tags (so there's no duplication,
+      if you're redacting US regions anyway, and so you can check
+      if the US regions are sufficient by looking for text outside).
+      output_rects=True will output each OCR rectangle individually.
+    meta dict must contain keys taken from DICOM tag values:
+      ImageType
+      ManufacturerModelName
+      BurnedInAnnotation
     """
+    ocr_engine = options.get('ocr_engine', None)
+    nlp_engine = options.get('nlp_engine', None)
+    output_rects = options.get('output_rects', False)
+    us_regions = options.get('us_regions', False)
+    except_us_regions = options.get('except_us_regions', False)
+    csv_writer = options.get('csv_writer', None)
+    db_writer = options.get('db_writer', None)
+
+    # Convert from PIL Image to numpy array
+    img = np.asarray(img)
+
     assert(ocr_engine)
     ocr_engine_name = ocr_engine.engine_name() if ocr_engine else 'NOOCR'
     ocr_engine_enum = ocr_engine.engine_enum() if ocr_engine else -1
@@ -155,32 +202,24 @@ def process_image(img, filename = None,
             return any([r.contains_rect(rect) for r in rectlist])
         ocr_rectlist = [ rect for rect in ocr_rectlist if not rect_within_rectlist(rect, us_rectlist) ]
 
-
-    # Output in CSV format
-    if csv_writer:
-        for rect in ocr_rectlist:
-            ocrenum, ocrtext, nerenum, is_sensitive = rect.text_tuple()
-            csv_writer.writerow([
-                filename, frame, overlay,
-                imagetype, manufacturer, bia,
-                OCREnum().name(ocrenum),
-                rect.L(), rect.T(), rect.R(), rect.B(),
-                ocrtext,
-                NEREnum().name(nerenum),
-                is_sensitive
-            ])
-
-    # Output to database
-    if db_writer:
-        for dicomrect in ocr_rectlist:
-            db_writer.add_rect(filename, dicomrect)
+    save_rects(filename, frame, overlay, meta, ocr_rectlist,
+        csv_writer = csv_writer, db_writer = db_writer)
 
     return
 
 
 # ---------------------------------------------------------------------
 # OCR every image and overlay in a DICOM file
-def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, output_rects = False, ignore_overlays = False, us_regions = False, except_us_regions = False, csv_writer = None, db_writer: DicomRectDB = None):
+
+def process_dicom(filename, options : dict):
+    """ Examine every frame in the DICOM file and run OCR.
+    Add rectangles to database or CSV.
+    options should contain:
+    ocr_engine: OCR = None, nlp_engine: NER = None,
+    csv_writer = None, db_writer: DicomRectDB = None, options : dict):
+    output_rects = False, redact_forms = False, ignore_overlays = False,
+    us_regions = False, except_us_regions = False
+    """
 
     # Attempt to read and parse as DICOM
     try:
@@ -208,23 +247,9 @@ def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, outp
     bits_allocated = ds['BitsAllocated'].value if 'BitsAllocated' in ds else -1
     msg('%s is %s using %d/%d bits with %d frames' % (filename, str(pixel_data.shape), bits_stored, bits_allocated, num_frames))
 
-    # Get some tag values massaged to return proper values
-    image_type = dicomimg.get_tag_imagetype()
-    manuf = dicomimg.get_tag_manufacturer_model()
-
     # Additional parameters passes to process_image()
-    meta = {
-        'us_regions':    us_regions,
-        'except_us_regions':    except_us_regions,
-        'ocr_engine':    ocr_engine,
-        'nlp_engine':    nlp_engine,
-        'output_rects':  output_rects,
-        'bia':           ds.get('BurnedInAnnotation', ''),
-        'manufacturer':  manuf,
-        'imagetype':     image_type,
-        'csv_writer':    csv_writer,
-        'db_writer':     db_writer
-    }
+    # Get some tag values massaged to return proper values
+    meta = dicomimg.get_selected_metadata()
 
     # Save all the frames
     for idx in range(dicomimg.get_total_frames()):
@@ -235,12 +260,27 @@ def process_dicom(filename, ocr_engine: OCR = None, nlp_engine: NER = None, outp
             err('Cannot extract frame %d from %s (%s)' % (idx, filename, e))
             continue
         frame, overlay = dicomimg.get_current_frame_overlay()
-        if ignore_overlays and overlay != -1:
+        if idx == 0 and options.get('redact_forms', None):
+            is_scanned_form = False
+            det = ScannedFormsDetector()
+            rc = det.test_Image(img)
+            if rc and len(rc)>0 and 'class' in rc[0]:
+                is_scanned_form = (rc[0]['class'] == 1)
+            if is_scanned_form:
+                max_rectlist = [
+                    DicomRectText(0, meta['Rows']-1, 0, meta['Columns']-1,
+                    frame=frame, overlay=overlay,
+                    ocrengine=OCREnum.ScannedForm, ocrtext='SCANNED_FORM',
+                    nerengine=NEREnum.scannedform, nerpii=True)
+                ]
+                save_rects(filename, frame, overlay, meta, max_rectlist, options['csv_writer'], options['db_writer'])
+                break # no need for other frames
+        if options['ignore_overlays'] and overlay != -1:
             continue
         if not img:
             err('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
             continue
-        process_image(np.asarray(img), filename=filename, frame=frame, overlay=overlay, **meta)
+        process_image(img, filename=filename, frame=frame, overlay=overlay, options = options, meta = meta)
     return
 
 
@@ -258,6 +298,7 @@ if __name__ == "__main__":
     parser.add_argument('--use-ultrasound-regions', action='store_true', help='collect rectangles from Ultrasound region tags', default=False)
     parser.add_argument('--except-ultrasound-regions', action='store_true', help='ignore OCR inside rectangles from Ultrasound region tags', default=False)
     parser.add_argument('--rects', action="store_true", help='Output each OCR rectangle separately with coordinates', default=False)
+    parser.add_argument('--forms', action="store_true", help='Detect scanned forms and redact the whole image', default=False)
     parser.add_argument('--no-overlays', action="store_true", help='Do not process any DICOM overlays', default=False)
     parser.add_argument('--review', action="store_true", help='Ignore database and perform OCR again', default=False)
     parser.add_argument('files', nargs=argparse.REMAINDER)
@@ -331,8 +372,15 @@ if __name__ == "__main__":
                 debug("ignore (already in db) %s" % file)
                 continue
         # Run the OCR
-        process_dicom(file, ocr_engine = ocr_engine, nlp_engine = nlp_engine,
-            output_rects = args.rects, ignore_overlays = args.no_overlays,
-            us_regions = args.use_ultrasound_regions,
-            except_us_regions = args.except_ultrasound_regions,
-            csv_writer = csv_writer, db_writer = db_writer)
+        options = {
+            'ocr_engine' : ocr_engine,
+            'nlp_engine' : nlp_engine,
+            'csv_writer' : csv_writer,
+            'db_writer' : db_writer,
+            'output_rects' : args.rects,
+            'ignore_overlays' : args.no_overlays,
+            'redact_forms' : args.forms,
+            'us_regions' : args.use_ultrasound_regions,
+            'except_us_regions' : args.except_ultrasound_regions,
+        }
+        process_dicom(file, options = options)

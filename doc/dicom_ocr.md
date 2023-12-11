@@ -64,6 +64,17 @@ rectangle as PII because it was not on a allowlist. The text may still be
 safe without PII but the allowlist alone cannot determine this so it errs on
 the side of caution.
 
+The program can be asked to detect if the DICOM contains a scanned image
+of a paper form which can contain handwritten text that OCR might miss.
+It will effectively redact the whole image of the first frame.
+
+## Requirements
+
+See the README in this repo for all requirements.
+
+For the detection of scanned forms:
+* Copy `scannedforms_model.pth` into `$SMI_ROOT/data/dicompixelanon`
+
 ## Examples
 
 To run OCR and then detect PII in the resulting text, and save the

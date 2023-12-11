@@ -57,6 +57,7 @@ from their directory without building and installing the library
 * Install all of the Python requirements (see below)
 * Copy `data/ocr_allowlist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt` if required for dicom_redact
 * Copy `data/deid.dicom.smi` into `$SMI_ROOT/data/deid/deid.dicom.smi`
+* Copy `scannedforms_model.pth` into `$SMI_ROOT/data/dicompixelanon`
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
 
@@ -74,10 +75,10 @@ pip install $(ls dist/*whl|tail -1)
 ## Run
 
 Now you can run the applications:
- * dcmaudit, if you want to view a DICOM file and manually curate a database of rectangles
- * dicom_ocr, if you want to run OCR on a DICOM file and store the results in a database
- * dicom_redact, if you want to redact the DICOM file based on the rectangles in the database
- * dicom_pixel_anon, to run both ocr and redact together
+ * dcmaudit.py, if you want to view a DICOM file and manually curate a database of rectangles
+ * dicom_ocr.py, if you want to run OCR on a DICOM file and store the results in a database
+ * dicom_redact.py, if you want to redact the DICOM file based on the rectangles in the database
+ * dicom_pixel_anon.sh, to run both OCR and redaction together
 
 See below for a suggested workflow.
 
