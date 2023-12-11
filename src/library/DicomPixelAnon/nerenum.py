@@ -11,6 +11,7 @@ class NEREnum:
     stanford = 30
     stanza = 40
     allowlist = 50
+    scannedform = 60
 
     def __init__(self):
         """

@@ -7,6 +7,7 @@ class OCREnum:
     EasyOCREngine = 2
     Keras = 3
     UltrasoundRegions = 4
+    ScannedForm = 5
 
     def __init__(self):
         self._mapping = {}
