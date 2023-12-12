@@ -43,11 +43,18 @@ fi
 # exit straight away if any commands fail
 set -e
 
-# Get a list of all rectangles into the database
+# Get a list of all rectangles of text into the database,
+# but ignore any text on an allowlist. Detect scanned forms
+# and add a rectangle the size of the whole image to the database.
+# People might need to know all regions that are redacted so
+# add UltraSound regions (and any text found within them) to the db.
+# (i.e. use --use-ultrasound-regions not --except-ultrasound-regions).
 echo "$(date) ${prog} Running OCR on $@"
-dicom_ocr.py --db "${dbdir}" --review --rects "$@"
+dicom_ocr.py --db "${dbdir}" --review --forms --pii ocr_allowlist --use-ultrasound-regions --rects "$@"
 
-# Redact by reading the database
+# Redact by reading the database, and using UltraSound regions.
+# Use the deid rules to pick up any other redaction rules
+# (these rules may also include UltraSound regions).
 echo "$(date) ${prog} Redacting $input"
 dicom_redact.py --db "${dbdir}" \
     --remove-ultrasound-regions \
