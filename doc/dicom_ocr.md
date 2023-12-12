@@ -11,7 +11,7 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
                          [--csv filename.csv or "stdout"]
                          [--db database_dir or "default"] [--review]
                          [--csv-header/--no-csv-header]
-                         [--rects] [--no-overlays]
+                         [--rects] [--forms] [--no-overlays]
                          [--use-ultrasound-regions]
                          [--except-ultrasound-regions]
                          files...
@@ -30,6 +30,7 @@ usage: dicom_ocr.py [-v] [-d] [--ocr OCR] [--pii PII]
  --csv file.csv        output to CSV filename, or use "stdout" for stdout
  --csv-header          output CSV header when using --csv
  --rects               Output each OCR rectangle separately with coordinates
+ --forms               Detect scanned forms and redact the whole image
  --no-overlays         Do not process any DICOM overlays (default processes overlays)
 ```
 
@@ -50,7 +51,10 @@ The tag `SequenceOfUltrasoundRegions` contains a set of rectangles defining
 the image content so this program can invert those to get a set of rectangles
 surrounding the image content. Such rectangles can be treated the same way
 as rectangles found using OCR; stored in a database or CSV file for future
-redaction.
+redaction. Use the `--use-ultrasound-regions` option for this. Text found
+using OCR within these regions would normally be added to the output
+but this could cause duplicated regions so can be excluded (if totally within
+the ultrasound region) with the `--except-ultrasound-regions` option.
 
 PII can be detected using one of a number of algorithms; SpaCy and Flair
 also have several language models to choose from, although none are highly
@@ -66,7 +70,8 @@ the side of caution.
 
 The program can be asked to detect if the DICOM contains a scanned image
 of a paper form which can contain handwritten text that OCR might miss.
-It will effectively redact the whole image of the first frame.
+The `--forms` option will effectively redact the whole image of the first frame
+if a scanned form is detected.
 
 ## Requirements
 
