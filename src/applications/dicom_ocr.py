@@ -82,10 +82,14 @@ def check_for_pii(nlp_engine : NER, text) -> int:
 
 def check_for_scanned_form(img):
     """ Use a PyTorch model to see if this image is a scanned form.
+    Only construct a ScannedFormDetector object once to save time.
     """
-    det = ScannedFormDetector()
-    rc = det.test_Image(img)
-    return (rc[0]['class'] == 1)
+    if not hasattr(check_for_scanned_form, 'det'):
+        check_for_scanned_form.det = ScannedFormDetector()
+    rc = check_for_scanned_form.det.test_Image(img)
+    if rc and len(rc)>0 and 'class' in rc[0]:
+        return (rc[0]['class'] == 1)
+    return False
 
 
 # ---------------------------------------------------------------------
@@ -261,12 +265,7 @@ def process_dicom(filename, options : dict):
             continue
         frame, overlay = dicomimg.get_current_frame_overlay()
         if idx == 0 and options.get('redact_forms', None):
-            is_scanned_form = False
-            det = ScannedFormDetector()
-            rc = det.test_Image(img)
-            if rc and len(rc)>0 and 'class' in rc[0]:
-                is_scanned_form = (rc[0]['class'] == 1)
-            if is_scanned_form:
+            if check_for_scanned_form(img):
                 max_rectlist = [
                     DicomRectText(0, meta['Rows']-1, 0, meta['Columns']-1,
                     frame=frame, overlay=overlay,
