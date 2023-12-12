@@ -262,7 +262,7 @@ def process_dicom(filename, options : dict):
         frame, overlay = dicomimg.get_current_frame_overlay()
         if idx == 0 and options.get('redact_forms', None):
             is_scanned_form = False
-            det = ScannedFormsDetector()
+            det = ScannedFormDetector()
             rc = det.test_Image(img)
             if rc and len(rc)>0 and 'class' in rc[0]:
                 is_scanned_form = (rc[0]['class'] == 1)
