@@ -144,7 +144,7 @@ class SingleImageDataset(torch.utils.data.Dataset):
     """ Holds only a single image of type PIL Image
     """
     def __init__(self, img, transform = None, return_path = False):
-        self.img = img
+        self.img = img.convert('RGB')
         self.transform = transform
         self.return_path = return_path
 
