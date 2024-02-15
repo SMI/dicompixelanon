@@ -17,6 +17,7 @@ import pydicom
 from pydicom.uid import RLELossless
 
 logger = logging.getLogger(__name__)
+compression = False
 
 
 def hasher(id):
@@ -41,34 +42,55 @@ def process_file(infile, outfile):
     except:
         logger.error('Cannot find image pixels in DICOM: %s' % infile)
         return
+    logger.debug('BPP %s Frames %sx%s %s BitsAlloc %s BitsStored %s SignedInts %s ArrayShape %s Type %s' % (ds.SamplesPerPixel, ds.NumberOfFrames, ds.Rows, ds.Columns, ds.BitsAllocated, ds.BitsStored, ds.PixelRepresentation, (pixel_data.shape,), pixel_data.dtype))
     # Create an empty array exactly same dimensions as pixel_data
     zero_data =  np.zeros_like(pixel_data)
     # Replace the pixel data in the DICOM, using compression
-    ds.compress(RLELossless, zero_data)
+    if compression:
+        ds.compress(transfer_syntax_uid = RLELossless, arr = zero_data)
+        ds['PixelData'].VR = 'OB'
+    else:
+        ds.PixelData = zero_data.tobytes()
 
     # Hash all the UIDs, including the one in the header
+    mappings={}
     file_metas = getattr(ds, 'file_meta', pydicom.Dataset())
     if hasattr(file_metas, 'MediaStorageSOPInstanceUID'):
-        file_metas.MediaStorageSOPInstanceUID = hasher(str(file_metas['MediaStorageSOPInstanceUID']).encode())
+        mssop = file_metas['MediaStorageSOPInstanceUID'].value
+        mappings[mssop] = hasher(mssop.encode())
+        file_metas.MediaStorageSOPInstanceUID = mappings[mssop]
         ds.file_meta = file_metas
-    ds.SOPInstanceUID = hasher(ds.SOPInstanceUID.encode())
-    ds.StudyInstanceUID = hasher(ds.StudyInstanceUID.encode())
-    ds.SeriesInstanceUID = hasher(ds.SeriesInstanceUID.encode())
+    mappings[ds.SOPInstanceUID] = hasher(ds.SOPInstanceUID.encode())
+    mappings[ds.StudyInstanceUID] = hasher(ds.StudyInstanceUID.encode())
+    mappings[ds.SeriesInstanceUID] = hasher(ds.SeriesInstanceUID.encode())
+    ds.SOPInstanceUID = mappings[ds.SOPInstanceUID]
+    ds.StudyInstanceUID = mappings[ds.StudyInstanceUID]
+    ds.SeriesInstanceUID = mappings[ds.SeriesInstanceUID]
+
+    # Replace any directory names which are actual UIDs
+    for map in mappings:
+        # XXX this might fail if map is a prefix for multiple mappings
+        # but can't put trailing slash as need to replace in filename.
+        outfile = outfile.replace(f'/{map}', f'/{mappings[map]}')
 
     # Save the new image
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
     ds.save_as(outfile)
 
+# ---------------------------------------------------------------------
 parser = argparse.ArgumentParser(description='DICOM Image Remover')
 parser.add_argument('-d', '--debug', action="store_true", help='debug')
+parser.add_argument('-c', '--compress', action="store_true", help='compress using RLE (lossless)')
 parser.add_argument('-i', '--inputdir', action="store", help='input directory (will be searched recursively)')
 parser.add_argument('-o', '--outputdir', action="store", help='output directory (will mirror input hierarchy)')
 args = parser.parse_args()
 if args.debug:
     logging.basicConfig(level = logging.DEBUG)
+if args.compress:
+    compression = True
 
 for root, dirs, files in os.walk(args.inputdir):
     for filename in files:
         infile = os.path.join(root, filename)
         outfile = infile.replace(args.inputdir, args.outputdir)
-        os.makedirs(os.path.dirname(outfile), exist_ok=True)
         process_file(infile, outfile)
