@@ -15,6 +15,7 @@ import sys
 import numpy as np
 import pydicom
 from pydicom.uid import RLELossless
+from pydicom.valuerep import VR as VR_
 
 logger = logging.getLogger(__name__)
 compression = False
@@ -48,7 +49,7 @@ def process_file(infile, outfile):
     # Replace the pixel data in the DICOM, using compression
     if compression:
         ds.compress(transfer_syntax_uid = RLELossless, arr = zero_data)
-        ds['PixelData'].VR = 'OB'
+        ds['PixelData'].VR = VR_.OB
     else:
         ds.PixelData = zero_data.tobytes()
 
