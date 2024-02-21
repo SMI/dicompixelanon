@@ -10,6 +10,7 @@ Contents:
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 * [dicom rect db](doc/dicomrectdb.md) - the database about DICOM files which have been examined
 * [deidrules](doc/deidrules.md) - redaction using rules
+* [dicom_pixel_remover](doc/dicom_pixel_remover.md) - replace DICOM images with blanks
 
 Utilities:
 * `dcmaudit.py` - interactive GUI to mark rectangles for redaction in DICOM image frames and overlays
