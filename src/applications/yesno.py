@@ -26,7 +26,6 @@ try:
     can_read_dicom = True
 except:
     can_read_dicom = False
-print('Can read DICOM? %s' % can_read_dicom)
 
 # Read list of images from command line
 image_list = sys.argv[1:]
