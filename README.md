@@ -1,12 +1,34 @@
 # dicompixelanon
 
-Anonymisation of text burned into the pixels of DICOM images.
+Anonymisation of text burned into the pixels of DICOM images. This software
+has been used on the complete archive of a whole national population across
+a variety of modalities (CT, MR, CR, DX, etc) and has proven highly effective.
+
+This repo contains a full suite of software for
+* viewing DICOM files in a GUI, including every frame, and every frame of every overlay
+* marking up regions which need to be redacted
+* maintaining databases of regions to be redacted
+* maintaining redaction rules to be applied to DICOM files
+* automatically finding text within DICOM images (checking every every frame and overlay)
+* automatically redacting DICOM files based on the finding text, rules, or regions
+* verifying that a redaction process has taken place correctly
+(including GUI tools for quickly accepting/rejecting images)
+* training Machine Learning models to identify particular image types
+(used to spot scanned documents and forms which aren't clinical images)
+* replacing all image frames with blank images (to produce dummy/synthetic data)
+* a reusable library of code for reading and manipulating DICOM images
+
+It also contains software which can be used to create dummy or synthetic DICOM files
+based on originals, changing only the content of the image frames not the metadata.
+
+What it does not do: anonymise the metadata in the DICOM tags;
+this is best left to other tools (see CTP for example).
 
 Contents:
 * [dcmaudit](doc/dcmaudit.md) - view DICOM images, annotate regions to redact
-* [dicom_ocr](doc/dicom_ocr.md) - run OCR on the images and overlays in one or more DICOM files
-* [dicom_redact](doc/dicom_redact.md) - redact regions from DICOM images
 * [dicom_pixel_anon](doc/dicom_pixel_anon.md) - run OCR and redact regions from DICOM images
+   * [dicom_ocr](doc/dicom_ocr.md) - run OCR on the images and overlays in one or more DICOM files
+   * [dicom_redact](doc/dicom_redact.md) - redact regions from DICOM images
 * [pydicom_images](doc/pydicom_images.md) - extract DICOM images and overlays, run OCR and NLP/NER to find PII
 * [dicom rect db](doc/dicomrectdb.md) - the database about DICOM files which have been examined
 * [deidrules](doc/deidrules.md) - redaction using rules
