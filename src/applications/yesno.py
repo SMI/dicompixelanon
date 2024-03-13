@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # Simply program to display a set of images and allow you to click
 # Yes or No button (or keypress). The meaning is up to you!
+# Key press: y = Yes, n = No, Space = Next, p = Previous, q = Quit.
 # The output goes to stdout in a CSV format with two columns
 # class 0=No, 1=Yes and filename.
 # Usage: yesno.py filenames...
 # if you only give one filename then it's treated as a text file
-# containing a list of filenames, or a CSV file.
+# containing a list of filenames, or a CSV file with column 'filename'.
 # To do:
 #  proper command line arguments, esp. -i input -o output
 #  allow Undo button
-#  allow reading DICOM files
 #  contrast adjustment
 #  custom buttons
 #  multi-frame images
@@ -21,6 +21,12 @@ from PIL import Image
 from PIL import ImageTk
 import tkinter
 from tkinter import messagebox
+try:
+    from DicomPixelAnon.dicomimage import DicomImage
+    can_read_dicom = True
+except:
+    can_read_dicom = False
+print('Can read DICOM? %s' % can_read_dicom)
 
 # Read list of images from command line
 image_list = sys.argv[1:]
@@ -50,7 +56,12 @@ def change_image(delta):
     current_image += delta
     print('%d/%d   \r' % (current_image,len(image_list)), file=sys.stderr)
     root.title(os.path.basename(image_list[current_image]))
-    image_data = Image.open(image_list[current_image])
+    try:
+        dicom_image = DicomImage(image_list[current_image])
+        image_data = dicom_image.image(0, -1)
+    except:
+        raise
+        image_data = Image.open(image_list[current_image])
     max_width = root.winfo_screenwidth() - 150
     max_height = root.winfo_screenheight() - 150
     if image_data.width > max_width or image_data.height > max_height:
@@ -75,8 +86,14 @@ def no(event_data):
     answer(0)
     change_image(+1)
 
+def next(event_data):
+    change_image(+1)
+
 def prev(event_data):
     change_image(-1)
+
+def quit(event_data):
+    root.destroy()
 
 # Construct the GUI
 #  root window accepts keyboard shortcuts
@@ -86,6 +103,8 @@ root.title('yesno')
 root.bind("<n>", no)
 root.bind("<y>", yes)
 root.bind("<p>", prev)
+root.bind("<KeyPress-space>", next)
+root.bind("<q>", quit)
 #  image is displayed in a 'label' widget
 label = tkinter.Label(root, compound=tkinter.TOP)
 label.pack()
@@ -96,8 +115,8 @@ frame.pack()
 tkinter.Button(frame, text='Quit', command=root.quit).pack(side=tkinter.LEFT)
 #tkinter.Button(frame, text='Previous picture', command=lambda: change_image(-1)).pack(side=tkinter.LEFT)
 #tkinter.Button(frame, text='Next picture', command=lambda: change_image(+1)).pack(side=tkinter.LEFT)
-tkinter.Button(frame, text='Yes', command=lambda: answer(1)).pack(side=tkinter.LEFT)
-tkinter.Button(frame, text='No', command=lambda: answer(0)).pack(side=tkinter.LEFT)
+tkinter.Button(frame, text='Yes', command=lambda: yes(0)).pack(side=tkinter.LEFT)
+tkinter.Button(frame, text='No', command=lambda: no(0)).pack(side=tkinter.LEFT)
 
 # Start at first image
 change_image(0)
