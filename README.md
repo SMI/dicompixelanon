@@ -228,7 +228,12 @@ Notes:
 * if pip tries to install source-code packages and you don't have a compiler
 then it's probably trying to install pre-release packages
 so use the `--prefer-binary` option (or `--only-binary :all:`)
-
+* if you get an error about matplotlib please try to install it
+separately first, i.e. `pip install --prefer-binary matplotlib`
+* if you get an error about fastDamerauLevenshtein ("Microsoft Visual C++ is required")
+please delete that line from `dicompixelanon\src\library\requirements.txt`
+* Note that the keyboard shortcuts might not work on Windows
+(I don't know why) so please use the menu instead (sorry).
 ```
 python -m venv c:\tmp\venv
 c:\tmp\venv\Scripts\activate.bat
@@ -237,10 +242,11 @@ pip install --prefer-binary pydicom pydal easyocr numpy Pillow spacy flair pylib
 python -m spacy download en_core_web_trf
 cd c:\tmp
 git clone https://github.com/SMI/SmiServices
+git clone https://github.com/SMI/StructuredReports
 git clone https://github.com/SMI/dicompixelanon
-pip install --prefer-binary -r c:\tmp\SmiServices\src\common\Smi_Common_Python\requirements.txt
+pip install --prefer-binary -r c:\tmp\StructuredReports\src\library\requirements.txt
 pip install --prefer-binary -r c:\tmp\dicompixelanon\src\library\requirements.txt
-cd c:\tmp\SmiServices\src\common\Smi_Common_Python
+cd c:\tmp\StructuredReports\src\library
 python .\setup.py install
 cd c:\tmp\dicompixelanon\src\library
 python .\setup.py install
