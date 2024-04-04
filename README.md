@@ -225,11 +225,17 @@ Notes:
 * you need a recent version of Python (3.6 probably too old)
 * if you get an error about module skbuild not found, try `pip install scikit-build`
 * if pip tries to install spacy v4 then `pip install spacy==3.6.0`
-* if pip tries to install source-code packages and you don't have a compiler
-then it's probably trying to install pre-release packages
-so use the `--prefer-binary` option (or `--only-binary :all:`)
+* if pip tries to install source-code packages then you could install a compiler
+from https://visualstudio.microsoft.com/visual-cpp-build-tools/
+* if you don't have a compiler then 
+use the `--prefer-binary` option (or `--only-binary :all:`)
 * if you get an error about matplotlib please try to install it
 separately first, i.e. `pip install --prefer-binary matplotlib`
+This is caused by an old binary version of deid asking for an old version of matplotlib.
+* we need to force sentencepiece to be binary because it needs a compiler
+* we need to force deid to be source to get the latest version
+because older binary versions require an old matplotlib
+but deid does not need to be compiled so it's safe to force a source version
 * if you get an error about fastDamerauLevenshtein ("Microsoft Visual C++ is required")
 please delete that line from `dicompixelanon\src\library\requirements.txt`
 * Note that the keyboard shortcuts might not work on Windows
@@ -238,14 +244,14 @@ please delete that line from `dicompixelanon\src\library\requirements.txt`
 python -m venv c:\tmp\venv
 c:\tmp\venv\Scripts\activate.bat
 pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
-pip install --prefer-binary pydicom pydal easyocr numpy Pillow spacy flair pylibjpeg pylibjpeg_libjpeg
+pip install --prefer-binary pydicom pydal easyocr numpy Pillow spacy flair pylibjpeg pylibjpeg_libjpeg --only-binary=sentencepiece
 python -m spacy download en_core_web_trf
 cd c:\tmp
 git clone https://github.com/SMI/SmiServices
 git clone https://github.com/SMI/StructuredReports
 git clone https://github.com/SMI/dicompixelanon
 pip install --prefer-binary -r c:\tmp\StructuredReports\src\library\requirements.txt
-pip install --prefer-binary -r c:\tmp\dicompixelanon\src\library\requirements.txt
+pip install --prefer-binary --no-binary=deid -r c:\tmp\dicompixelanon\src\library\requirements.txt --no-binary=deid
 cd c:\tmp\StructuredReports\src\library
 python .\setup.py install
 cd c:\tmp\dicompixelanon\src\library
