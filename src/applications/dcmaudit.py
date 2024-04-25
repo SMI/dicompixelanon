@@ -168,6 +168,8 @@ class App:
         #self.app_image.bind("<Configure>", self.on_resize)
 
         # Main window keyboard shortcuts
+        #  Grab keyboard focus if needed
+        #self.tk_app.focus_force()
         #self.tk_app.bind("<Return>", self.done_file_event)
         self.tk_app.bind("<Escape>", self.escape_file_event)
         self.tk_app.bind("<Shift-Escape>", self.prev_file_event)
