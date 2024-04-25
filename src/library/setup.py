@@ -11,7 +11,7 @@ import sys
 # Read requirements.txt in current directory
 # and convert it into the form required by setuptools
 requirements_txt = join(abspath(dirname(__file__)), 'requirements.txt')
-requirements = [l.strip() for l in open(requirements_txt) if l and not l.startswith('#')]
+requirements = [l.strip() for l in open(requirements_txt) if l and l.strip() and not l.startswith('#')]
  
 def translate_req(req):
     # this>=0.3.2 -> this(>=0.3.2)
