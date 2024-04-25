@@ -223,6 +223,10 @@ Unpack `default.zip` into `$SMI_ROOT/data/stanza/en/`
 
 Notes:
 * you need a recent version of Python (3.6 probably too old)
+* some packages are not yet available for Python 3.12 in binary form,
+so if you don't have a compiler you might need to install Python 3.10,
+which you can install alongside other versions if you wish, or install
+into your personal AppData directory
 * if you get an error about module skbuild not found, try `pip install scikit-build`
 * if pip tries to install spacy v4 then `pip install spacy==3.6.0`
 * if pip tries to install source-code packages then you could install a compiler
@@ -240,8 +244,16 @@ but deid does not need to be compiled so it's safe to force a source version
 please delete that line from `dicompixelanon\src\library\requirements.txt`
 * Note that the keyboard shortcuts might not work on Windows
 (I don't know why) so please use the menu instead (sorry).
+
+Create the virtual environment (venv) using your preferred version of Python,
+for example use *one* of these:
 ```
 python -m venv c:\tmp\venv
+C:\Program Files\Python310\python.exe -m venv c:\tmp\venv
+C:\Users\Guneet\AppData\Local\Programs\Python\Python310\python.exe -m venv c:\tmp\venv
+```
+
+```
 c:\tmp\venv\Scripts\activate.bat
 pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
 pip install --prefer-binary pydicom pydal easyocr numpy Pillow spacy flair pylibjpeg pylibjpeg_libjpeg --only-binary=sentencepiece
