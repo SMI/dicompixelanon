@@ -69,6 +69,26 @@ options:
                         CSV of validation images, can be same as traincsv for auto 80/20 split
 ```
 
+When a model has been created you can test it with `test_forms.py` which takes either
+a CSV file of `filename,class` or an image filename (or multiple filenames).
+
+```
+usage: test_forms.py [-h] [-d] [-o OUTCSV] [-j JSON] [-m MODELFILE] [-r ROOTDIR] [-v VALCSV] [-i [IMAGE ...]]
+  -d, --debug           debug
+  -o OUTCSV, --outcsv OUTCSV output CSV file
+  -j JSON, --json JSON  output JSON file
+  -m MODELFILE, --model MODELFILE
+                        filename to load/save trained model
+  -r ROOTDIR, --rootdir ROOTDIR
+                        directory prefix for images
+  -v VALCSV, --valcsv VALCSV
+                        CSV of validation images
+  -i [IMAGE ...], --image [IMAGE ...]
+                        image to test (an image file or a DICOM file)
+```
+
+e.g. `./test_forms.py -m my_model.pth -o results.csv -v images_for_testing.csv`
+
 ## Results
 
 

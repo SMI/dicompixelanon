@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 # Command line parameters
 parser = argparse.ArgumentParser(description='Detect scanned forms vs clinical images')
 parser.add_argument('-d', '--debug', action="store_true", default=False, help='debug')
+parser.add_argument('-o', '--outcsv', action="store", default=None, help='output CSV file')
 parser.add_argument('-j', '--json', action="store", default=None, help='output JSON file')
 parser.add_argument('-m', '--model', dest='modelfile', action="store", default=None, help='filename to load/save trained model')
 parser.add_argument('-r', '--rootdir', dest='rootdir', action="store", default=None, help='directory prefix for images')
@@ -35,3 +36,9 @@ if args.json:
     with open(args.json, 'w') as fd:
         print(json.dumps(rc), file=fd)
     print(' Results written to %s' % args.json)
+if args.outcsv:
+    with open(args.outcsv, 'w', newline='') as fd:
+        writer = csv.DictWriter(fd, fieldnames=rc[0].keys(), lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        for row in rc:
+            writer.writerow(row)
