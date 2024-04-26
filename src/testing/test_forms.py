@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import glob
 import json
 import logging
 import os
@@ -29,6 +30,9 @@ det = ScannedFormDetector(load_model_path = model_file)
 if args.valcsv:
     rc = det.test_csv_file(args.valcsv, root_dir = root_dir)
 if args.image:
+    # If wildcards are not expanded by the shell, do it manually
+    if len(args.image)==1 and '*' in args.image[0]:
+        args.image = glob.glob(args.image[0])
     rc += det.test_image_list(args.image, root_dir = root_dir)
 
 print('Accuracy %s (%s / %s)' % (det.infer_accuracy, det.infer_num_correct, det.infer_num_total))
