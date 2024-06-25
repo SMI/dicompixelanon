@@ -47,7 +47,10 @@ def process_file(infile, outfile, salt=None):
     except:
         logger.error('Cannot find image pixels in DICOM: %s' % infile)
         return
-    logger.debug('BPP %s Frames %sx%s %s BitsAlloc %s BitsStored %s SignedInts %s ArrayShape %s Type %s' % (ds.SamplesPerPixel, ds.NumberOfFrames, ds.Rows, ds.Columns, ds.BitsAllocated, ds.BitsStored, ds.PixelRepresentation, (pixel_data.shape,), pixel_data.dtype))
+    logger.debug('BPP %s Frames %sx%s %s BitsAlloc %s BitsStored %s SignedInts %s ArrayShape %s Type %s' % (
+        ds.SamplesPerPixel,
+        ds.get('NumberOfFrames', 'ERR_NumberOfFrames),
+        ds.Rows, ds.Columns, ds.BitsAllocated, ds.BitsStored, ds.PixelRepresentation, (pixel_data.shape,), pixel_data.dtype))
     # Create an empty array exactly same dimensions as pixel_data
     zero_data =  np.zeros_like(pixel_data)
     # Replace the pixel data in the DICOM, using compression
