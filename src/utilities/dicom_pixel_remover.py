@@ -79,10 +79,10 @@ def process_file(infile, outfile, salt=None):
     ds.SeriesInstanceUID = mappings[ds.SeriesInstanceUID]
 
     # Replace any directory names which are actual UIDs
-    for map in mappings:
+    for m in mappings:
         # XXX this might fail if map is a prefix for multiple mappings
         # but can't put trailing slash as need to replace in filename.
-        outfile = outfile.replace(f'/{map}', f'/{mappings[map]}')
+        outfile = outfile.replace(m, mappings[m])
 
     # Save the new image
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
