@@ -49,7 +49,7 @@ def process_file(infile, outfile, salt=None):
         return
     logger.debug('BPP %s Frames %sx%s %s BitsAlloc %s BitsStored %s SignedInts %s ArrayShape %s Type %s' % (
         ds.SamplesPerPixel,
-        ds.get('NumberOfFrames', 'ERR_NumberOfFrames),
+        ds.get('NumberOfFrames', 'ERR_NumberOfFrames'),
         ds.Rows, ds.Columns, ds.BitsAllocated, ds.BitsStored, ds.PixelRepresentation, (pixel_data.shape,), pixel_data.dtype))
     # Create an empty array exactly same dimensions as pixel_data
     zero_data =  np.zeros_like(pixel_data)
@@ -94,7 +94,7 @@ parser.add_argument('-d', '--debug', action="store_true", help='debug')
 parser.add_argument('-c', '--compress', action="store_true", help='compress using RLE (lossless)')
 parser.add_argument('-i', '--inputdir', action="store", help='input directory (will be searched recursively)')
 parser.add_argument('-o', '--outputdir', action="store", help='output directory (will mirror input hierarchy)')
-parser.add_argument('--salt', action="store", help="salt to randomise hash (max 8 chars)')
+parser.add_argument('--salt', action="store", help="salt to randomise hash (max 8 chars)")
 args = parser.parse_args()
 if args.debug:
     logging.basicConfig(level = logging.DEBUG)
