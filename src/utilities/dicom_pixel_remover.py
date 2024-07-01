@@ -35,18 +35,22 @@ def hasher(id, salt=None):
     return str(int(hashobj.hexdigest(), base=16))
 
 
-def process_file(infile, outfile, salt=None):
+def process_file(infile, outfile, salt=None) -> int:
+
     logger.debug('convert %s to %s' % (infile, outfile))
+
     try:
         ds = pydicom.dcmread(infile)
     except:
         logger.error('Cannot parse as DICOM: %s' % infile)
-        return
+        return 1
+
     try:
         pixel_data = ds.pixel_array
     except:
         logger.error('Cannot find image pixels in DICOM: %s' % infile)
-        return
+        return 1
+
     logger.debug('BPP %s Frames %sx%s %s BitsAlloc %s BitsStored %s SignedInts %s ArrayShape %s Type %s' % (
         ds.SamplesPerPixel,
         ds.get('NumberOfFrames', 'ERR_NumberOfFrames'),
@@ -88,21 +92,36 @@ def process_file(infile, outfile, salt=None):
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     ds.save_as(outfile)
 
-# ---------------------------------------------------------------------
-parser = argparse.ArgumentParser(description='DICOM Image Remover')
-parser.add_argument('-d', '--debug', action="store_true", help='debug')
-parser.add_argument('-c', '--compress', action="store_true", help='compress using RLE (lossless)')
-parser.add_argument('-i', '--inputdir', action="store", help='input directory (will be searched recursively)')
-parser.add_argument('-o', '--outputdir', action="store", help='output directory (will mirror input hierarchy)')
-parser.add_argument('--salt', action="store", help="salt to randomise hash (max 8 chars)")
-args = parser.parse_args()
-if args.debug:
-    logging.basicConfig(level = logging.DEBUG)
-if args.compress:
-    compression = True
+    return 0
 
-for root, dirs, files in os.walk(args.inputdir):
-    for filename in files:
-        infile = os.path.join(root, filename)
-        outfile = infile.replace(args.inputdir, args.outputdir)
-        process_file(infile, outfile, args.salt)
+
+def main() -> int:
+
+    parser = argparse.ArgumentParser(description='DICOM Image Remover')
+    parser.add_argument('-d', '--debug', action="store_true", help='debug')
+    parser.add_argument('-c', '--compress', action="store_true", help='compress using RLE (lossless)')
+    parser.add_argument('-i', '--inputdir', action="store", help='input directory (will be searched recursively)')
+    parser.add_argument('-o', '--outputdir', action="store", help='output directory (will mirror input hierarchy)')
+    parser.add_argument('--salt', action="store", help="salt to randomise hash (max 8 chars)")
+    args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level = logging.DEBUG)
+
+    if args.compress:
+        global compression
+        compression = True
+
+    rc = 0
+
+    for root, dirs, files in os.walk(args.inputdir):
+        for filename in files:
+            infile = os.path.join(root, filename)
+            outfile = infile.replace(args.inputdir, args.outputdir)
+            rc |= process_file(infile, outfile, args.salt)
+
+
+    return rc
+
+if __name__ == "__main__":
+    raise SystemExit(main())
