@@ -17,6 +17,7 @@ shape and size (dimensions and number of frames)
 * does not change any overlay frames
 * input files should already have passed through the CTP
 anonymiser to remove tags with possible PII
+* You should use a salt to randomise the hashed UIDs/filenames.
 
 ## Usage
 
@@ -25,4 +26,5 @@ anonymiser to remove tags with possible PII
 -c = compress using RLE (lossless) otherwise uncompressed
 -i inputdir (will be searched recursively)
 -o outputdir (will be searched recursively)
+--salt to randomise hash (max 8 chars)
 ```
