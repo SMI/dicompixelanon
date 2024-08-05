@@ -1,3 +1,4 @@
+"""
 # Classes and functions for managing DICOM images in PyTorch
 
 # Class ScannedFormDetector is a simple binary classification class
@@ -8,6 +9,7 @@
 # Class DicomDataset is a replacement for the pytorch ImageFolder class.
 # Instead of requiring a specific directory structure this one can take
 # a list of filenames.
+"""
 
 import csv
 import logging
@@ -16,11 +18,11 @@ import random
 import tempfile # for pytest
 from tqdm import tqdm
 from PIL import Image
-from DicomPixelAnon.dicomimage import DicomImage
 import torch, torchvision
 from torchvision import datasets, models, transforms
 from torch.nn.modules.loss import BCEWithLogitsLoss
 from torch.optim import lr_scheduler
+from DicomPixelAnon.dicomimage import DicomImage
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,7 @@ class DicomDataset(torch.utils.data.Dataset):
             ds = DicomImage(filename)
             return True
         except:
-            logger.warn('not a valid DICOM: %s' % filename)
+            logger.warning('not a valid DICOM: %s' % filename)
             return False
 
 
@@ -132,7 +134,7 @@ def test_DicomDataset():
         print('class,filename\n0,%s\n1,%s\n' %
             (tmpimg1filename, tmpimg2filename), file=fd)
     dd = DicomDataset(tmpfile, root_dir=root_dir, return_path = True, check_valid = False)
-    dd_out = [x for x in dd]
+    dd_out = list(dd)
     #for img,classif,fn in dd_out:
     assert(dd_out[0][2] == tmpimg1)
     assert(dd_out[1][2] == tmpimg2)
@@ -227,22 +229,22 @@ class ScannedFormDetector:
         return
 
 
-    def __show_img(img):
-        """ Display a window showing the given pytorch image tensor
-        """
-        import numpy as np
-        import matplotlib.pyplot as plt 
-        # Show as image:
-        img = img.cpu().numpy()
-        ## transpose image to fit plt input
-        img = img.T
-        # Normalise image
-        data_min = np.min(img, axis=(1,2), keepdims=True)
-        data_max = np.max(img, axis=(1,2), keepdims=True)
-        scaled_data = (img - data_min) / (data_max - data_min)
-        # Show image
-        plt.imshow(scaled_data)
-        plt.show()
+    #def __show_img(img):
+    #    """ Display a window showing the given pytorch image tensor
+    #    """
+    #    import numpy as np
+    #    import matplotlib.pyplot as plt 
+    #    # Show as image:
+    #    img = img.cpu().numpy()
+    #    ## transpose image to fit plt input
+    #    img = img.T
+    #    # Normalise image
+    #    data_min = np.min(img, axis=(1,2), keepdims=True)
+    #    data_max = np.max(img, axis=(1,2), keepdims=True)
+    #    scaled_data = (img - data_min) / (data_max - data_min)
+    #    # Show image
+    #    plt.imshow(scaled_data)
+    #    plt.show()
 
 
     def __train(self, n_epochs = 20):
@@ -374,19 +376,19 @@ class ScannedFormDetector:
                 outputs = self.model(images)
                 # Calculate how many correct
                 for idx, sigm in enumerate(torch.sigmoid(outputs)):
-                  orig_class = int(labels[idx])
-                  pred_class = 0 if float(sigm) < 0.5 else 1
-                  if self.debug: print('idx %s label should be %s got sigm %s (%s)' % (idx,labels[idx],sigm,item_path[idx]))
-                  return_list.append( {
-                    'filename': item_path[idx],
-                    'class': pred_class,
-                    'class_orig': orig_class,
-                    'sigmoid': float(sigm)
-                  } )
-                  if pred_class == orig_class:
-                    correct += 1
-                  if self.debug: print('predicted class %s for %s' % (pred_class, item_path[idx]))
-                  #if self.debug: __show_img(images[idx])
+                    orig_class = int(labels[idx])
+                    pred_class = 0 if float(sigm) < 0.5 else 1
+                    if self.debug: print('idx %s label should be %s got sigm %s (%s)' % (idx,labels[idx],sigm,item_path[idx]))
+                    return_list.append( {
+                        'filename': item_path[idx],
+                        'class': pred_class,
+                        'class_orig': orig_class,
+                        'sigmoid': float(sigm)
+                    } )
+                    if pred_class == orig_class:
+                        correct += 1
+                    if self.debug: print('predicted class %s for %s' % (pred_class, item_path[idx]))
+                    #if self.debug: __show_img(images[idx])
                 total += labels.size(0)
         self.infer_accuracy = 100 * correct // total
         self.infer_num_correct = correct
