@@ -82,7 +82,7 @@ class DicomDataset(torch.utils.data.Dataset):
                 if (random.random() < percent) and (not check_valid or self.__valid_dicom(row['filename'])):
                     self.file_list.append(row)
         if not self.file_list:
-            raise Exception('Samping %f percent from %s returned no rows' % (percent*100.0, csv_file))
+            raise Exception('Samping %f percent from %s returned no rows' % (percent*100.0, filename))
 
     def __len__(self):
         return len(self.file_list)
