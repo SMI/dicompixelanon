@@ -117,9 +117,13 @@ Some sample data is provided as part of the GDCM repo:
 Useful sample files:
 
 * `gdcm-US-ALOKA-16.dcm` - has Sequence of Ultrasound Regions (3) plus text within the image regions
+* `US-GE-4AICL142.dcm` - has SequenceOfUltrasoundRegions
 * `CT_OSIRIX_OddOverlay.dcm` - has 1 overlay
 * `XA_GE_JPEG_02_with_Overlays.dcm` - has 8 overlays in high bits
 * `PHILIPS_Brilliance_ExtraBytesInOverlay.dcm` - has 1 overlay
+* `MR-SIEMENS-DICOM-WithOverlays.dcm` - has separate overlays
+* `GE_DLX-8-MONO2-Multiframe.dcm` - has multiple frames
+
 
 
 # Requirements
