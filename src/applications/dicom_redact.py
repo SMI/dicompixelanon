@@ -20,6 +20,7 @@ import os
 import re
 import pydicom
 from pydicom.pixel_data_handlers.numpy_handler import pack_bits
+from pydicom.uid import JPEGLSLossless, JPEG2000Lossless
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.ocrenum import OCREnum
@@ -54,6 +55,10 @@ elem_OverlayCols = 0x0011
 elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
 
+# Choose compression scheme as 'JPEG-LS' or 'JPEG2000'
+# (only the latter is supported on Python 3.6)
+compression_scheme = 'JPEG2000'
+
 
 # ---------------------------------------------------------------------
 
@@ -69,6 +74,21 @@ def mark_as_uncompressed(ds):
         ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
     else:
         ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRBigEndian
+
+
+# ---------------------------------------------------------------------
+
+def compress_dataset(ds):
+    """ Do lossless compression of the pydicom Dataset
+    """
+    if compression_scheme == 'JPEG-LS':
+        ds.compress(JPEGLSLossless)
+        # ds.file_meta.TransferSyntaxUID = JPEGLSLossless # should already be done
+    elif compression_scheme == 'JPEG2000':
+        ds.compress(JPEG2000Lossless)
+        # ds.file_meta.TransferSyntaxUID = JPEG2000Lossless # should already be done
+    else:
+        logger.warning('unknown compression_scheme, will not compress')
 
 
 # ---------------------------------------------------------------------
@@ -647,6 +667,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Redact DICOM')
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose')
     parser.add_argument('--db', dest='db', action="store", help='database directory to read rectangles (needs --dicom)')
+    parser.add_argument('--compress', dest='compress', action="store_true", help='Use lossless compression (JPEG2000)')
     parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
     parser.add_argument('--dicom', dest='dicom', nargs='*', action="store", help='DICOM filename(s) to be redacted', default=None)
     parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=[])
@@ -724,4 +745,6 @@ if __name__ == '__main__':
         outfilename = create_output_filename(infilename, args.output, args.relative)
         ds = pydicom.dcmread(infilename)
         redact_DicomRect_rectangles(ds, rect_list)
+        if args.compress:
+            compress_dataset(ds)
         ds.save_as(outfilename)
