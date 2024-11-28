@@ -46,11 +46,12 @@ overlays. This tool can do that job to fully clean a DICOM file.
 ## NOTE!
 
 The utility has to decompress the image (if compressed), but it
-does not (yet) recompress the image again afterwards, so the file size
-may increase. Some other redaction tools have the ability to preserve
+does not recompress the image again afterwards using the same
+compression scheme so the file size may increase.
+Some other redaction tools have the ability to preserve
 most of a lossy-JPEG-compressed image except for the redacted blocks,
-but those tools do not handle overlays at all. Compression, and lossy
-compression support can of course be added to this tool later.
+but those tools do not handle overlays at all. Lossless compression is
+an option but the only scheme supported is JPEG2000Lossless.
 
 ## Usage:
 
@@ -58,6 +59,7 @@ compression support can of course be added to this tool later.
   -v, --verbose         Verbose
   --db DB               database directory to read rectangles (needs --dicom)
   --csv CSV             CSV path to read rectangles (redacts all files in csv if --dicom not used)
+  --compress            Compress the output using lossless JPEG2000
   --dicom DICOM         DICOM path to be redacted
   -o OUTPUT, --output O Output DICOM dir or filename (created automatically if not specified)
   --relative-path RELATIVE
