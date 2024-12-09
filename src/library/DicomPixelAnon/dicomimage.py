@@ -33,10 +33,23 @@ class DicomImage:
         # bits_stored is the number of meaningful bits within those allocated.
         self.bits_stored = self.ds['BitsStored'].value if 'BitsStored' in self.ds else -1
         self.bits_allocated = self.ds['BitsAllocated'].value if 'BitsAllocated' in self.ds else -1
-        self.bit_mask = (~((~0) << self.bits_stored))
+        # Mask is all bits set 1 for pixel data, 0 for overlay bits
+        # If signed integer be careful not to calculate mask with top bit
+        # otherwise numpy complains about overflow.
+        if np.issubdtype(self.pixel_data.dtype, np.signedinteger):
+            if self.bits_stored < self.bits_allocated:
+                self.bit_mask = np.array([0], dtype=self.pixel_data.dtype)
+                self.bit_mask[0] = (~((~0) << self.bits_stored))
+            else:
+                # all bits used for image pixels so mask has all bits set:
+                self.bit_mask = -1
+        else:
+            self.bit_mask = (~((~0) << self.bits_stored))
 
         # Check for signed integers
         self.signed = self.ds['PixelRepresentation'].value if 'PixelRepresentation' in self.ds else 0
+        self.signed = (int(self.signed) != 0) # convert to bool
+        assert (self.signed == (np.issubdtype(self.pixel_data.dtype, np.signedinteger)))
 
         logging.info('%s is %s using %d/%d bits with %d frames' % (filename, str(self.pixel_data.shape), self.bits_stored, self.bits_allocated, self.num_frames))
 
@@ -238,12 +251,13 @@ class DicomImage:
                 else:
                     pix_extracted = (self.pixel_data[frame,:,:,:] & self.bit_mask)
             # If signed integers [-N,N) then map to unsigned [0,N)
-            if self.signed:
-                if self.bits_stored > 8:
-                    # XXX assuming 16-bit, not larger
-                    pix_extracted = (pix_extracted + 32768).astype(np.uint16)
-                else:
-                    pix_extracted = (pix_extracted + 128).astype(np.uint8)
+            # This is not required since rescale_np will do it
+            #if self.signed:
+            #    if self.bits_stored > 8:
+            #        # XXX assuming 16-bit, not larger
+            #        pix_extracted = (pix_extracted + 32768).astype(np.uint16)
+            #    else:
+            #        pix_extracted = (pix_extracted + 128).astype(np.uint8)
             # Equalise it before returning
             return Image.fromarray(rescale_np(pix_extracted, inverted))
         if overlay >= 0:
