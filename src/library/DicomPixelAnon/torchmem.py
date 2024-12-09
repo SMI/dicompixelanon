@@ -24,5 +24,11 @@ except AssertionError as e:
         pass
     else:
         raise
+except RuntimeError as e:
+    # Ignore if no NVIDIA driver installed
+    if 'no NVIDIA driver' in str(e):
+        pass
+    else:
+        raise
 except Exception as e:
     raise
