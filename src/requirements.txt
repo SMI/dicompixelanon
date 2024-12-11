@@ -1,3 +1,4 @@
+boto3
 pydicom
 pylibjpeg
 pylibjpeg_libjpeg

@@ -22,6 +22,7 @@ from PIL import ImageTk
 from PIL import ImageDraw
 from PIL.ImageOps import equalize, invert
 import argparse
+import boto3
 import csv
 import logging
 import numpy as np
@@ -208,7 +209,13 @@ class S3CredentialsDialog:
 class S3LoadDialog:
     def __init__(self, parent):
         # Initialise class variables
+        self.bucket = None
         self.access = self.secret = None
+        self.random = False
+        self.csv_file = None
+        self.study_list = []
+        self.series_list = []
+        self.output_dir = None
         self.path_list = []
         # Read the stored credentials
         cred_store = S3CredentialStore()
@@ -224,9 +231,9 @@ class S3LoadDialog:
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         self.bucket_dropdown = tkinter.StringVar()
         def pick(xx):
-            chose = self.bucket_dropdown.get()
-            (self.access, self.secret, self.endpoint) = cred_store.read_cred(chose)
-            print('Picked %s / %s at %s' % (self.access,self.secret,self.endpoint))
+            self.bucket = self.bucket_dropdown.get()
+            (self.access, self.secret, self.endpoint) = cred_store.read_cred(self.bucket)
+            print('Picked %s using %s / %s at %s' % (self.bucket,self.access,self.secret,self.endpoint))
         self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
         self.bucketMenu.grid(row=0, column=1)
         # Random sample
@@ -237,7 +244,7 @@ class S3LoadDialog:
         # CSV file
         #tkinter.Label(top, text='CSV file (optional):').grid(row=2, column=0)
         def showFileChooser():
-            self.csv_file = self.csvChooser = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
+            self.csv_file = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
                 initialdir='.',
                 #initialfile='',
                 filetypes=[('csv','*.csv'), ('CSV', '*.CSV')]
@@ -263,27 +270,57 @@ class S3LoadDialog:
 
     def load(self):
         if not self.access or not self.secret:
-            tkinter.messagebox.showerror(title="No credentials",
-                message='Please select some credentials',
-                type=tkinter.messagebox.OKCANCEL)
+            tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
-        print('Will use: s3 %s = %s' % (self.access, self.secret))
-        print(' random = %s' % self.randomVar.get())
+        self.random = True if self.randomVar.get() else False
+        self.study_list = self.studyEntry.get().split(',')
+        self.series_list = self.seriesEntry.get().split(',')
+        self.output_dir = self.outputEntry.get()
+        self.csv_file = self.csvEntry.get()
+        print('Will use: s3 in %s using %s = %s at %s' % (self.bucket, self.access, self.secret, self.endpoint))
+        print(' random = %s' % self.random)
         print(' paths = %s' % self.path_list)
-        print(' study = %s' % self.studyEntry.get())
-        print(' series = %s' % self.seriesEntry.get())
-        print(' output = %s' % self.outputEntry.get())
+        print(' study = %s' % self.study_list)
+        print(' series = %s' % self.series_list)
+        print(' output = %s' % self.output_dir)
         print(' CSV = %s' % self.csv_file)
         # If random then read CSV and pick a series
+        if self.randomVar.get() and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
+            return
         # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
         # If a series but not study then need CSV to find study
         # If a study and series are supplied then load it
         # If output directory given then write there, else create temporary dir
         # path can be given as a format string
-        with open(self.csv_file) as fd:
-            csvr = csv.DictReader(fd)
-            for row in csvr:
-                print('reading %s' % row)
+        if self.csv_file:
+            with open(self.csv_file) as fd:
+                csvr = csv.DictReader(fd)
+                for row in csvr:
+                    print('reading %s' % row)
+        #
+        print('Log into S3')
+        s3 = boto3.resource('s3',
+            endpoint_url=self.endpoint,
+            aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+        print('List bucket')
+        s3bucket = s3.Bucket(name=self.bucket)
+        s3prefix = ''
+        # Let's assume that study and series lists only have one entry
+        if self.study_list and len(self.study_list[0]):
+            s3prefix += self.study_list[0]
+        if self.series_list and len(self.series_list[0]):
+            if s3prefix:
+                s3prefix += '/'
+            s3prefix += self.series_list[0]
+        print('Try a list of prefix %s' % s3prefix)
+        for obj in s3bucket.objects.filter(Prefix = s3prefix):
+            print(f"{obj.key}\t{obj.size}\t{obj.last_modified}")
+        print('Download:')
+        for obj in s3bucket.objects.filter(Prefix = s3prefix):
+            key = obj.key
+            print('  %s' % key)
+            s3bucket.download_file(key, os.path.join(self.output_dir, os.path.basename(key)))
         self.top.destroy()
 
 
