@@ -25,6 +25,7 @@ import argparse
 import boto3
 import csv
 import logging
+import random
 import numpy as np
 import os
 import sys
@@ -44,6 +45,7 @@ from DicomPixelAnon import deidrules
 from DicomPixelAnon import ultrasound
 
 DEFAULT_ENDPOINT = 'http://127.0.0.1:7070/'
+CREDS_FILENAME = '.dcmaudit_s3creds.csv'
 
 
 # =====================================================================
@@ -105,7 +107,7 @@ class S3CredentialStore:
     """ Store S3 credentials in home directory
     """
     def __init__(self):
-        self.cred_path = os.path.join(os.environ.get('HOME','.'), '.s3cred.csv')
+        self.cred_path = os.path.join(os.environ.get('HOME','.'), CREDS_FILENAME)
         self.creds = dict()
         self.read_creds()
     def read_creds(self):
@@ -223,8 +225,7 @@ class S3LoadDialog:
         cred_names = list(cred_list.keys())
         if not cred_names:
             tkinter.messagebox.showerror(title="No credentials",
-                message='Please use the credential manager to save some credentials',
-                type=tkinter.messagebox.OKCANCEL)
+                message='Please use the credential manager to save some credentials')
             return
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
@@ -273,8 +274,8 @@ class S3LoadDialog:
             tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
         self.random = True if self.randomVar.get() else False
-        self.study_list = self.studyEntry.get().split(',')
-        self.series_list = self.seriesEntry.get().split(',')
+        self.study_list = self.studyEntry.get().split(',') if self.studyEntry.get() else []
+        self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
         self.output_dir = self.outputEntry.get()
         self.csv_file = self.csvEntry.get()
         print('Will use: s3 in %s using %s = %s at %s' % (self.bucket, self.access, self.secret, self.endpoint))
@@ -285,7 +286,7 @@ class S3LoadDialog:
         print(' output = %s' % self.output_dir)
         print(' CSV = %s' % self.csv_file)
         # If random then read CSV and pick a series
-        if self.randomVar.get() and not self.csv_file:
+        if self.random and not self.csv_file:
             tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
             return
         # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
@@ -293,34 +294,65 @@ class S3LoadDialog:
         # If a study and series are supplied then load it
         # If output directory given then write there, else create temporary dir
         # path can be given as a format string
-        if self.csv_file:
-            with open(self.csv_file) as fd:
-                csvr = csv.DictReader(fd)
-                for row in csvr:
-                    print('reading %s' % row)
         #
+        # Open CSV file
+        csvr = None
+        if self.csv_file:
+            fd = open(self.csv_file)
+            csvr = csv.DictReader(fd)
+            csvr.fd = fd # keep for later
+        # If we want random selection then read from CSV
+        if self.random:
+            numrows = 0
+            for row in csvr:
+                numrows += 1
+            csvr.fd.seek(0)
+            next(csvr.fd) # skip header row
+            numrows = random.randint(0, numrows-2)
+            while numrows > 0:
+                next(csvr)
+                numrows -= 1
+            row = next(csvr)
+            self.study_list.append(row['StudyInstanceUID'])
+            self.series_list.append(row['SeriesInstanceUID'])
+        # If we only have series we need CSV to get study
+        if self.series_list and not self.study_list and csvr:
+            for row in csvr:
+                if row['SeriesInstanceUID'] in self.series_list:
+                    self.study_list.append(row['StudyInstanceUID'])
+                    print('CSV given series %s got study %s' % (row['SeriesInstanceUID'], row['StudyInstanceUID']))
+        # Finished with CSV file now
+        if csvr:
+            csvr.fd.close()
+        # Connect to S3 service
         print('Log into S3')
         s3 = boto3.resource('s3',
             endpoint_url=self.endpoint,
             aws_access_key_id=self.access, aws_secret_access_key=self.secret)
-        print('List bucket')
+        print('Looking for study %s' % self.study_list)
+        print('Looking for series %s' % self.series_list)
+        # Select the bucket given by the credential name
         s3bucket = s3.Bucket(name=self.bucket)
-        s3prefix = ''
-        # Let's assume that study and series lists only have one entry
-        if self.study_list and len(self.study_list[0]):
-            s3prefix += self.study_list[0]
-        if self.series_list and len(self.series_list[0]):
-            if s3prefix:
-                s3prefix += '/'
-            s3prefix += self.series_list[0]
-        print('Try a list of prefix %s' % s3prefix)
-        for obj in s3bucket.objects.filter(Prefix = s3prefix):
-            print(f"{obj.key}\t{obj.size}\t{obj.last_modified}")
-        print('Download:')
-        for obj in s3bucket.objects.filter(Prefix = s3prefix):
-            key = obj.key
-            print('  %s' % key)
-            s3bucket.download_file(key, os.path.join(self.output_dir, os.path.basename(key)))
+        # Make all combinations of study and series prefixes
+        s3prefix_list = []
+        for study in self.study_list:
+            if not self.series_list:
+                s3prefix_list.append(study)
+                continue
+            for series in self.series_list:
+                s3prefix = '%s/%s' % (study, series)
+                s3prefix_list.append(s3prefix)
+        print('Try a list of prefix %s' % s3prefix_list)
+        if not '{file}' in self.output_dir:
+            self.output_dir += '/{file}'
+        for s3prefix in s3prefix_list:
+            for obj in s3bucket.objects.filter(Prefix = s3prefix):
+                (stu,ser,sop) = obj.key.split('/')
+                path = self.output_dir.format(study=stu, series=ser, file=sop)
+                print(f"{obj.key}\t{obj.size}\t{obj.last_modified}")
+                print('  write to %s' % path)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                s3bucket.download_file(obj.key, path)
         self.top.destroy()
 
 
