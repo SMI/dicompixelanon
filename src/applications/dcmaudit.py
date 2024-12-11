@@ -815,7 +815,8 @@ class App:
             return
         self.render_flag = False
         if self.image is None:
-            self.app_image.configure(image=self.dummy_tkimage)
+            if hasattr(self, 'dummy_tkimage'):
+                self.app_image.configure(image=self.dummy_tkimage)
             self.info_label.configure(text="\n\n")
             return
 
