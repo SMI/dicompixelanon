@@ -42,6 +42,8 @@ from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon import deidrules
 from DicomPixelAnon import ultrasound
 
+DEFAULT_ENDPOINT = 'http://127.0.0.1:7070/'
+
 
 # =====================================================================
 # Allow a thread to return a value. Use like this:
@@ -106,35 +108,35 @@ class S3CredentialStore:
         self.creds = dict()
         self.read_creds()
     def read_creds(self):
-        """ Returns a dict mapping nickname to a tuple (access,secret)
+        """ Returns a dict mapping nickname to a tuple (access,secret,endpoint)
         """
         self.creds = dict()
         if os.path.isfile(self.cred_path):
             with open(self.cred_path, newline='') as fd:
                 csvr = csv.DictReader(fd)
                 for row in csvr:
-                    self.creds[row['name']] = (row['access'], row['secret'])
+                    self.creds[row['name']] = (row['access'], row['secret'], row['endpoint'])
         return self.creds
     def read_cred(self, nickname):
         """ Returns tuple (access,secret) or None
         """
         self.read_creds()
-        (acc,sec) = self.creds.get(nickname, ('',''))
-        return (acc,sec)
-    def add_cred(self, nickname, access, secret):
+        (acc,sec,srv) = self.creds.get(nickname, ('',''))
+        return (acc,sec,srv)
+    def add_cred(self, nickname, access, secret, endpoint):
         """ Appends to the CSV
         XXX possibly re-read the file in case someone else modified it,
         and merge with the values held in self.creds?
         """
-        self.creds[nickname] = (access, secret)
+        self.creds[nickname] = (access, secret, endpoint)
         if not access or not secret:
             del self.creds[nickname]
         with open(self.cred_path, 'w', newline='') as fd:
-            csvw = csv.DictWriter(fd, fieldnames=['name','access','secret'], lineterminator='\n')
+            csvw = csv.DictWriter(fd, fieldnames=['name','access','secret','endpoint'], lineterminator='\n')
             csvw.writeheader()
             for nickname in self.creds:
-                (acc,sec) = self.creds[nickname]
-                csvw.writerow( { 'name': nickname, 'access': acc, 'secret': sec } )
+                (acc,sec,srv) = self.creds[nickname]
+                csvw.writerow( { 'name': nickname, 'access': acc, 'secret': sec, 'endpoint': srv } )
 
 
 # =====================================================================
@@ -147,6 +149,7 @@ class S3CredentialsDialog:
     def __init__(self, parent):
         # Initialise class variables
         self.access = self.secret = None
+        self.endpoint = DEFAULT_ENDPOINT
         # Read the stored credentials
         # Add an empty one so there's at least one item
         cred_store = S3CredentialStore()
@@ -162,35 +165,42 @@ class S3CredentialsDialog:
             chose = self.bucket_dropdown.get()
             if chose == '---':
                 return
-            (acc,sec) = cred_store.read_cred(chose)
+            (acc,sec,srv) = cred_store.read_cred(chose)
+            self.serverEntry.delete(0, tkinter.END)
+            self.serverEntry.insert(0, srv)
             self.accessEntry.delete(0, tkinter.END)
             self.accessEntry.insert(0, acc)
             self.secretEntry.delete(0, tkinter.END)
             self.secretEntry.insert(0, sec)
             self.nickEntry.delete(0, tkinter.END)
             self.nickEntry.insert(0, chose)
-        self.quickEntry = tkinter.OptionMenu(top, self.bucket_dropdown, *options, command = pick)
-        self.quickEntry.grid(row=0, column=1)
-        tkinter.Label(top, text='Access key:').grid(row=1, column=0)
+        self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *options, command = pick)
+        self.bucketMenu.grid(row=0, column=1)
+        tkinter.Label(top, text='Server:').grid(row=1, column=0)
+        self.serverEntry = tkinter.Entry(top)
+        self.serverEntry.insert(0, DEFAULT_ENDPOINT)
+        self.serverEntry.grid(row=1, column=1)
+        tkinter.Label(top, text='Access key:').grid(row=2, column=0)
         self.accessEntry = tkinter.Entry(top)
-        self.accessEntry.grid(row=1, column=1)
-        tkinter.Label(top, text='Secret key:').grid(row=2, column=0)
+        self.accessEntry.grid(row=2, column=1)
+        tkinter.Label(top, text='Secret key:').grid(row=3, column=0)
         self.secretEntry = tkinter.Entry(top)
-        self.secretEntry.grid(row=2, column=1)
-        tkinter.Label(top, text='Nickname:').grid(row=3, column=0)
+        self.secretEntry.grid(row=3, column=1)
+        tkinter.Label(top, text='Nickname:').grid(row=4, column=0)
         self.nickEntry = tkinter.Entry(top)
-        self.nickEntry.grid(row=3, column=1)
+        self.nickEntry.grid(row=4, column=1)
         self.mySubmitButton = tkinter.Button(top, text='Save', command=self.send)
-        self.mySubmitButton.grid(row=4, column=1)
+        self.mySubmitButton.grid(row=5, column=1)
 
     def send(self):
         self.access = self.accessEntry.get()
         self.secret = self.secretEntry.get()
         self.nickname = self.nickEntry.get()
+        self.endpoint = self.serverEntry.get()
         if self.nickname:
             cred_store = S3CredentialStore()
             print('Adding credential %s to store' % self.nickname)
-            cred_store.add_cred(self.nickname, self.access, self.secret)
+            cred_store.add_cred(self.nickname, self.access, self.secret, self.endpoint)
         self.top.destroy()
 
 
@@ -215,10 +225,10 @@ class S3LoadDialog:
         self.bucket_dropdown = tkinter.StringVar()
         def pick(xx):
             chose = self.bucket_dropdown.get()
-            (self.access,self.secret) = cred_store.read_cred(chose)
-            print('Picked %s / %s' % (self.access,self.secret))
-        self.quickEntry = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
-        self.quickEntry.grid(row=0, column=1)
+            (self.access, self.secret, self.endpoint) = cred_store.read_cred(chose)
+            print('Picked %s / %s at %s' % (self.access,self.secret,self.endpoint))
+        self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
+        self.bucketMenu.grid(row=0, column=1)
         # Random sample
         tkinter.Label(top, text='Random sample:').grid(row=1, column=0)
         self.randomVar = tkinter.IntVar()
