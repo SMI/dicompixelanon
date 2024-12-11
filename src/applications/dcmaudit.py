@@ -22,6 +22,7 @@ from PIL import ImageTk
 from PIL import ImageDraw
 from PIL.ImageOps import equalize, invert
 import argparse
+import csv
 import logging
 import numpy as np
 import os
@@ -94,6 +95,186 @@ class GridEntryDialog(tkinter.simpledialog.Dialog):
 
     def apply(self):
         pass
+
+
+# =====================================================================
+class S3CredentialStore:
+    """ Store S3 credentials in home directory
+    """
+    def __init__(self):
+        self.cred_path = os.path.join(os.environ.get('HOME','.'), '.s3cred.csv')
+        self.creds = dict()
+        self.read_creds()
+    def read_creds(self):
+        """ Returns a dict mapping nickname to a tuple (access,secret)
+        """
+        self.creds = dict()
+        if os.path.isfile(self.cred_path):
+            with open(self.cred_path, newline='') as fd:
+                csvr = csv.DictReader(fd)
+                for row in csvr:
+                    self.creds[row['name']] = (row['access'], row['secret'])
+        return self.creds
+    def read_cred(self, nickname):
+        """ Returns tuple (access,secret) or None
+        """
+        self.read_creds()
+        (acc,sec) = self.creds.get(nickname, ('',''))
+        return (acc,sec)
+    def add_cred(self, nickname, access, secret):
+        """ Appends to the CSV
+        XXX possibly re-read the file in case someone else modified it,
+        and merge with the values held in self.creds?
+        """
+        self.creds[nickname] = (access, secret)
+        if not access or not secret:
+            del self.creds[nickname]
+        with open(self.cred_path, 'w', newline='') as fd:
+            csvw = csv.DictWriter(fd, fieldnames=['name','access','secret'], lineterminator='\n')
+            csvw.writeheader()
+            for nickname in self.creds:
+                (acc,sec) = self.creds[nickname]
+                csvw.writerow( { 'name': nickname, 'access': acc, 'secret': sec } )
+
+
+# =====================================================================
+class S3CredentialsDialog:
+    """ Pop up a dialogue box for managing S3 credentials
+    cached in a hidden file in the home directory:
+    ~/.s3cred.csv contains 3 columns name,access,secret.
+    """
+
+    def __init__(self, parent):
+        # Initialise class variables
+        self.access = self.secret = None
+        # Read the stored credentials
+        # Add an empty one so there's at least one item
+        cred_store = S3CredentialStore()
+        cred_list = cred_store.read_creds()
+        cred_names = list(cred_list.keys())
+        options = cred_names if len(cred_names) else ['---']
+        # Construct GUI
+        top = self.top = tkinter.Toplevel(parent)
+        tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
+        #self.myLabel.pack() instead of pack()ing every widget we use grid(row,column)
+        self.bucket_dropdown = tkinter.StringVar()
+        def pick(xx):
+            chose = self.bucket_dropdown.get()
+            if chose == '---':
+                return
+            (acc,sec) = cred_store.read_cred(chose)
+            self.accessEntry.delete(0, tkinter.END)
+            self.accessEntry.insert(0, acc)
+            self.secretEntry.delete(0, tkinter.END)
+            self.secretEntry.insert(0, sec)
+            self.nickEntry.delete(0, tkinter.END)
+            self.nickEntry.insert(0, chose)
+        self.quickEntry = tkinter.OptionMenu(top, self.bucket_dropdown, *options, command = pick)
+        self.quickEntry.grid(row=0, column=1)
+        tkinter.Label(top, text='Access key:').grid(row=1, column=0)
+        self.accessEntry = tkinter.Entry(top)
+        self.accessEntry.grid(row=1, column=1)
+        tkinter.Label(top, text='Secret key:').grid(row=2, column=0)
+        self.secretEntry = tkinter.Entry(top)
+        self.secretEntry.grid(row=2, column=1)
+        tkinter.Label(top, text='Nickname:').grid(row=3, column=0)
+        self.nickEntry = tkinter.Entry(top)
+        self.nickEntry.grid(row=3, column=1)
+        self.mySubmitButton = tkinter.Button(top, text='Save', command=self.send)
+        self.mySubmitButton.grid(row=4, column=1)
+
+    def send(self):
+        self.access = self.accessEntry.get()
+        self.secret = self.secretEntry.get()
+        self.nickname = self.nickEntry.get()
+        if self.nickname:
+            cred_store = S3CredentialStore()
+            print('Adding credential %s to store' % self.nickname)
+            cred_store.add_cred(self.nickname, self.access, self.secret)
+        self.top.destroy()
+
+
+# =====================================================================
+class S3LoadDialog:
+    def __init__(self, parent):
+        # Initialise class variables
+        self.access = self.secret = None
+        self.path_list = []
+        # Read the stored credentials
+        cred_store = S3CredentialStore()
+        cred_list = cred_store.read_creds()
+        cred_names = list(cred_list.keys())
+        if not cred_names:
+            tkinter.messagebox.showerror(title="No credentials",
+                message='Please use the credential manager to save some credentials',
+                type=tkinter.messagebox.OKCANCEL)
+            return
+        # Construct GUI
+        top = self.top = tkinter.Toplevel(parent)
+        tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
+        self.bucket_dropdown = tkinter.StringVar()
+        def pick(xx):
+            chose = self.bucket_dropdown.get()
+            (self.access,self.secret) = cred_store.read_cred(chose)
+            print('Picked %s / %s' % (self.access,self.secret))
+        self.quickEntry = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
+        self.quickEntry.grid(row=0, column=1)
+        # Random sample
+        tkinter.Label(top, text='Random sample:').grid(row=1, column=0)
+        self.randomVar = tkinter.IntVar()
+        self.randomCheck = tkinter.Checkbutton(top, text='Random',variable=self.randomVar, onvalue=1, offvalue=0) # command=<func>
+        self.randomCheck.grid(row=1, column=1)
+        # CSV file
+        #tkinter.Label(top, text='CSV file (optional):').grid(row=2, column=0)
+        def showFileChooser():
+            self.csv_file = self.csvChooser = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
+                initialdir='.',
+                #initialfile='',
+                filetypes=[('csv','*.csv'), ('CSV', '*.CSV')]
+                )
+            if not self.csv_file:
+                return
+            self.csvEntry.delete(0, tkinter.END)
+            self.csvEntry.insert(0, self.csv_file)
+            # XXX TODO: update initialdir with dirname of new file
+        tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=2, column=0)
+        self.csvEntry = tkinter.Entry(top)
+        self.csvEntry.grid(row=2, column=1)
+        tkinter.Label(top, text='Study Ids:').grid(row=3, column=0)
+        self.studyEntry = tkinter.Entry(top)
+        self.studyEntry.grid(row=3, column=1)
+        tkinter.Label(top, text='Series Ids:').grid(row=4, column=0)
+        self.seriesEntry = tkinter.Entry(top)
+        self.seriesEntry.grid(row=4, column=1)
+        tkinter.Label(top, text='Output directory:').grid(row=5, column=0)
+        self.outputEntry = tkinter.Entry(top)
+        self.outputEntry.grid(row=5, column=1)
+        self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load).grid(row=6, column=1)
+
+    def load(self):
+        if not self.access or not self.secret:
+            tkinter.messagebox.showerror(title="No credentials",
+                message='Please select some credentials',
+                type=tkinter.messagebox.OKCANCEL)
+            return
+        print('Will use: s3 %s = %s' % (self.access, self.secret))
+        print(' random = %s' % self.randomVar.get())
+        print(' paths = %s' % self.path_list)
+        print(' study = %s' % self.studyEntry.get())
+        print(' series = %s' % self.seriesEntry.get())
+        print(' output = %s' % self.outputEntry.get())
+        print(' CSV = %s' % self.csv_file)
+        # If random then read CSV and pick a series
+        # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
+        # If a series but not study then need CSV to find study
+        # If a study and series are supplied then load it
+        # If output directory given then write there, else create temporary dir
+        # path can be given as a format string
+        with open(self.csv_file) as fd:
+            csvr = csv.DictReader(fd)
+            for row in csvr:
+                print('reading %s' % row)
+        self.top.destroy()
 
 
 # =====================================================================
@@ -206,6 +387,9 @@ class App:
         self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        self.openmenu.add_separator()
+        self.openmenu.add_command(label='Manage S3 credentials', command=lambda: self.manage_s3_event(None))
+        self.openmenu.add_command(label='Open files from S3', command=lambda: self.open_s3_event(None))
         self.openmenu.add_separator()
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
@@ -346,6 +530,30 @@ class App:
             if rc == 'cancel':
                 return
         DicomRectDB.set_db_path(directory)
+
+
+
+    def manage_s3_event(self, event):
+        """ Only display dialogue box to edit credential store """
+        root = self.tk_app
+        s3cred = S3CredentialsDialog(root)
+        root.wait_window(s3cred.top)
+
+    def open_s3_event(self, event):
+        """ Display dialogue box to pick a series to load,
+        copies from S3, then loads them.
+        """
+        root = self.tk_app
+        s3load = S3LoadDialog(root)
+        # If dialogue box never got constructed due to error then
+        # if won't have a 'top' so doesn't need to be destroyed.
+        if hasattr(s3load, 'top'):
+            root.wait_window(s3load.top)
+        print('S3 creds = %s / %s' % (s3load.access, s3load.secret))
+        print('S3 path = %s' % (s3load.path_list))
+        #self.set_image_list(FileList(filenames))
+        #self.load_next_file()
+
 
     def save_db_csv_event(self, event, rects = False, tags = False):
         """ Pop up a file dialog box asking for a CSV filename.
