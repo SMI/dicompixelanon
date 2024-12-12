@@ -208,8 +208,15 @@ class S3CredentialsDialog:
 
 
 # =====================================================================
+
+class S3LoadPrefs:
+    def __init__(self):
+        self.output_dir = None
+        self.csv_file_dir = None
+        pass
+
 class S3LoadDialog:
-    def __init__(self, parent):
+    def __init__(self, parent, s3loadprefs = None):
         # Initialise class variables
         self.bucket = None
         self.access = self.secret = None
@@ -219,6 +226,9 @@ class S3LoadDialog:
         self.series_list = []
         self.output_dir = None
         self.path_list = []
+        if s3loadprefs:
+            self.output_dir = s3loadprefs.output_dir
+            self.csv_file_dir = s3loadprefs.csv_file_dir
         # Read the stored credentials
         cred_store = S3CredentialStore()
         cred_list = cred_store.read_creds()
@@ -289,6 +299,12 @@ class S3LoadDialog:
         if self.random and not self.csv_file:
             tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
             return
+        if self.series_list and not self.study_list and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Cannot download a Series without a Study unless a CSV file is given")
+            return
+        if not self.study_list and not self.series_list and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Cannot download all Studies unless a CSV file is given")
+            return
         # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
         # If a series but not study then need CSV to find study
         # If a study and series are supplied then load it
@@ -298,37 +314,56 @@ class S3LoadDialog:
         # Open CSV file
         csvr = None
         if self.csv_file:
+            print('Opening CSV file %s' % self.csv_file)
             fd = open(self.csv_file)
             csvr = csv.DictReader(fd)
             csvr.fd = fd # keep for later
-        # If we want random selection then read from CSV
+        # Read from CSV
         if self.random:
+            print('Reading CSV file')
             numrows = 0
             for row in csvr:
                 numrows += 1
+            # Rewind and skip header row
             csvr.fd.seek(0)
-            next(csvr.fd) # skip header row
-            numrows = random.randint(0, numrows-2)
+            next(csvr.fd)
+            # Pick ten random rows
+            rownum_list = [random.randint(0,numrows-1) for n in range(10)]
             while numrows > 0:
-                next(csvr)
+                row = next(csvr)
+                if numrows in rownum_list:
+                    self.study_list.append(row['StudyInstanceUID'])
+                    self.series_list.append(row['SeriesInstanceUID'])
                 numrows -= 1
-            row = next(csvr)
-            self.study_list.append(row['StudyInstanceUID'])
-            self.series_list.append(row['SeriesInstanceUID'])
+        # If we don't have Study or Series then read all
+        if not self.study_list and not self.series_list:
+            numrows = 0
+            for row in csvr:
+                self.study_list.append(row['StudyInstanceUID'])
+                self.series_list.append(row['SeriesInstanceUID'])
         # If we only have series we need CSV to get study
-        if self.series_list and not self.study_list and csvr:
+        if self.series_list and not self.study_list:
+            numrows = 0
             for row in csvr:
                 if row['SeriesInstanceUID'] in self.series_list:
                     self.study_list.append(row['StudyInstanceUID'])
                     print('CSV given series %s got study %s' % (row['SeriesInstanceUID'], row['StudyInstanceUID']))
+                    numrows += 1
+                    if numrows > 10000:
+                        print('Limiting to 10,000')
+                        break
         # Finished with CSV file now
         if csvr:
             csvr.fd.close()
         # Connect to S3 service
         print('Log into S3')
-        s3 = boto3.resource('s3',
-            endpoint_url=self.endpoint,
-            aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+        try:
+            s3 = boto3.resource('s3',
+                endpoint_url=self.endpoint,
+                aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+        except:
+            tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
+            return
         print('Looking for study %s' % self.study_list)
         print('Looking for series %s' % self.series_list)
         # Select the bucket given by the credential name
@@ -343,8 +378,16 @@ class S3LoadDialog:
                 s3prefix = '%s/%s' % (study, series)
                 s3prefix_list.append(s3prefix)
         print('Try a list of prefix %s' % s3prefix_list)
+        # Format output path which can include {study} {series} and {file}
+        if not self.output_dir:
+            self.output_dir = os.environ.get('HOME','.')
+        if not '{' in self.output_dir:
+            self.output_dir += '/{study}/{series}/{file}'
         if not '{file}' in self.output_dir:
             self.output_dir += '/{file}'
+        tkinter.messagebox.showerror(title="Note", message="Files will be saved in\n%s" % self.output_dir)
+        # List bucket and download files, creating directories as necessary
+        self.path_list = []
         for s3prefix in s3prefix_list:
             for obj in s3bucket.objects.filter(Prefix = s3prefix):
                 (stu,ser,sop) = obj.key.split('/')
@@ -353,6 +396,7 @@ class S3LoadDialog:
                 print('  write to %s' % path)
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 s3bucket.download_file(obj.key, path)
+                self.path_list.append(path)
         self.top.destroy()
 
 
@@ -630,8 +674,8 @@ class App:
             root.wait_window(s3load.top)
         print('S3 creds = %s / %s' % (s3load.access, s3load.secret))
         print('S3 path = %s' % (s3load.path_list))
-        #self.set_image_list(FileList(filenames))
-        #self.load_next_file()
+        self.set_image_list(FileList(s3load.path_list))
+        self.load_next_file()
 
 
     def save_db_csv_event(self, event, rects = False, tags = False):
