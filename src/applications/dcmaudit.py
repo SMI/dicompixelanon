@@ -565,6 +565,11 @@ class App:
         self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
         self.ocr_easy_loader_thread.start()
         self.ocr_tess_loader_thread.start()
+        # Make initial window bigger
+        self.tkimage = ImageTk.PhotoImage(Image.new('L', (640,480)))
+        self.app_image.configure(image=self.tkimage)
+
+
 
     def ocr_easy_loader(self):
         """ This is called in a thread """
