@@ -2,15 +2,21 @@
 to all of the image frames and overlay frames within, as numpy arrays.
 """
 
+import boto3
+import io
 import json
 import logging
 import pydicom
+import re
 import numpy as np
 from PIL import Image
+from DicomPixelAnon.s3url import s3url_is, s3url_parse
+
 
 class DicomImage:
     """ Holds the data for a single DICOM file.
     Frame and overlay numbers start at 0, so use -1 for unset/not applicable.
+    A DICOM filename can be a s3:// URL but must be in the format used by s3.py.
     """
     # Class static constants:
     elem_OverlayBitPosition = 0x0102
@@ -22,7 +28,16 @@ class DicomImage:
 
     def __init__(self, filename):
         self.filename = filename
-        self.ds = pydicom.dcmread(filename)
+        if s3url_is(filename):
+            (access, secret, endpoint, bucket, key) = s3url_parse(filename)
+            with io.BytesIO() as mem:
+                s3 = boto3.resource('s3', endpoint_url=f'http://{endpoint}/', aws_access_key_id=access, aws_secret_access_key=secret)
+                s3bucket = s3.Bucket(name=bucket)
+                s3bucket.Object(key=key).download_fileobj(mem)
+                mem.seek(0)
+                self.ds = pydicom.dcmread(mem)
+        else:
+            self.ds = pydicom.dcmread(filename)
         self.pixel_data = self.ds.pixel_array # this can raise an exception in some files
 
         # Check for multiple frames

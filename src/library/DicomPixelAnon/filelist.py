@@ -7,6 +7,8 @@ import csv
 import glob
 import logging
 import os
+from DicomPixelAnon.s3url import s3url_is
+
 
 class FileList:
     """ A list of filenames to process.
@@ -38,6 +40,7 @@ class FileList:
         If an entry in the list is a filename *.csv or *.CSV then the
         CSV file is read and the list of filenames is taken from the
         'filename' or 'DicomFilePath' column.
+        If an entry in the list is a s3:// URL then it is appended as given.
         """
         for file in filenames:
             # Read filenames from a CSV file
@@ -58,6 +61,8 @@ class FileList:
                             for prefix in self.prefixes:
                                 # XXX should use realpath to check this file not already added
                                 self.files.extend(glob.glob(os.path.join(prefix, cfile)))
+            elif s3url_is(file):
+                self.files.append(file)
             elif os.path.isabs(file):
                 self.files.extend(glob.glob(file))
             else:
