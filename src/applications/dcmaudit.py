@@ -43,7 +43,10 @@ from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon import deidrules
 from DicomPixelAnon import ultrasound
+from DicomPixelAnon.s3url import s3url_create
 
+
+# Configuration:
 DEFAULT_ENDPOINT = 'http://127.0.0.1:7070/'
 CREDS_FILENAME = '.dcmaudit_s3creds.csv'
 
@@ -379,24 +382,29 @@ class S3LoadDialog:
                 s3prefix_list.append(s3prefix)
         print('Try a list of prefix %s' % s3prefix_list)
         # Format output path which can include {study} {series} and {file}
-        if not self.output_dir:
-            self.output_dir = os.environ.get('HOME','.')
-        if not '{' in self.output_dir:
-            self.output_dir += '/{study}/{series}/{file}'
-        if not '{file}' in self.output_dir:
-            self.output_dir += '/{file}'
-        tkinter.messagebox.showerror(title="Note", message="Files will be saved in\n%s" % self.output_dir)
+        # If a relative path is given then prefix it with our HOME directory
+        if self.output_dir:
+            if not (self.output_dir[0]=='/' or self.output_dir=='~' or self.output_dir=='$'):
+                self.output_dir = os.environ.get('HOME','.')
+            if not '{' in self.output_dir:
+                self.output_dir += '/{study}/{series}/{file}'
+            if not '{file}' in self.output_dir:
+                self.output_dir += '/{file}'
+            tkinter.messagebox.showerror(title="Note", message="Files will be saved in\n%s" % self.output_dir)
         # List bucket and download files, creating directories as necessary
         self.path_list = []
         for s3prefix in s3prefix_list:
             for obj in s3bucket.objects.filter(Prefix = s3prefix):
                 (stu,ser,sop) = obj.key.split('/')
                 path = self.output_dir.format(study=stu, series=ser, file=sop)
-                print(f"{obj.key}\t{obj.size}\t{obj.last_modified}")
-                print('  write to %s' % path)
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                s3bucket.download_file(obj.key, path)
-                self.path_list.append(path)
+                print(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
+                if self.output_dir:
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    s3bucket.download_file(obj.key, path)
+                    self.path_list.append(path)
+                else:
+                    self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
+
         self.top.destroy()
 
 
@@ -507,12 +515,12 @@ class App:
         # Create the Open menu as the second menu item
         self.openmenu = tkinter.Menu(self.menu)
         self.menu.add_cascade(label = 'File', menu = self.openmenu)
-        self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
-        self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
+        self.openmenu.add_command(label='Open files', accelerator='Ctrl+O', command=lambda: self.open_files_event(None))
+        self.openmenu.add_command(label='Open directory', accelerator='Ctrl+D', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
         self.openmenu.add_separator()
-        self.openmenu.add_command(label='Manage S3 credentials', command=lambda: self.manage_s3_event(None))
-        self.openmenu.add_command(label='Open files from S3', command=lambda: self.open_s3_event(None))
+        self.openmenu.add_command(label='Manage S3 credentials', accelerator='Ctrl+3', command=lambda: self.manage_s3_event(None))
+        self.openmenu.add_command(label='Open files from S3', accelerator='Ctrl+S', command=lambda: self.open_s3_event(None))
         self.openmenu.add_separator()
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
