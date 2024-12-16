@@ -35,6 +35,7 @@ import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.simpledialog
 from tkinter.ttk import Progressbar
+from tktooltip import ToolTip
 import pytesseract
 from DicomPixelAnon.filelist import FileList
 from DicomPixelAnon.dicomrectdb import DicomRectDB
@@ -142,24 +143,30 @@ class S3CredentialsDialog:
             self.bucketEntry.delete(0, tkinter.END)
             self.bucketEntry.insert(0, chose)
         self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *options, command = pick)
+        ToolTip(self.bucketMenu, msg="Select from a set of saved credentials", delay=TTD)
         self.bucketMenu.grid(row=0, column=1)
         tkinter.Label(top, text='Server:').grid(row=1, column=0)
         self.serverEntry = tkinter.Entry(top)
         self.serverEntry.insert(0, DEFAULT_S3_ENDPOINT)
+        ToolTip(self.serverEntry, msg="Enter the web address of the bucket server", delay=TTD)
         self.serverEntry.grid(row=1, column=1)
         tkinter.Label(top, text='Access key:').grid(row=2, column=0)
         self.accessEntry = tkinter.Entry(top)
+        ToolTip(self.accessEntry, msg="Enter the access key you were given for the bucket. An empty key will remove the named bucket from the list.", delay=TTD)
         self.accessEntry.grid(row=2, column=1)
         tkinter.Label(top, text='Secret key:').grid(row=3, column=0)
         self.secretEntry = tkinter.Entry(top)
+        ToolTip(self.secretEntry, msg="Enter the secret key you were given for the bucket", delay=TTD)
         self.secretEntry.grid(row=3, column=1)
         tkinter.Label(top, text='Bucket name:').grid(row=4, column=0)
         self.bucketEntry = tkinter.Entry(top)
+        ToolTip(self.bucketEntry, msg="Enter the name of the bucket exactly as given when you were provided access", delay=TTD)
         self.bucketEntry.grid(row=4, column=1)
         self.mySubmitButton = tkinter.Button(top, text='Save', command=self.save)
+        ToolTip(self.mySubmitButton, msg="The credentials will be saved under the name you have selected for the bucket", delay=TTD)
         self.mySubmitButton.grid(row=5, column=1)
 
-    def send(self):
+    def save(self):
         self.access = self.accessEntry.get()
         self.secret = self.secretEntry.get()
         self.bucketname = self.bucketEntry.get()
@@ -204,11 +211,13 @@ class S3LoadDialog:
             (self.access, self.secret, self.endpoint) = cred_store.read_cred(self.bucket)
             print('Picked %s using %s / %s at %s' % (self.bucket,self.access,self.secret,self.endpoint))
         self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
+        ToolTip(self.bucketMenu, msg="Select the name of the bucket where the files are stored", delay=TTD)
         self.bucketMenu.grid(row=0, column=1)
         # Random sample
         tkinter.Label(top, text='Random sample:').grid(row=1, column=0)
         self.randomVar = tkinter.IntVar()
         self.randomCheck = tkinter.Checkbutton(top, text='Random',variable=self.randomVar, onvalue=1, offvalue=0) # command=<func>
+        ToolTip(self.randomCheck, msg=f"If selected then {NUM_RANDOM_S3_IMAGES} will be selected randomly from the CSV file", delay=TTD)
         self.randomCheck.grid(row=1, column=1)
         # CSV file
         #tkinter.Label(top, text='CSV file (optional):').grid(row=2, column=0)
@@ -225,17 +234,22 @@ class S3LoadDialog:
             # XXX TODO: update initialdir with dirname of new file
         tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=2, column=0)
         self.csvEntry = tkinter.Entry(top)
+        ToolTip(self.csvEntry, msg="A CSV file can be used to lookup Study numbers given Series numbers, or for random sampling", delay=TTD)
         self.csvEntry.grid(row=2, column=1)
         tkinter.Label(top, text='Study Ids:').grid(row=3, column=0)
         self.studyEntry = tkinter.Entry(top)
+        ToolTip(self.studyEntry, msg="Enter one (or more, comma separated) Study numbers, or leave blank if random sampling", delay=TTD)
         self.studyEntry.grid(row=3, column=1)
         tkinter.Label(top, text='Series Ids:').grid(row=4, column=0)
         self.seriesEntry = tkinter.Entry(top)
+        ToolTip(self.seriesEntry, msg="Enter one (or more, comma separated) Series numbers, or leave blank for all Series in a Study", delay=TTD)
         self.seriesEntry.grid(row=4, column=1)
         tkinter.Label(top, text='Output directory:').grid(row=5, column=0)
         self.outputEntry = tkinter.Entry(top)
+        ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
         self.outputEntry.grid(row=5, column=1)
         self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load).grid(row=6, column=1)
+        ToolTip(self.mySubmitButton, msg="Download the images (and save as files, if output directory specified) and load into the viewer", delay=TTD)
 
     def load(self):
         if not self.access or not self.secret:
