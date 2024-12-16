@@ -1444,13 +1444,12 @@ if __name__=='__main__':
     else:
         logging.basicConfig(level = logging.INFO)
 
-    if not os.getenv('SMI_ROOT'):
-        logging.error('$SMI_ROOT must be set, so we can write into data/dicompixelanon directory')
-        exit(1)
-
     if args.db:
         database_path = args.db
     else:
+        if not os.getenv('SMI_ROOT'):
+            logging.error('$SMI_ROOT must be set, so we can write into data/dicompixelanon directory')
+            exit(1)
         database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
     DicomRectDB.set_db_path(database_path)
 
