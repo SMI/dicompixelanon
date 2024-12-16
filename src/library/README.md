@@ -10,6 +10,11 @@ Note that you must first install either the CPU or GPU version of PyTorch
 before installing requirements.txt otherwise you will get the default
 (probably GPU).
 
+Installation in a restricted environment (safe haven): if you only have
+access to `pypi.org` then you might not be able to get packages from `pytorch.org`
+so you need URLs to the compiled wheels specific for your Python version, e.g.
+`pip install -r requirements-3.10.txt`
+
 ## Installation
 
 Run `python3 ./setup.py bdist_wheel` to create `dist/DicomPixelAnon-1.0.0-py3-none-any.whl`

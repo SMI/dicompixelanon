@@ -22,10 +22,9 @@ Pillow<10.0
 pytesseract==0.3.8
 # easyocr cannot handle numpy v2
 numpy<2.0
-# easyocr gives Illegal Instruction if torch is newer than:
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==1.11.0+cpu
-torchvision==0.12.0+cpu
+# easyocr gives Illegal Instruction if torch is newer than 1.11.0:
+https://files.pythonhosted.org/packages/76/96/3fd30662981043ac6fa1dc4f2cf8f5fa5401cc125ff7b7bf1536eae5db28/torch-1.11.0-cp310-cp310-manylinux1_x86_64.whl
+https://files.pythonhosted.org/packages/31/16/f41a1eef1dca9f7b5388f742e443e03ee2d3c31ef2427201a10edb864ee1/torchvision-0.12.0-cp310-cp310-manylinux1_x86_64.whl
 opencv_python_headless
 # easyocr pinned to 1.6.2 otherwise you need torch.backends.mps which only comes in torch 1.12
 easyocr==1.6.2
