@@ -2,15 +2,21 @@
 to all of the image frames and overlay frames within, as numpy arrays.
 """
 
+import boto3
+import io
 import json
 import logging
 import pydicom
+import re
 import numpy as np
 from PIL import Image
+from DicomPixelAnon.s3url import s3url_is, s3url_parse, s3url_sanitise
+
 
 class DicomImage:
     """ Holds the data for a single DICOM file.
     Frame and overlay numbers start at 0, so use -1 for unset/not applicable.
+    A DICOM filename can be a s3:// URL but must be in the format used by s3.py.
     """
     # Class static constants:
     elem_OverlayBitPosition = 0x0102
@@ -22,7 +28,17 @@ class DicomImage:
 
     def __init__(self, filename):
         self.filename = filename
-        self.ds = pydicom.dcmread(filename)
+        if s3url_is(filename):
+            (access, secret, endpoint, bucket, key) = s3url_parse(filename)
+            self.filename = s3url_sanitise(filename)
+            with io.BytesIO() as mem:
+                s3 = boto3.resource('s3', endpoint_url=f'http://{endpoint}/', aws_access_key_id=access, aws_secret_access_key=secret)
+                s3bucket = s3.Bucket(name=bucket)
+                s3bucket.Object(key=key).download_fileobj(mem)
+                mem.seek(0)
+                self.ds = pydicom.dcmread(mem)
+        else:
+            self.ds = pydicom.dcmread(filename)
         self.pixel_data = self.ds.pixel_array # this can raise an exception in some files
 
         # Check for multiple frames
@@ -51,7 +67,7 @@ class DicomImage:
         self.signed = (int(self.signed) != 0) # convert to bool
         assert (self.signed == (np.issubdtype(self.pixel_data.dtype, np.signedinteger)))
 
-        logging.info('%s is %s using %d/%d bits with %d frames' % (filename, str(self.pixel_data.shape), self.bits_stored, self.bits_allocated, self.num_frames))
+        logging.info('%s is %s using %d/%d bits with %d frames' % (self.filename, str(self.pixel_data.shape), self.bits_stored, self.bits_allocated, self.num_frames))
 
         self.overlay_group_list = [ii for ii in range(0x6000, 0x6020, 2)]
         self.overlay_group_used = [False] * len(self.overlay_group_list)
@@ -79,6 +95,9 @@ class DicomImage:
 
 
     def get_filename(self):
+        """ Returns the filename, but if file is loaded from S3 then
+        it will have the access,secret,endpoint removed for privacy.
+        """
         return self.filename
 
     def is_secondary_capture(self):
