@@ -29,6 +29,7 @@ import random
 import numpy as np
 import os
 import sys
+import traceback
 from threading import Thread
 import tkinter
 import tkinter.filedialog
@@ -1321,7 +1322,9 @@ class App:
             if s3url_is(filename):
                 filename = s3url_sanitise(filename)
             self.dcm = DicomImage(filename_to_load)
+        except Exception as e:
             logging.warning('Cannot load DICOM from file "%s"' % filename)
+            logging.error(traceback.format_exc())
             tkinter.messagebox.showerror(title="Help",
                 message='Cannot load DICOM from file "%s"' % filename)
             return True
