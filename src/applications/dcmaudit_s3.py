@@ -10,6 +10,8 @@ import os
 
 CREDS_FILENAME = '.dcmaudit_s3creds.csv'
 
+# =====================================================================
+
 class S3CredentialStore:
     """ Store S3 credentials in home directory
     """
@@ -53,3 +55,14 @@ class S3CredentialStore:
             for nickname in self.creds:
                 (acc,sec,srv) = self.creds[nickname]
                 csvw.writerow( { 'name': nickname, 'access': acc, 'secret': sec, 'endpoint': srv } )
+
+
+# =====================================================================
+
+class S3LoadPrefs:
+    def __init__(self):
+        self.output_dir = None
+        self.csv_file_dir = None
+
+
+# =====================================================================
