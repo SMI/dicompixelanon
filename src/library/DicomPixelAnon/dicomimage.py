@@ -54,7 +54,7 @@ class DicomImage:
         # Check for signed integers
         self.signed = self.ds['PixelRepresentation'].value if 'PixelRepresentation' in self.ds else 0
 
-        logging.info('%s is %s using %d/%d bits with %d frames' % (filename, str(self.pixel_data.shape), self.bits_stored, self.bits_allocated, self.num_frames))
+        logging.info('%s is %s using %d/%d bits with %d frames' % (self.filename, str(self.pixel_data.shape), self.bits_stored, self.bits_allocated, self.num_frames))
 
         self.overlay_group_list = [ii for ii in range(0x6000, 0x6020, 2)]
         self.overlay_group_used = [False] * len(self.overlay_group_list)
@@ -82,6 +82,9 @@ class DicomImage:
 
 
     def get_filename(self):
+        """ Returns the filename, but if file is loaded from S3 then
+        it will have the access,secret,endpoint removed for privacy.
+        """
         return self.filename
 
     def is_secondary_capture(self):
