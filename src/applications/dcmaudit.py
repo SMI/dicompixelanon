@@ -205,6 +205,7 @@ class S3LoadDialog:
             return
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
+        top.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         self.bucket_dropdown = tkinter.StringVar()
         def pick(xx):
