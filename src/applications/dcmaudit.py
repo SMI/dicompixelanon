@@ -210,7 +210,6 @@ class S3LoadDialog:
         def pick(xx):
             self.bucket = self.bucket_dropdown.get()
             (self.access, self.secret, self.endpoint) = cred_store.read_cred(self.bucket)
-            print('Picked %s using %s / %s at %s' % (self.bucket,self.access,self.secret,self.endpoint))
         self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
         ToolTip(self.bucketMenu, msg="Select the name of the bucket where the files are stored", delay=TTD)
         self.bucketMenu.grid(row=0, column=1)
@@ -261,14 +260,7 @@ class S3LoadDialog:
         self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
         self.output_dir = self.outputEntry.get()
         self.csv_file = self.csvEntry.get()
-        print('Will use: s3 in %s using %s = %s at %s' % (self.bucket, self.access, self.secret, self.endpoint))
-        print(' random = %s' % self.random)
-        print(' paths = %s' % self.path_list)
-        print(' study = %s' % self.study_list)
-        print(' series = %s' % self.series_list)
-        print(' output = %s' % self.output_dir)
-        print(' CSV = %s' % self.csv_file)
-        # If random then read CSV and pick a series
+        # Sanity checks
         if self.random and not self.csv_file:
             tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
             return
@@ -322,14 +314,15 @@ class S3LoadDialog:
                     self.study_list.append(row['StudyInstanceUID'])
                     print('CSV given series %s got study %s' % (row['SeriesInstanceUID'], row['StudyInstanceUID']))
                     numrows += 1
-                    if numrows > 10000:
-                        print('Limiting to 10,000')
+                    if numrows > MAX_S3_LOAD:
+                        tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
                         break
         # Finished with CSV file now
         if csvr:
             csvr.fd.close()
+
         # Connect to S3 service
-        print('Log into S3')
+        logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
         try:
             s3 = boto3.resource('s3',
                 endpoint_url=self.endpoint,
@@ -337,8 +330,7 @@ class S3LoadDialog:
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
-        print('Looking for study %s' % self.study_list)
-        print('Looking for series %s' % self.series_list)
+
         # Select the bucket given by the credential name
         s3bucket = s3.Bucket(name=self.bucket)
         # Make all combinations of study and series prefixes
@@ -358,16 +350,17 @@ class S3LoadDialog:
                 self.output_dir = os.environ.get('HOME','.')
             if not '{' in self.output_dir:
                 self.output_dir += '/{study}/{series}/{file}'
-            if not '{file}' in self.output_dir:
-                self.output_dir += '/{file}'
-            tkinter.messagebox.showerror(title="Note", message="Files will be saved in\n%s" % self.output_dir)
+            #if not '{file}' in self.output_dir:
+            #    self.output_dir += '/{file}'
+            logging.debug('Files will be saved in\n%s' % self.output_dir)
+
         # List bucket and download files, creating directories as necessary
         self.path_list = []
         for s3prefix in s3prefix_list:
             for obj in s3bucket.objects.filter(Prefix = s3prefix):
                 (stu,ser,sop) = obj.key.split('/')
                 path = self.output_dir.format(study=stu, series=ser, file=sop)
-                print(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
+                logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
                 if self.output_dir:
                     os.makedirs(os.path.dirname(path), exist_ok=True)
                     s3bucket.download_file(obj.key, path)
@@ -652,11 +645,9 @@ class App:
         root = self.tk_app
         s3load = S3LoadDialog(root)
         # If dialogue box never got constructed due to error then
-        # if won't have a 'top' so doesn't need to be destroyed.
+        # it won't have a 'top' so doesn't need to be destroyed.
         if hasattr(s3load, 'top'):
             root.wait_window(s3load.top)
-        print('S3 creds = %s / %s' % (s3load.access, s3load.secret))
-        print('S3 path = %s' % (s3load.path_list))
         self.set_image_list(FileList(s3load.path_list))
         self.load_next_file()
 
