@@ -55,10 +55,10 @@ def s3url_create(access, secret, endpoint, bucket, key):
     because we don't store the http:// in our URL format.
     """
     endpoint = endpoint.replace('https://','').replace('http://','').replace('/','')
-    assert(':' not in access)
-    assert('@' not in secret)
     assert('/' not in endpoint)
     assert('/' not in bucket)
     if not access or not secret:
-        return f's3://{access}:{secret}@{endpoint}/{bucket}/{key}'
+        return f's3://{bucket}/{key}'
+    assert(':' not in access)
+    assert('@' not in secret)
     return f's3://{access}:{secret}@{endpoint}/{bucket}/{key}'
