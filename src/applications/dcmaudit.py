@@ -50,8 +50,10 @@ from dcmaudit_s3 import S3CredentialStore
 
 
 # Configuration:
-DEFAULT_ENDPOINT = 'http://127.0.0.1:7070/'
-CREDS_FILENAME = '.dcmaudit_s3creds.csv'
+DEFAULT_S3_ENDPOINT = 'http://127.0.0.1:7070/' # nsh-fs02:7070
+NUM_RANDOM_S3_IMAGES = 10
+MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
+TTD=0.4                # delay in seconds before ToolTip is shown
 
 
 # =====================================================================
@@ -118,7 +120,7 @@ class S3CredentialsDialog:
     def __init__(self, parent):
         # Initialise class variables
         self.access = self.secret = None
-        self.endpoint = DEFAULT_ENDPOINT
+        self.endpoint = DEFAULT_S3_ENDPOINT
         # Read the stored credentials
         # Add an empty one so there's at least one item
         cred_store = S3CredentialStore()
@@ -195,6 +197,8 @@ class S3LoadDialog:
         if s3loadprefs:
             self.output_dir = s3loadprefs.output_dir
             self.csv_file_dir = s3loadprefs.csv_file_dir
+        else:
+            self.csv_file_dir = '.'
         # Read the stored credentials
         cred_store = S3CredentialStore()
         cred_list = cred_store.read_creds()
@@ -224,7 +228,7 @@ class S3LoadDialog:
         #tkinter.Label(top, text='CSV file (optional):').grid(row=2, column=0)
         def showFileChooser():
             self.csv_file = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
-                initialdir='.',
+                initialdir=self.csv_file_dir,
                 #initialfile='',
                 filetypes=[('csv','*.csv'), ('CSV', '*.CSV')]
                 )
@@ -232,7 +236,7 @@ class S3LoadDialog:
                 return
             self.csvEntry.delete(0, tkinter.END)
             self.csvEntry.insert(0, self.csv_file)
-            # XXX TODO: update initialdir with dirname of new file
+            self.csv_file_dir = os.path.dirname(self.csv_file)
         tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=2, column=0)
         self.csvEntry = tkinter.Entry(top)
         ToolTip(self.csvEntry, msg="A CSV file can be used to lookup Study numbers given Series numbers, or for random sampling", delay=TTD)
@@ -249,10 +253,15 @@ class S3LoadDialog:
         self.outputEntry = tkinter.Entry(top)
         ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
         self.outputEntry.grid(row=5, column=1)
-        self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load).grid(row=6, column=1)
+        self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load)
+        self.mySubmitButton.grid(row=6, column=1)
         ToolTip(self.mySubmitButton, msg="Download the images (and save as files, if output directory specified) and load into the viewer", delay=TTD)
 
     def load(self):
+        # Save preferences for next time XXX needs s3loadprefs passed
+        #if s3loadprefs:
+        #    s3loadprefs.output_dir = self.output_dir
+        #    s3loadprefs.csv_file_dir = self.csv_file_dir
         if not self.access or not self.secret:
             tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
@@ -271,20 +280,34 @@ class S3LoadDialog:
         if not self.study_list and not self.series_list and not self.csv_file:
             tkinter.messagebox.showerror(title="Error", message="Cannot download all Studies unless a CSV file is given")
             return
+        if len(self.study_list)>1 and (len(self.study_list) != len(self.series_list)):
+            tkinter.messagebox.showerror(title="Error", message="Not sure what you mean by multiple Study AND multiple Series")
+            return
         # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
         # If a series but not study then need CSV to find study
         # If a study and series are supplied then load it
-        # If output directory given then write there, else create temporary dir
-        # path can be given as a format string
+        # If output directory given then write there, else load direct into memory
         #
+        s3prefix_list = set()
+
+        # If same number of study and series then combine them
+        if len(self.study_list)>1 and (len(self.study_list) == len(self.series_list)):
+            s3prefix_list.update([ f'{stu}/{ser}' for (stu,ser) in zip(self.study_list, self.series_list)])
+
         # Open CSV file
         csvr = None
         if self.csv_file:
             print('Opening CSV file %s' % self.csv_file)
             fd = open(self.csv_file)
             csvr = csv.DictReader(fd)
+            if 'StudyInstanceUID' not in csvr.fieldnames or 'SeriesInstanceUID' not in csvr.fieldnames:
+                tkinter.messagebox.showerror(title="Error", message="The CSV file does not have columns called StudyInstanceUID and SeriesInstanceUID")
+                return
+            #if 'SOPInstanceUID' in csvr.fieldnames:
+            #    tkinter.messagebox.showerror(title="Error", message="The CSV file has a column called SOPInstanceUID which means multiple instances of Study+Series so queries may not work well; please try a CSV file reduced to only Study and Series")
             csvr.fd = fd # keep for later
-        # Read from CSV
+
+        # Random: read CSV and select random rows
         if self.random:
             print('Reading CSV file')
             numrows = 0
@@ -294,30 +317,52 @@ class S3LoadDialog:
             csvr.fd.seek(0)
             next(csvr.fd)
             # Pick ten random rows
-            rownum_list = [random.randint(0,numrows-1) for n in range(10)]
+            rownum_list = [random.randint(0,numrows-1) for n in range(NUM_RANDOM_S3_IMAGES)]
             while numrows > 0:
                 row = next(csvr)
                 if numrows in rownum_list:
-                    self.study_list.append(row['StudyInstanceUID'])
-                    self.series_list.append(row['SeriesInstanceUID'])
+                    s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                 numrows -= 1
+
         # If we don't have Study or Series then read all
         if not self.study_list and not self.series_list:
             numrows = 0
             for row in csvr:
-                self.study_list.append(row['StudyInstanceUID'])
-                self.series_list.append(row['SeriesInstanceUID'])
+                s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                numrows += 1
+                if numrows > MAX_S3_LOAD:
+                    tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
+                    break
+
         # If we only have series we need CSV to get study
         if self.series_list and not self.study_list:
             numrows = 0
             for row in csvr:
                 if row['SeriesInstanceUID'] in self.series_list:
-                    self.study_list.append(row['StudyInstanceUID'])
-                    print('CSV given series %s got study %s' % (row['SeriesInstanceUID'], row['StudyInstanceUID']))
+                    s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                     numrows += 1
                     if numrows > MAX_S3_LOAD:
                         tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
                         break
+
+        # If we only have study we need to iterate, or we can use CSV to get series
+        if self.study_list and not self.series_list:
+            if csvr:
+                numrows = 0
+                for row in csvr:
+                    if row['StudyInstanceUID'] in self.study_list:
+                        s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                        numrows += 1
+                        if numrows > MAX_S3_LOAD:
+                            tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
+                            break
+            else:
+                s3prefix_list.update(self.study_list)
+
+        print('Try a list of prefix:')
+        for pfx in s3prefix_list:
+            print('  %s' % pfx)
+
         # Finished with CSV file now
         if csvr:
             csvr.fd.close()
@@ -334,17 +379,8 @@ class S3LoadDialog:
 
         # Select the bucket given by the credential name
         s3bucket = s3.Bucket(name=self.bucket)
-        # Make all combinations of study and series prefixes
-        s3prefix_list = []
-        for study in self.study_list:
-            if not self.series_list:
-                s3prefix_list.append(study)
-                continue
-            for series in self.series_list:
-                s3prefix = '%s/%s' % (study, series)
-                s3prefix_list.append(s3prefix)
-        print('Try a list of prefix %s' % s3prefix_list)
-        # Format output path which can include {study} {series} and {file}
+
+        # Format output path which can include {study} {series}
         # If a relative path is given then prefix it with our HOME directory
         if self.output_dir:
             if not (self.output_dir[0]=='/' or self.output_dir=='~' or self.output_dir=='$'):
