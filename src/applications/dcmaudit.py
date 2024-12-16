@@ -44,7 +44,7 @@ from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon import deidrules
 from DicomPixelAnon import ultrasound
-from DicomPixelAnon.s3url import s3url_create
+from DicomPixelAnon.s3url import s3url_create, s3url_is, s3url_sanitise
 from dcmaudit_s3 import S3CredentialStore
 
 
@@ -1317,8 +1317,10 @@ class App:
             break
 
         try:
-            self.dcm = DicomImage(filename)
-        except:
+            filename_to_load = filename
+            if s3url_is(filename):
+                filename = s3url_sanitise(filename)
+            self.dcm = DicomImage(filename_to_load)
             logging.warning('Cannot load DICOM from file "%s"' % filename)
             tkinter.messagebox.showerror(title="Help",
                 message='Cannot load DICOM from file "%s"' % filename)

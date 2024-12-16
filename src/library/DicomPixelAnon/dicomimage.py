@@ -10,7 +10,7 @@ import pydicom
 import re
 import numpy as np
 from PIL import Image
-from DicomPixelAnon.s3url import s3url_is, s3url_parse
+from DicomPixelAnon.s3url import s3url_is, s3url_parse, s3url_sanitise
 
 
 class DicomImage:
@@ -30,6 +30,7 @@ class DicomImage:
         self.filename = filename
         if s3url_is(filename):
             (access, secret, endpoint, bucket, key) = s3url_parse(filename)
+            self.filename = s3url_sanitise(filename)
             with io.BytesIO() as mem:
                 s3 = boto3.resource('s3', endpoint_url=f'http://{endpoint}/', aws_access_key_id=access, aws_secret_access_key=secret)
                 s3bucket = s3.Bucket(name=bucket)
