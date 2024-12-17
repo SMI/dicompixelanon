@@ -176,10 +176,8 @@ class S3CredentialsDialog:
         self.endpoint = self.serverEntry.get()
         if self.bucketname:
             cred_store = S3CredentialStore()
-            print('Adding credential %s to store' % self.bucketname)
             cred_store.add_cred(self.bucketname, self.access, self.secret, self.endpoint)
             if self.access and self.secret and self.bucketname:
-                logging.debug()
                 try:
                     logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
                     s3 = boto3.resource('s3',
