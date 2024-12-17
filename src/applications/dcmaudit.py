@@ -402,17 +402,27 @@ class S3LoadDialog:
 
         # List bucket and download files, creating directories as necessary
         self.path_list = []
+        def get_obj(obj):
+            (stu,ser,sop) = obj.key.split('/')
+            path = self.output_dir.format(study=stu, series=ser, file=sop)
+            logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
+            if self.output_dir:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                s3bucket.download_file(obj.key, path)
+                self.path_list.append(path)
+            else:
+                self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
         for s3prefix in s3prefix_list:
             for obj in s3bucket.objects.filter(Prefix = s3prefix):
-                (stu,ser,sop) = obj.key.split('/')
-                path = self.output_dir.format(study=stu, series=ser, file=sop)
-                logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
-                if self.output_dir:
-                    os.makedirs(os.path.dirname(path), exist_ok=True)
-                    s3bucket.download_file(obj.key, path)
-                    self.path_list.append(path)
+                # Expecting Study/Series/SOP but if we only get Study/Series
+                # then need to do an additional 'ls' inside the Series
+                # (typically if Series is a symlink):
+                key_parts = obj.key.split('/')
+                if len(key_parts)==2:
+                    for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
+                        get_obj(obj2)
                 else:
-                    self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
+                    get_obj(obj)
 
         self.top.destroy()
 
