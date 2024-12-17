@@ -178,6 +178,17 @@ class S3CredentialsDialog:
             cred_store = S3CredentialStore()
             print('Adding credential %s to store' % self.bucketname)
             cred_store.add_cred(self.bucketname, self.access, self.secret, self.endpoint)
+            if self.access and self.secret and self.bucketname:
+                logging.debug()
+                try:
+                    logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
+                    s3 = boto3.resource('s3',
+                        endpoint_url=self.endpoint,
+                        aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+                    s3.meta.client.head_bucket(Bucket = self.bucketname)
+                except:
+                    tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the bucket name, endpoint URL and the credentials")
+                    return
         self.top.destroy()
 
 
