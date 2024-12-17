@@ -330,14 +330,14 @@ class S3LoadDialog:
             while numrows > 0:
                 row = next(csvr)
                 if numrows in rownum_list:
-                    s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                    s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                 numrows -= 1
 
         # If we don't have Study or Series then read all
         if not self.study_list and not self.series_list:
             numrows = 0
             for row in csvr:
-                s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                 numrows += 1
                 if numrows > MAX_S3_LOAD:
                     tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
@@ -348,7 +348,7 @@ class S3LoadDialog:
             numrows = 0
             for row in csvr:
                 if row['SeriesInstanceUID'] in self.series_list:
-                    s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                    s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                     numrows += 1
                     if numrows > MAX_S3_LOAD:
                         tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
@@ -360,13 +360,13 @@ class S3LoadDialog:
                 numrows = 0
                 for row in csvr:
                     if row['StudyInstanceUID'] in self.study_list:
-                        s3prefix_list.add('%s/%s' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                        s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
                         numrows += 1
                         if numrows > MAX_S3_LOAD:
                             tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
                             break
             else:
-                s3prefix_list.update(self.study_list)
+                s3prefix_list.update(['%s/'%s for s in self.study_list])
 
         print('Try a list of prefix:')
         for pfx in s3prefix_list:
