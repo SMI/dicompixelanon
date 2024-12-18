@@ -8,6 +8,7 @@
 #
 # These requirements are more easily installed using "uv pip".
 #
+boto3
 # pydicom v3 has some breaking changes we've not checked yet,
 # also, deid is not ready for pydicom v3:
 pydicom<3.0
