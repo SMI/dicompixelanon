@@ -928,22 +928,35 @@ class App:
     def help_button_pressed(self, event=None):
         """ Display a dialog with some help text.
         """
-        tkinter.messagebox.showinfo(title="Help",
-            message="Keyboard actions:\n"
-                "r = redact the rectangle\n"
-                "i = info for this file\n"
-                "o = OCR this frame\n"
-                "A = apply all suggested rectangles\n"
-                "right-click = apply suggested rect\n"
-                "n = next frame\n"
-                "p = previous frame\n"
-                "f = fast forward\n"
-                "N = mark done; next file\n"
-                "Esc = next file\n"
-                "P = prev file\n"
-                "t = tag this image for further investigation\n"
-                "Z = reset file\n"
-                "q = quit\n")
+        message=("Keyboard actions:\n\n"
+            "i = display information about this file\n"
+            "+ = display image with rectangles redacted\n"
+            "- = display image without rectangles redacted\n"
+            "\n"
+            "n = display the next frame of this image\n"
+            "p = display the previous frame of this image\n"
+            "f = fast-forward to the last frame of this image\n"
+            "\n"
+            "Esc = move to the next file (does not mark this file as 'done')\n"
+            "N = move to the next file (marks this file as 'done' so you won't see it again)\n"
+            "P = back to the previous file (which has not been marked as 'done')\n"
+            "\n"
+            "r = redact the part of the frame which the draggable rectangle is over\n"
+            "A = apply (redact) all of the suggested rectangles to be redacted\n"
+            "right-click = apply (redact) the suggested rectangle under the mouse\n"
+            "Z = undo, remove all redaction rectables from this file\n"
+            "o = OCR, find redaction rectangles by finding text in the frame\n"
+            "\n"
+            "t = tag this image for further investigation (see the * in the window title bar)\n"
+            "c = write a comment about this file\n")
+        #tkinter.messagebox.showinfo(title="Help", message=message) # ugly
+        t=tkinter.Toplevel()
+        t.geometry(f'+{self.tk_app.winfo_x()+20}+{self.tk_app.winfo_y()+20}')
+        t.title("Help")
+        tx = tkinter.Text(t)
+        tx.insert(tkinter.END, message)
+        tx.pack()
+        tkinter.Button(t, text='OK', command=t.destroy).pack()
         return
 
     def press_event(self, event):
