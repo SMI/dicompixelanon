@@ -4,14 +4,7 @@ we use s3://accesskey:secretkey@endpoint/bucket/path/to/key
 where endpoint is host:port, so the http is implied (no https).
 """
 
-import boto3
-import io
-import json
-import logging
-import pydicom
 import re
-import numpy as np
-from PIL import Image
 
 
 def s3url_is(url):
