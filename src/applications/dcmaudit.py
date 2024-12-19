@@ -414,16 +414,20 @@ class S3LoadDialog:
             else:
                 self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
         for s3prefix in s3prefix_list:
-            for obj in s3bucket.objects.filter(Prefix = s3prefix):
-                # Expecting Study/Series/SOP but if we only get Study/Series
-                # then need to do an additional 'ls' inside the Series
-                # (typically if Series is a symlink):
-                key_parts = obj.key.split('/')
-                if len(key_parts)==2:
-                    for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
-                        get_obj(obj2)
-                else:
-                    get_obj(obj)
+            try:
+                for obj in s3bucket.objects.filter(Prefix = s3prefix):
+                    # Expecting Study/Series/SOP but if we only get Study/Series
+                    # then need to do an additional 'ls' inside the Series
+                    # (typically if Series is a symlink):
+                    key_parts = obj.key.split('/')
+                    if len(key_parts)==2:
+                        for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
+                            get_obj(obj2)
+                    else:
+                        get_obj(obj)
+            except:
+                tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server")
+                return
 
         self.top.destroy()
 
