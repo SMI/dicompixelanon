@@ -129,6 +129,7 @@ class S3CredentialsDialog:
         options = cred_names if len(cred_names) else ['---']
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
+        top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         #self.myLabel.pack() instead of pack()ing every widget we use grid(row,column)
         self.bucket_dropdown = tkinter.StringVar()
@@ -218,7 +219,7 @@ class S3LoadDialog:
             return
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
-        top.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
+        top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         self.bucket_dropdown = tkinter.StringVar()
         def pick(xx):
