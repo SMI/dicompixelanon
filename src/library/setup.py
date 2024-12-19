@@ -21,7 +21,7 @@ def translate_req(req):
         if op in req:
             req, version = req.split(op)
             version = op + version
-            if '+' in version
+            if '+' in version:
                 version = version.split('+')[0]
     if version:
         req += '(%s)' % version
