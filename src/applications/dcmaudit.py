@@ -234,8 +234,14 @@ class S3LoadDialog:
         self.randomCheck = tkinter.Checkbutton(top, text='Random',variable=self.randomVar, onvalue=1, offvalue=0) # command=<func>
         ToolTip(self.randomCheck, msg=f"If selected then {NUM_RANDOM_S3_IMAGES} will be selected randomly from the CSV file", delay=TTD)
         self.randomCheck.grid(row=1, column=1)
+        # First of each Series
+        tkinter.Label(top, text='One image per series:').grid(row=2, column=0)
+        self.singlePerSeriesVar = tkinter.IntVar()
+        self.singlePerSeriesCheck = tkinter.Checkbutton(top, text='Overview',variable=self.singlePerSeriesVar, onvalue=1, offvalue=0)
+        ToolTip(self.singlePerSeriesCheck, msg=f"If selected then only one image is selected per-Series", delay=TTD)
+        self.singlePerSeriesCheck.grid(row=2, column=1)
         # CSV file
-        #tkinter.Label(top, text='CSV file (optional):').grid(row=2, column=0)
+        #tkinter.Label(top, text='CSV file (optional):').grid(row=3, column=0)
         def showFileChooser():
             self.csv_file = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
                 initialdir=self.csv_file_dir,
@@ -247,24 +253,24 @@ class S3LoadDialog:
             self.csvEntry.delete(0, tkinter.END)
             self.csvEntry.insert(0, self.csv_file)
             self.csv_file_dir = os.path.dirname(self.csv_file)
-        tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=2, column=0)
+        tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=3, column=0)
         self.csvEntry = tkinter.Entry(top)
         ToolTip(self.csvEntry, msg="A CSV file can be used to lookup Study numbers given Series numbers, or for random sampling", delay=TTD)
-        self.csvEntry.grid(row=2, column=1)
-        tkinter.Label(top, text='Study Ids:').grid(row=3, column=0)
+        self.csvEntry.grid(row=3, column=1)
+        tkinter.Label(top, text='Study Ids:').grid(row=4, column=0)
         self.studyEntry = tkinter.Entry(top)
         ToolTip(self.studyEntry, msg="Enter one (or more, comma separated) Study numbers, or leave blank if random sampling", delay=TTD)
-        self.studyEntry.grid(row=3, column=1)
-        tkinter.Label(top, text='Series Ids:').grid(row=4, column=0)
+        self.studyEntry.grid(row=4, column=1)
+        tkinter.Label(top, text='Series Ids:').grid(row=5, column=0)
         self.seriesEntry = tkinter.Entry(top)
         ToolTip(self.seriesEntry, msg="Enter one (or more, comma separated) Series numbers, or leave blank for all Series in a Study", delay=TTD)
-        self.seriesEntry.grid(row=4, column=1)
-        tkinter.Label(top, text='Output directory:').grid(row=5, column=0)
+        self.seriesEntry.grid(row=5, column=1)
+        tkinter.Label(top, text='Output directory:').grid(row=6, column=0)
         self.outputEntry = tkinter.Entry(top)
         ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
-        self.outputEntry.grid(row=5, column=1)
+        self.outputEntry.grid(row=6, column=1)
         self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load)
-        self.mySubmitButton.grid(row=6, column=1)
+        self.mySubmitButton.grid(row=7, column=1)
         ToolTip(self.mySubmitButton, msg="Download the images (and save as files, if output directory specified) and load into the viewer", delay=TTD)
 
     def load(self):
@@ -276,6 +282,7 @@ class S3LoadDialog:
             tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
         self.random = True if self.randomVar.get() else False
+        self.onePerSeries = True if self.singlePerSeriesVar.get() else False
         self.study_list = self.studyEntry.get().split(',') if self.studyEntry.get() else []
         self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
         self.output_dir = self.outputEntry.get()
@@ -413,6 +420,7 @@ class S3LoadDialog:
                 self.path_list.append(path)
             else:
                 self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
+        prevSeries = None
         for s3prefix in s3prefix_list:
             try:
                 for obj in s3bucket.objects.filter(Prefix = s3prefix):
@@ -423,8 +431,13 @@ class S3LoadDialog:
                     if len(key_parts)==2:
                         for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
                             get_obj(obj2)
+                            if self.onePerSeries:
+                                break
                     else:
-                        get_obj(obj)
+                        # Skip if Series id is same as a previous one
+                        if self.onePerSeries and (key_parts[1] != prevSeries):
+                            get_obj(obj)
+                        prevSeries = key_parts[1]
             except:
                 tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server")
                 return
