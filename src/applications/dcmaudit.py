@@ -529,6 +529,7 @@ class App:
         self.tk_app.bind("<Control-d>", self.open_directory_event)
         self.tk_app.bind("<Control-3>", self.manage_s3_event)
         self.tk_app.bind("<Control-s>", self.open_s3_event)
+        self.tk_app.bind("<Control-c>", self.quit_event)
 
         # Internal settings
         self.render_flag = False # indicate that window should be rendered at next idle time
