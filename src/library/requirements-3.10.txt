@@ -19,8 +19,8 @@ pydal
 pymongo
 # You will need Pillow<10.0 if using easyocr<1.7
 Pillow<10.0
-# pytesseract is only tied to 0.3.8 to be compatible with python 3.6
-pytesseract==0.3.8
+# pytesseract is only tied to 0.3.8 if using python 3.6
+pytesseract
 # easyocr cannot handle numpy v2
 numpy<2.0
 # easyocr gives Illegal Instruction if torch is newer than 1.11.0
