@@ -3,6 +3,7 @@ boto3
 pydicom
 pylibjpeg
 pylibjpeg_libjpeg
+pylibjpeg_openjpeg
 pydal
 pymongo
 Pillow
