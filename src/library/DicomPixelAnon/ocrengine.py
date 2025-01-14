@@ -73,7 +73,7 @@ class OCR:
             if not os.path.isdir(self.easy_cfg_dir):
                 self.easy_cfg_dir = os.path.join(os.environ.get('HOME'), '.EasyOCR', 'model')
             logging.debug('OCR: Using EasyOCR(%s,%s,%s)' % (self.easy_language, self.easy_gpu, self.easy_cfg_dir))
-            self.easyreader = easyocr.Reader([self.easy_language], gpu=self.easy_gpu, model_storage_directory=self.easy_cfg_dir)
+            self.easyreader = easyocr.Reader([self.easy_language], gpu=self.easy_gpu, model_storage_directory=self.easy_cfg_dir, quantize=False)
         else:
             raise RuntimeError('unsupported OCR engine')
         self.ocr_data = []
