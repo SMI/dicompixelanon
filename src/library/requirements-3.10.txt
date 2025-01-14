@@ -17,6 +17,7 @@ pylibjpeg_libjpeg
 deid
 pydal
 pymongo
+tqdm
 # You will need Pillow<10.0 if using easyocr<1.7
 Pillow<10.0
 # pytesseract is only tied to 0.3.8 if using python 3.6
