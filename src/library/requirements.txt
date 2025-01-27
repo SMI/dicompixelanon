@@ -3,28 +3,29 @@
 # These requirements are more easily installed using "uv pip".
 #
 boto3
-# pydicom v3 has some breaking changes we've not checked yet,
-# also, deid is not ready for pydicom v3:
-pydicom<3.0
+# pydicom v3 has some breaking changes but we need it for compression
+pydicom
 pylibjpeg
 pylibjpeg_libjpeg
 pylibjpeg_openjpeg
-deid
+# deid is not ready for pydicom v3 so use the PR
+# however this forces numpy<2 unnecessarily which is a shame
+git+https://github.com/pydicom/deid.git@refs/pull/268/head
 pydal
 pymongo
 tqdm
-# You will need Pillow<10.0 if using easyocr<1.7
+# Pillow<10.0 for easyocr<1.7
 Pillow
-# pytesseract is only tied to 0.3.8 to be compatible with python 3.6
+# pytesseract should be pinned to 0.3.8 for python 3.6
 pytesseract
-# easyocr < 1.7 annot handle numpy v2
+# numpy should be >2 but easyocr < 1.7 cannot handle numpy v2 neither can deid PR 268
 numpy
 # easyocr gives Illegal Instruction if torch is newer than 1.11.0 (torchvision 0.12.0) unless quantize=False
 # Trying to specify CPU with +cpu needs a version, but still doesn't work with pypi.org
-torch>2.0+cpu
-torchvision>0.15+cpu
+torch>2.0
+torchvision>0.15
 opencv_python_headless
-# easyocr pinned to 1.6.2 otherwise you need torch.backends.mps which only comes in torch 1.12
+# easyocr pinned to 1.6.2 if torch<1.12 otherwise torch.backends.mps is needed from torch 1.12
 easyocr
 # spacy is optional unless you need NER:
 #spacy
@@ -33,6 +34,6 @@ easyocr
 # stanza is optional:
 #stanza
 # matplotlib is optional, only for debugging:
-matplotlib
+#matplotlib
 # This one is completely optional, delete if you can't compile it:
 fastDamerauLevenshtein
