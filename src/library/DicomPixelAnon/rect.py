@@ -209,7 +209,7 @@ class DicomRectText(DicomRect):
         _, txt, _, _ = self.text_tuple()
         _, TXT, _, _ = other_rect.text_tuple()
         if damerauLevenshtein == False:
-            return txt == Txt
+            return txt == TXT
         txt_sim = damerauLevenshtein(txt, TXT, similarity=True)
         if txt_sim < sim_lim:
             return False
