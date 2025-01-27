@@ -9,19 +9,28 @@ output=""
 relative=""
 dbdir=""
 prog=$(basename $0)
-options="o:r:D:"
-usage="usage: $prog [-D db_dir] [-r relative_dir] -o output  input..."
+options="cfo:r:D:"
+usage="usage: $prog [-D db_dir] [-c] [-f] [-r relative_dir] -o output  input..."
 
 # Configuration, choose which OCR algorithm
 ocr_tool="easyocr"
 keep_rects=1
+opt_forms=""
+opt_compression=""
 
 while getopts "$options" var; do
     case $var in
+        c) opt_compression="--compress";;
+        f) opt_forms="--forms";;
         o) output="$OPTARG";;
         r) relative="--relative $OPTARG";;
         D) dbdir="$OPTARG";;
-        ?) echo "$usage"; exit 1;;
+        ?) echo "$usage";
+            echo "-D is the path to the database directory"
+            echo "-c to compress the output files"
+            echo "-f to detect scanned forms"
+            echo "-o is the path to the output directory"
+            exit 1;;
     esac
 done
 shift $(($OPTIND - 1))
@@ -50,7 +59,7 @@ set -e
 # add UltraSound regions (and any text found within them) to the db.
 # (i.e. use --use-ultrasound-regions not --except-ultrasound-regions).
 echo "$(date) ${prog} Running OCR on $@"
-dicom_ocr.py --db "${dbdir}" --review --forms --pii ocr_allowlist --use-ultrasound-regions --rects "$@"
+dicom_ocr.py --db "${dbdir}" --review $opt_forms --pii ocr_allowlist --use-ultrasound-regions --rects "$@"
 
 # Redact by reading the database, and using UltraSound regions.
 # Use the deid rules to pick up any other redaction rules
@@ -58,7 +67,7 @@ dicom_ocr.py --db "${dbdir}" --review --forms --pii ocr_allowlist --use-ultrasou
 echo "$(date) ${prog} Redacting $input"
 dicom_redact.py --db "${dbdir}" \
     --remove-ultrasound-regions \
-    --deid \
+    --deid $opt_compression \
     --output "${output}" $relative \
     --dicom "$@"
 
