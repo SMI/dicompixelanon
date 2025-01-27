@@ -19,7 +19,11 @@ import numpy as np
 import os
 import re
 import pydicom
-from pydicom.pixel_data_handlers.numpy_handler import pack_bits
+# pack_bits moved from pixel_data_handlers to pixels.utils in pydicom v3
+try:
+    from pydicom.pixels.utils import pack_bits
+else:
+    from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.ocrenum import OCREnum
