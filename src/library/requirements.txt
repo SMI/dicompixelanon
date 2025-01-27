@@ -8,6 +8,7 @@ boto3
 pydicom<3.0
 pylibjpeg
 pylibjpeg_libjpeg
+pylibjpeg_openjpeg
 deid
 pydal
 pymongo
