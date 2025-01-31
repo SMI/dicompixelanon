@@ -1,10 +1,8 @@
 # XXX NOTE XXXX
 #
-# This file is specific to Python 3.10 on CPU.
-# If you have a GPU then:
-# * remove --find-links,
-# * remove the +cpu suffix,
-# * unpin Pillow, torch, torchvision, easyocr
+# This file is specific to Python 3.10 on CPU, but with older versions of
+# easyocr, pydicom, Pillow, numpy and and pytorch, but it does need direct
+# links to torch on pytorch.org.
 #
 # These requirements are more easily installed using "uv pip".
 #
