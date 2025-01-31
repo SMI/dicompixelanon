@@ -166,6 +166,9 @@ def remove_overlays_in_high_bits(ds):
     #    masked = (pixel_data[frame,:,:] & bit_mask)
     #else:
     #    masked = (pixel_data[frame,:,:,:] & bit_mask)
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = masked.tobytes()
 
     # XXX does not re-compress
@@ -223,6 +226,9 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=None):
         y1 = y0 + h
         pixel_data[y0:y1, x0:x1] &= bit_mask_arr
 
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
     mark_as_uncompressed(ds)
@@ -280,6 +286,9 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
             # XXX assumes the colour channel is the last element
             pixel_data[frame, y0:y1, x0:x1, :] &= bit_mask_arr
 
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
     mark_as_uncompressed(ds)
