@@ -8,9 +8,8 @@ pydicom
 pylibjpeg
 pylibjpeg_libjpeg
 pylibjpeg_openjpeg
-# deid is not ready for pydicom v3 so use the PR
-# however this forces numpy<2 unnecessarily which is a shame
-git+https://github.com/pydicom/deid.git@refs/pull/268/head
+# deid 0.4.0 is needed for pydicom v3 (otherwise it forces numpy<2)
+deid
 pydal
 pymongo
 tqdm
