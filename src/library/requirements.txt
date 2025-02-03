@@ -5,9 +5,11 @@
 boto3
 # pydicom v3 has some breaking changes but we need it for compression
 pydicom
+pyjpegls
 pylibjpeg
 pylibjpeg_libjpeg
 pylibjpeg_openjpeg
+pylibjpeg_rle
 # deid 0.4.0 is needed for pydicom v3 (otherwise it forces numpy<2)
 deid
 pydal
@@ -17,7 +19,7 @@ tqdm
 Pillow
 # pytesseract should be pinned to 0.3.8 for python 3.6
 pytesseract
-# numpy should be >2 but easyocr < 1.7 cannot handle numpy v2 neither can deid PR 268
+# numpy should be >2 (easyocr<1.7 cannot handle numpy v2, neither can deid<0.4)
 numpy
 # easyocr gives Illegal Instruction if torch is newer than 1.11.0 (torchvision 0.12.0) unless quantize=False
 # Trying to specify CPU with +cpu needs a version, but still doesn't work with pypi.org
