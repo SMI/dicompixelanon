@@ -19,7 +19,7 @@ import numpy as np
 import os
 import re
 import pydicom
-from pydicom.uid import JPEGLSLossless, JPEG2000Lossless
+from pydicom.uid import JPEGLSLossless, JPEG2000Lossless, RLELossless
 # pack_bits moved from pixel_data_handlers to pixels.utils in pydicom v3
 try:
     from pydicom.pixels.utils import pack_bits
@@ -59,9 +59,8 @@ elem_OverlayCols = 0x0011
 elem_OverlayNumFrames = 0x0015
 elem_OverlayOrigin = 0x0050
 
-# Choose compression scheme as 'JPEG-LS' or 'JPEG2000'
-# (only the latter is supported on Python 3.6)
-compression_scheme = 'JPEG2000'
+# Choose compression scheme as 'JPEG-LS' or 'JPEG2000' or 'RLE'
+compression_scheme = 'RLE'
 
 
 # ---------------------------------------------------------------------
@@ -91,6 +90,8 @@ def compress_dataset(ds):
     elif compression_scheme == 'JPEG2000':
         ds.compress(JPEG2000Lossless)
         # ds.file_meta.TransferSyntaxUID = JPEG2000Lossless # should already be done
+    elif compression_scheme == 'RLE':
+        ds.compress(RLELossless)
     else:
         logger.warning('unknown compression_scheme, will not compress')
 
