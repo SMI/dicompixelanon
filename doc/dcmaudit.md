@@ -18,9 +18,12 @@ Note that only raster graphic overlays are supported.
 
 ## Installation
 
-See requirements.txt, `pip install -r requirements.txt`
+See requirements.txt, `pip install -r requirements.txt`. Note that
+it requires the DicomPixelAnon library which has its own requirements.
+You are advised to see `src/library/requirements*` especially if using
+python 3.10 inside a safe haven as it has its own `requirements-3.10.txt`
 
-Note that on CentOS-7 the maximum version of pytesseract is 0.3.8
+Note that on CentOS-7/python-3.6 the maximum version of pytesseract is 0.3.8
 because after that it needs python 3.7 and Pillow 8. Ensure you are
 installing into a python3 environment.
 

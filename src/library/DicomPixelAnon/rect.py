@@ -32,31 +32,43 @@ class Rect:
             self.R() == other.R())
 
     def set_rect(self, t, b, l, r):
+        """ set the coordinates for top, bottom, left, right """
         self.top, self.bottom, self.left, self.right = t, b, l, r
         return self
 
     def get_rect(self):
+        """ return tuple (top, bottom, left, right) """
         return self.top, self.bottom, self.left, self.right
 
     def is_valid(self):
+        """ returns True if rect coordinates make sense (top > bottom etc) """
         if (self.top < 0 or self.bottom <= self.top or
             self.left < 0 or self.right <= self.left):
             return False
         return True
 
     def ltrb(self):
+        """ return tuple (left, top, right, bottom) """
         return (self.left, self.top, self.right, self.bottom)
 
     def ltwh(self):
+        """ return tuple (left, top, width, height) """
         return (self.left, self.top, 1 + self.right - self.left, 1 + self.bottom - self.top)
 
     def T(self):
+        """ return top """
         return self.top
+
     def B(self):
+        """ return bottom """
         return self.bottom
+
     def L(self):
+        """ return left """
         return self.left
+
     def R(self):
+        """ return right """
         return self.right
 
     def contains(self, x, y):
@@ -146,8 +158,10 @@ class DicomRect(Rect):
         and the frame,overlay, if given, match this object.
         """
         rc = True
-        if frame != -1 and frame != self.frame: rc = False
-        if overlay != -1 and overlay != self.overlay: rc = False
+        if frame != -1 and frame != self.frame:
+            rc = False
+        if overlay != -1 and overlay != self.overlay:
+            rc = False
         if not super().contains(x,y): rc = False
         return rc
 
@@ -176,7 +190,7 @@ class DicomRectText(DicomRect):
 
     def __init__(self, top = None, bottom = None, left = None, right = None, frame = -1, overlay = -1, ocrengine = -1, ocrtext='', nerengine = 0, nerpii = -1, arect = None, dicomrect = None):
         if dicomrect:
-            super.__init__(dicomrect.T(), dicomrect.B(), dicomrect.L(), dicomrect.R(), dicomrect.F(), dicomrect.O())
+            super().__init__(dicomrect.T(), dicomrect.B(), dicomrect.L(), dicomrect.R(), dicomrect.F(), dicomrect.O())
         elif arect:
             super().__init__(arect.T(), arect.B(), arect.L(), arect.R(), frame, overlay)
         elif top != None:
@@ -191,7 +205,7 @@ class DicomRectText(DicomRect):
             self.ocrengine, self.ocrtext, self.nerengine, self.nerpii)
 
     def __eq__(self, other):
-        otherengine, othertext, otherner, otherpii = other.text_tuple()
+        _, othertext, _, _ = other.text_tuple()
         return (super().__eq__(other) and self.ocrtext == othertext)
 
     def text_tuple(self):
@@ -209,7 +223,7 @@ class DicomRectText(DicomRect):
         _, txt, _, _ = self.text_tuple()
         _, TXT, _, _ = other_rect.text_tuple()
         if damerauLevenshtein == False:
-            return txt == Txt
+            return txt == TXT
         txt_sim = damerauLevenshtein(txt, TXT, similarity=True)
         if txt_sim < sim_lim:
             return False
@@ -222,23 +236,23 @@ def test_similar():
     r1 = Rect(10,20,30,40)
     r2 = Rect(13,17,33,38)
     r3 = Rect(13,17,33,35)
-    assert(r1.similar(r2) == True)
-    assert(r1.similar(r3) == False)
-    assert(r2.similar(r3) == True)
+    assert r1.similar(r2)
+    assert not r1.similar(r3)
+    assert r2.similar(r3)
     r4 = DicomRect(10,20,30,40,2,3)
     r5 = DicomRect(11,21,31,41,2,3)
     r6 = DicomRect(12,22,33,44,2,4)
-    assert(r4.similar(r5) == True)
-    assert(r4.similar(r6) == False)
-    assert(r5.similar(r6) == False)
+    assert r4.similar(r5)
+    assert not r4.similar(r6)
+    assert not r5.similar(r6)
     r7 = DicomRectText(10,20,30,40,2,3,-1,'jane maclean')
     r8 = DicomRectText(10,20,30,40,2,3,-1,'jane maclan')
     r9 = DicomRectText(10,20,30,40,2,3,-1,'jane macla')
-    assert(r7.similar(r8) == True)
-    assert(r7.similar(r9) == False)
-    assert(r8.similar(r9) == True)
+    assert r7.similar(r8)
+    assert not r7.similar(r9)
+    assert r8.similar(r9)
     r4.make_mbr(r6)
-    assert(r4.get_rect() == (10,22,30,44))
+    assert r4.get_rect() == (10,22,30,44)
 
 
 # ---------------------------------------------------------------------
@@ -255,7 +269,7 @@ def rect_is_huge_font(rect):
         return False
     if rect.L() == -1:
         return False
-    (E,text,N,P) = rect.text_tuple()
+    (_,text,_,_) = rect.text_tuple()
     if not text:
         return False
     # Longer text is most likely genuine and widely spaced
@@ -323,7 +337,7 @@ def test_add_Rect_to_list():
     add_Rect_to_list(l1, DicomRectText(10,20,30,40,1,2,-1,'jane macleod'), coalesce_similar = True)
     add_Rect_to_list(l1, DicomRectText(100,200,300,400,1,2,-1,'jane macleod'), coalesce_similar = True)
     add_Rect_to_list(l1, DicomRectText(8,19,28,42,1,2,-1,'jane mcleod'), coalesce_similar = True)
-    assert(str(l1) == 
+    assert(str(l1) ==
         '[<DicomRectText frame=1 overlay=2 28,8->42,20 -1="jane macleod" 0=-1>, <DicomRectText frame=1 overlay=2 300,100->400,200 -1="jane macleod" 0=-1>]')
 
 
@@ -339,8 +353,6 @@ def rect_exclusive_list(rectlist, width, height):
     # If not given anything to negate then return empty, not full frame rect.
     if not rectlist:
         return []
-    # Create all new list elements from same type as existing
-    RectType = type(rectlist[0])
     # Start with a rectangle which is full size
     r0 = deepcopy(rectlist[0]).set_rect(0, height-1, 0, width-1)
     newlist = [ r0 ]
@@ -379,15 +391,15 @@ def test_rect():
     assert d.F() == 9
     assert d.O() == 10
     d2 = DicomRect(4, 30, 5, 40)
-    assert(r.contains(5,5) == True)
-    assert(d.contains(5,5) == True)
-    assert(d.contains(5,5) == True)
-    assert(d.contains(5,5, 8, 8) == False)
-    assert(d.contains(5,5, 9, 10) == True)
+    assert r.contains(5,5)
+    assert d.contains(5,5)
+    assert d.contains(5,5)
+    assert not d.contains(5,5, 8, 8)
+    assert d.contains(5,5, 9, 10)
     # Check rectangle contained within a larger one
-    assert(r.contains_rect(d) == False)
-    assert(d.contains_rect(d2) == True)
-    assert(d2.contains_rect(d) == False)
+    assert not r.contains_rect(d)
+    assert d.contains_rect(d2)
+    assert not d2.contains_rect(d)
     # One rect contained in another is not added to list
     list1 = []
     list2 = []
@@ -399,26 +411,26 @@ def test_rect():
     add_Rect_to_list(list2, d2)
     add_Rect_to_list(list2, d)
     print(list2)
-    assert(len(list1) == 2)
-    assert(len(list2) == 2)
+    assert len(list1) == 2
+    assert len(list2) == 2
     # Intersection should be same whichever way performed
     r1 = Rect(10,30,10,40) # T,B,L,R
     r2 = Rect(20,40,15,20)
     r_i = r1.intersect_rect(r2)
-    assert(r_i.get_rect() == (20,30,15,20))
+    assert r_i.get_rect() == (20,30,15,20)
     r_i = r2.intersect_rect(r1)
-    assert(r_i.get_rect() == (20,30,15,20))
+    assert r_i.get_rect() == (20,30,15,20)
     # Two separate rect do not intersect
-    assert(r1.intersect_rect(Rect(100,100,101,101)).is_valid() == False)
+    assert not r1.intersect_rect(Rect(100,100,101,101)).is_valid()
     # An aligned rect does not intersect
-    assert(r1.intersect_rect(Rect(30,40,10,40)).is_valid() == False)
+    assert not r1.intersect_rect(Rect(30,40,10,40)).is_valid()
     # Test a real US
     #42,452,943,732
     #238,37,786,448
     r3 = Rect(left=42,right=943,top=452,bottom=732)
     r4 = Rect(left=238,right=786,top=37,bottom=348)
     r5 = r3.intersect_rect(r4)
-    assert(r5.is_valid() == False)
+    assert not r5.is_valid()
     list3 = []
     add_Rect_to_list(list3, r3)
     add_Rect_to_list(list3, r4)
@@ -436,7 +448,7 @@ def test_rect():
     # Plot for visual verification
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     # Need a line to resize the plot area?
     ax.plot([0, 100],[0, 1000])
     # Plot the two rectangles

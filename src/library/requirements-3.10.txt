@@ -1,0 +1,44 @@
+# XXX NOTE XXXX
+#
+# This file is specific to Python 3.10 on CPU, but with older versions of
+# easyocr, pydicom, Pillow, numpy and and pytorch, but it does at least
+# have direct links to torch on pypi so no need to access pytorch.org.
+#
+# These requirements are more easily installed using "uv pip".
+#
+boto3
+# pydicom v3 has some breaking changes we've not checked yet,
+# also, deid is not ready for pydicom v3:
+pydicom<3.0
+pylibjpeg
+pylibjpeg_libjpeg
+pylibjpeg_openjpeg
+deid
+pydal
+pymongo
+tqdm
+# You will need Pillow<10.0 if using easyocr<1.7
+Pillow<10.0
+# pytesseract is only tied to 0.3.8 if using python 3.6
+pytesseract
+# easyocr cannot handle numpy v2
+numpy<2.0
+# easyocr gives Illegal Instruction if torch is newer than 1.11.0
+# see https://github.com/JaidedAI/EasyOCR/issues/1174
+# Direct links to pypi.org so we don't need to access pytorch.org
+https://files.pythonhosted.org/packages/76/96/3fd30662981043ac6fa1dc4f2cf8f5fa5401cc125ff7b7bf1536eae5db28/torch-1.11.0-cp310-cp310-manylinux1_x86_64.whl
+https://files.pythonhosted.org/packages/31/16/f41a1eef1dca9f7b5388f742e443e03ee2d3c31ef2427201a10edb864ee1/torchvision-0.12.0-cp310-cp310-manylinux1_x86_64.whl
+#
+opencv_python_headless
+# easyocr pinned to 1.6.2 otherwise you need torch.backends.mps which only comes in torch 1.12
+easyocr==1.6.2
+# spacy is optional unless you need NER:
+spacy
+# flair is optional:
+flair
+# stanza is optional:
+stanza
+# matplotlib is optional, only for debugging:
+matplotlib
+# This one is completely optional, delete if you can't compile it:
+fastDamerauLevenshtein

@@ -11,16 +11,22 @@ import sys
 # Read requirements.txt in current directory
 # and convert it into the form required by setuptools
 requirements_txt = join(abspath(dirname(__file__)), 'requirements.txt')
-requirements = [l.strip() for l in open(requirements_txt) if l and l.strip() and not l.startswith('#')]
+requirements = [l.strip() for l in open(requirements_txt) if l and l.strip() and not l.startswith('#') and not l.startswith('--') and not l.startswith('git+')]
  
 def translate_req(req):
     # this>=0.3.2 -> this(>=0.3.2)
+    if 'git+' in req:
+        # e.g. git+https://github.com/pydicom/deid.git@refs/pull/268/head
+        parts = req.split('/')
+        req = parts[4].split('.git')[0]
     ops = ('<=', '>=', '==', '<', '>', '!=')
     version = None
     for op in ops:
         if op in req:
             req, version = req.split(op)
             version = op + version
+            if '+' in version:
+                version = version.split('+')[0]
     if version:
         req += '(%s)' % version
     return req

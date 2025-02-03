@@ -22,16 +22,21 @@ from PIL import ImageTk
 from PIL import ImageDraw
 from PIL.ImageOps import equalize, invert
 import argparse
+import boto3
+import csv
 import logging
+import random
 import numpy as np
 import os
 import sys
+import traceback
 from threading import Thread
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.simpledialog
 from tkinter.ttk import Progressbar
+from tktooltip import ToolTip
 import pytesseract
 from DicomPixelAnon.filelist import FileList
 from DicomPixelAnon.dicomrectdb import DicomRectDB
@@ -40,6 +45,15 @@ from DicomPixelAnon.ocrengine import OCR
 from DicomPixelAnon.dicomimage import DicomImage
 from DicomPixelAnon import deidrules
 from DicomPixelAnon import ultrasound
+from DicomPixelAnon.s3url import s3url_create, s3url_is, s3url_sanitise
+from dcmaudit_s3 import S3CredentialStore
+
+
+# Configuration:
+DEFAULT_S3_ENDPOINT = 'http://127.0.0.1:7070/' # nsh-fs02:7070
+NUM_RANDOM_S3_IMAGES = 10
+MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
+TTD=0.4                # delay in seconds before ToolTip is shown
 
 
 # =====================================================================
@@ -94,6 +108,341 @@ class GridEntryDialog(tkinter.simpledialog.Dialog):
 
     def apply(self):
         pass
+
+
+# =====================================================================
+class S3CredentialsDialog:
+    """ Pop up a dialogue box for managing S3 credentials
+    cached in a hidden file in the home directory:
+    ~/.s3cred.csv contains 3 columns name,access,secret.
+    """
+
+    def __init__(self, parent):
+        # Initialise class variables
+        self.access = self.secret = None
+        self.endpoint = DEFAULT_S3_ENDPOINT
+        # Read the stored credentials
+        # Add an empty one so there's at least one item
+        cred_store = S3CredentialStore()
+        cred_list = cred_store.read_creds()
+        cred_names = list(cred_list.keys())
+        options = cred_names if len(cred_names) else ['---']
+        # Construct GUI
+        top = self.top = tkinter.Toplevel(parent)
+        top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
+        tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
+        #self.myLabel.pack() instead of pack()ing every widget we use grid(row,column)
+        self.bucket_dropdown = tkinter.StringVar()
+        def pick(xx):
+            chose = self.bucket_dropdown.get()
+            if chose == '---':
+                return
+            (acc,sec,srv) = cred_store.read_cred(chose)
+            self.serverEntry.delete(0, tkinter.END)
+            self.serverEntry.insert(0, srv)
+            self.accessEntry.delete(0, tkinter.END)
+            self.accessEntry.insert(0, acc)
+            self.secretEntry.delete(0, tkinter.END)
+            self.secretEntry.insert(0, sec)
+            self.bucketEntry.delete(0, tkinter.END)
+            self.bucketEntry.insert(0, chose)
+        self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *options, command = pick)
+        ToolTip(self.bucketMenu, msg="Select from a set of saved credentials", delay=TTD)
+        self.bucketMenu.grid(row=0, column=1)
+        tkinter.Label(top, text='Server:').grid(row=1, column=0)
+        self.serverEntry = tkinter.Entry(top)
+        self.serverEntry.insert(0, DEFAULT_S3_ENDPOINT)
+        ToolTip(self.serverEntry, msg="Enter the web address of the bucket server", delay=TTD)
+        self.serverEntry.grid(row=1, column=1)
+        tkinter.Label(top, text='Access key:').grid(row=2, column=0)
+        self.accessEntry = tkinter.Entry(top)
+        ToolTip(self.accessEntry, msg="Enter the access key you were given for the bucket. An empty key will remove the named bucket from the list.", delay=TTD)
+        self.accessEntry.grid(row=2, column=1)
+        tkinter.Label(top, text='Secret key:').grid(row=3, column=0)
+        self.secretEntry = tkinter.Entry(top)
+        ToolTip(self.secretEntry, msg="Enter the secret key you were given for the bucket", delay=TTD)
+        self.secretEntry.grid(row=3, column=1)
+        tkinter.Label(top, text='Bucket name:').grid(row=4, column=0)
+        self.bucketEntry = tkinter.Entry(top)
+        ToolTip(self.bucketEntry, msg="Enter the name of the bucket exactly as given when you were provided access", delay=TTD)
+        self.bucketEntry.grid(row=4, column=1)
+        self.mySubmitButton = tkinter.Button(top, text='Save', command=self.save)
+        ToolTip(self.mySubmitButton, msg="The credentials will be saved under the name you have selected for the bucket", delay=TTD)
+        self.mySubmitButton.grid(row=5, column=1)
+
+    def save(self):
+        self.access = self.accessEntry.get()
+        self.secret = self.secretEntry.get()
+        self.bucketname = self.bucketEntry.get()
+        self.endpoint = self.serverEntry.get()
+        if self.bucketname:
+            cred_store = S3CredentialStore()
+            cred_store.add_cred(self.bucketname, self.access, self.secret, self.endpoint)
+            if self.access and self.secret and self.bucketname:
+                try:
+                    logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
+                    s3 = boto3.resource('s3',
+                        endpoint_url=self.endpoint,
+                        aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+                    s3.meta.client.head_bucket(Bucket = self.bucketname)
+                except:
+                    tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the bucket name, endpoint URL and the credentials")
+                    return
+        self.top.destroy()
+
+
+# =====================================================================
+
+class S3LoadDialog:
+    def __init__(self, parent, s3loadprefs = None):
+        # Initialise class variables
+        self.bucket = None
+        self.access = self.secret = None
+        self.random = False
+        self.csv_file = None
+        self.study_list = []
+        self.series_list = []
+        self.output_dir = None
+        self.path_list = []
+        if s3loadprefs:
+            self.output_dir = s3loadprefs.output_dir
+            self.csv_file_dir = s3loadprefs.csv_file_dir
+        else:
+            self.csv_file_dir = '.'
+        # Read the stored credentials
+        cred_store = S3CredentialStore()
+        cred_list = cred_store.read_creds()
+        cred_names = list(cred_list.keys())
+        if not cred_names:
+            tkinter.messagebox.showerror(title="No credentials",
+                message='Please use the credential manager to save some credentials')
+            return
+        # Construct GUI
+        top = self.top = tkinter.Toplevel(parent)
+        top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
+        tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
+        self.bucket_dropdown = tkinter.StringVar()
+        def pick(xx):
+            self.bucket = self.bucket_dropdown.get()
+            (self.access, self.secret, self.endpoint) = cred_store.read_cred(self.bucket)
+        self.bucketMenu = tkinter.OptionMenu(top, self.bucket_dropdown, *cred_names, command = pick)
+        ToolTip(self.bucketMenu, msg="Select the name of the bucket where the files are stored", delay=TTD)
+        self.bucketMenu.grid(row=0, column=1)
+        # Random sample
+        tkinter.Label(top, text='Random sample:').grid(row=1, column=0)
+        self.randomVar = tkinter.IntVar()
+        self.randomCheck = tkinter.Checkbutton(top, text='Random',variable=self.randomVar, onvalue=1, offvalue=0) # command=<func>
+        ToolTip(self.randomCheck, msg=f"If selected then {NUM_RANDOM_S3_IMAGES} will be selected randomly from the CSV file", delay=TTD)
+        self.randomCheck.grid(row=1, column=1)
+        # First of each Series
+        tkinter.Label(top, text='One image per series:').grid(row=2, column=0)
+        self.singlePerSeriesVar = tkinter.IntVar()
+        self.singlePerSeriesCheck = tkinter.Checkbutton(top, text='Overview',variable=self.singlePerSeriesVar, onvalue=1, offvalue=0)
+        ToolTip(self.singlePerSeriesCheck, msg=f"If selected then only one image is selected per-Series", delay=TTD)
+        self.singlePerSeriesCheck.grid(row=2, column=1)
+        # CSV file
+        #tkinter.Label(top, text='CSV file (optional):').grid(row=3, column=0)
+        def showFileChooser():
+            self.csv_file = tkinter.filedialog.askopenfilename(parent=top, title='CSV file (optional)',
+                initialdir=self.csv_file_dir,
+                #initialfile='',
+                filetypes=[('csv','*.csv'), ('CSV', '*.CSV')]
+                )
+            if not self.csv_file:
+                return
+            self.csvEntry.delete(0, tkinter.END)
+            self.csvEntry.insert(0, self.csv_file)
+            self.csv_file_dir = os.path.dirname(self.csv_file)
+        tkinter.Button(top, text='CSV file (optional)', command=showFileChooser).grid(row=3, column=0)
+        self.csvEntry = tkinter.Entry(top)
+        ToolTip(self.csvEntry, msg="A CSV file can be used to lookup Study numbers given Series numbers, or for random sampling", delay=TTD)
+        self.csvEntry.grid(row=3, column=1)
+        tkinter.Label(top, text='Study Ids:').grid(row=4, column=0)
+        self.studyEntry = tkinter.Entry(top)
+        ToolTip(self.studyEntry, msg="Enter one (or more, comma separated) Study numbers, or leave blank if random sampling", delay=TTD)
+        self.studyEntry.grid(row=4, column=1)
+        tkinter.Label(top, text='Series Ids:').grid(row=5, column=0)
+        self.seriesEntry = tkinter.Entry(top)
+        ToolTip(self.seriesEntry, msg="Enter one (or more, comma separated) Series numbers, or leave blank for all Series in a Study", delay=TTD)
+        self.seriesEntry.grid(row=5, column=1)
+        tkinter.Label(top, text='Output directory:').grid(row=6, column=0)
+        self.outputEntry = tkinter.Entry(top)
+        ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
+        self.outputEntry.grid(row=6, column=1)
+        self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load)
+        self.mySubmitButton.grid(row=7, column=1)
+        ToolTip(self.mySubmitButton, msg="Download the images (and save as files, if output directory specified) and load into the viewer", delay=TTD)
+
+    def load(self):
+        # Save preferences for next time XXX needs s3loadprefs passed
+        #if s3loadprefs:
+        #    s3loadprefs.output_dir = self.output_dir
+        #    s3loadprefs.csv_file_dir = self.csv_file_dir
+        if not self.access or not self.secret:
+            tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
+            return
+        self.random = True if self.randomVar.get() else False
+        self.onePerSeries = True if self.singlePerSeriesVar.get() else False
+        self.study_list = self.studyEntry.get().split(',') if self.studyEntry.get() else []
+        self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
+        self.output_dir = self.outputEntry.get()
+        self.csv_file = self.csvEntry.get()
+        # Sanity checks
+        if self.random and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
+            return
+        if self.series_list and not self.study_list and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Cannot download a Series without a Study unless a CSV file is given")
+            return
+        if not self.study_list and not self.series_list and not self.csv_file:
+            tkinter.messagebox.showerror(title="Error", message="Cannot download all Studies unless a CSV file is given")
+            return
+        if len(self.study_list)>1 and (len(self.study_list) != len(self.series_list)):
+            tkinter.messagebox.showerror(title="Error", message="Not sure what you mean by multiple Study AND multiple Series")
+            return
+        # If a study but no series then either (a) look in csv, or (b) load all series by doing S3 ls
+        # If a series but not study then need CSV to find study
+        # If a study and series are supplied then load it
+        # If output directory given then write there, else load direct into memory
+        #
+        s3prefix_list = set()
+
+        # If same number of study and series then combine them
+        if len(self.study_list)>1 and (len(self.study_list) == len(self.series_list)):
+            s3prefix_list.update([ f'{stu}/{ser}' for (stu,ser) in zip(self.study_list, self.series_list)])
+
+        # Open CSV file
+        csvr = None
+        if self.csv_file:
+            print('Opening CSV file %s' % self.csv_file)
+            fd = open(self.csv_file)
+            csvr = csv.DictReader(fd)
+            if 'StudyInstanceUID' not in csvr.fieldnames or 'SeriesInstanceUID' not in csvr.fieldnames:
+                tkinter.messagebox.showerror(title="Error", message="The CSV file does not have columns called StudyInstanceUID and SeriesInstanceUID")
+                return
+            #if 'SOPInstanceUID' in csvr.fieldnames:
+            #    tkinter.messagebox.showerror(title="Error", message="The CSV file has a column called SOPInstanceUID which means multiple instances of Study+Series so queries may not work well; please try a CSV file reduced to only Study and Series")
+            csvr.fd = fd # keep for later
+
+        # Random: read CSV and select random rows
+        if self.random:
+            print('Reading CSV file')
+            numrows = 0
+            for row in csvr:
+                numrows += 1
+            # Rewind and skip header row
+            csvr.fd.seek(0)
+            next(csvr.fd)
+            # Pick ten random rows
+            rownum_list = [random.randint(0,numrows-1) for n in range(NUM_RANDOM_S3_IMAGES)]
+            while numrows > 0:
+                row = next(csvr)
+                if numrows in rownum_list:
+                    s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                numrows -= 1
+
+        # If we don't have Study or Series then read all
+        if not self.study_list and not self.series_list:
+            numrows = 0
+            for row in csvr:
+                s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                numrows += 1
+                if numrows > MAX_S3_LOAD:
+                    tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
+                    break
+
+        # If we only have series we need CSV to get study
+        if self.series_list and not self.study_list:
+            numrows = 0
+            for row in csvr:
+                if row['SeriesInstanceUID'] in self.series_list:
+                    s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                    numrows += 1
+                    if numrows > MAX_S3_LOAD:
+                        tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
+                        break
+
+        # If we only have study we need to iterate, or we can use CSV to get series
+        if self.study_list and not self.series_list:
+            if csvr:
+                numrows = 0
+                for row in csvr:
+                    if row['StudyInstanceUID'] in self.study_list:
+                        s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
+                        numrows += 1
+                        if numrows > MAX_S3_LOAD:
+                            tkinter.messagebox.showerror(title="Error", message=f"Limited to {MAX_S3_LOAD}")
+                            break
+            else:
+                s3prefix_list.update(['%s/'%s for s in self.study_list])
+
+        print('Try a list of prefix:')
+        for pfx in s3prefix_list:
+            print('  %s' % pfx)
+
+        # Finished with CSV file now
+        if csvr:
+            csvr.fd.close()
+
+        # Connect to S3 service
+        logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
+        try:
+            s3 = boto3.resource('s3',
+                endpoint_url=self.endpoint,
+                aws_access_key_id=self.access, aws_secret_access_key=self.secret)
+        except:
+            tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
+            return
+
+        # Select the bucket given by the credential name
+        s3bucket = s3.Bucket(name=self.bucket)
+
+        # Format output path which can include {study} {series}
+        # If a relative path is given then prefix it with our HOME directory
+        if self.output_dir:
+            if not (self.output_dir[0]=='/' or self.output_dir=='~' or self.output_dir=='$'):
+                self.output_dir = os.environ.get('HOME','.')
+            if not '{' in self.output_dir:
+                self.output_dir += '/{study}/{series}/{file}'
+            #if not '{file}' in self.output_dir:
+            #    self.output_dir += '/{file}'
+            logging.debug('Files will be saved in\n%s' % self.output_dir)
+
+        # List bucket and download files, creating directories as necessary
+        self.path_list = []
+        def get_obj(obj):
+            (stu,ser,sop) = obj.key.split('/')
+            path = self.output_dir.format(study=stu, series=ser, file=sop)
+            logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
+            if self.output_dir:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                s3bucket.download_file(obj.key, path)
+                self.path_list.append(path)
+            else:
+                self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
+        prevSeries = None
+        for s3prefix in s3prefix_list:
+            try:
+                for obj in s3bucket.objects.filter(Prefix = s3prefix):
+                    # Expecting Study/Series/SOP but if we only get Study/Series
+                    # then need to do an additional 'ls' inside the Series
+                    # (typically if Series is a symlink):
+                    key_parts = obj.key.split('/')
+                    if len(key_parts)==2:
+                        for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
+                            get_obj(obj2)
+                            if self.onePerSeries:
+                                break
+                    else:
+                        # Skip if Series id is same as a previous one
+                        if self.onePerSeries and (key_parts[1] != prevSeries):
+                            get_obj(obj)
+                        prevSeries = key_parts[1]
+            except:
+                tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server")
+                return
+
+        self.top.destroy()
 
 
 # =====================================================================
@@ -188,6 +537,12 @@ class App:
         self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
         self.tk_app.bind("<q>", self.quit_event)
         self.tk_app.bind("<Z>", self.undo_file_event)
+        self.tk_app.bind("?", self.help_button_pressed)
+        self.tk_app.bind("<Control-o>", self.open_files_event)
+        self.tk_app.bind("<Control-d>", self.open_directory_event)
+        self.tk_app.bind("<Control-3>", self.manage_s3_event)
+        self.tk_app.bind("<Control-s>", self.open_s3_event)
+        self.tk_app.bind("<Control-c>", self.quit_event)
 
         # Internal settings
         self.render_flag = False # indicate that window should be rendered at next idle time
@@ -203,9 +558,12 @@ class App:
         # Create the Open menu as the second menu item
         self.openmenu = tkinter.Menu(self.menu)
         self.menu.add_cascade(label = 'File', menu = self.openmenu)
-        self.openmenu.add_command(label='Open files', command=lambda: self.open_files_event(None))
-        self.openmenu.add_command(label='Open directory', command=lambda: self.open_directory_event(None, False))
+        self.openmenu.add_command(label='Open files', accelerator='Ctrl+O', command=lambda: self.open_files_event(None))
+        self.openmenu.add_command(label='Open directory', accelerator='Ctrl+D', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
+        self.openmenu.add_separator()
+        self.openmenu.add_command(label='Manage S3 credentials', accelerator='Ctrl+3', command=lambda: self.manage_s3_event(None))
+        self.openmenu.add_command(label='Open files from S3', accelerator='Ctrl+S', command=lambda: self.open_s3_event(None))
         self.openmenu.add_separator()
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
@@ -258,6 +616,11 @@ class App:
         self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
         self.ocr_easy_loader_thread.start()
         self.ocr_tess_loader_thread.start()
+        # Make initial window bigger
+        self.tkimage = ImageTk.PhotoImage(Image.new('L', (640,480)))
+        self.app_image.configure(image=self.tkimage)
+
+
 
     def ocr_easy_loader(self):
         """ This is called in a thread """
@@ -346,6 +709,28 @@ class App:
             if rc == 'cancel':
                 return
         DicomRectDB.set_db_path(directory)
+
+
+
+    def manage_s3_event(self, event):
+        """ Only display dialogue box to edit credential store """
+        root = self.tk_app
+        s3cred = S3CredentialsDialog(root)
+        root.wait_window(s3cred.top)
+
+    def open_s3_event(self, event):
+        """ Display dialogue box to pick a series to load,
+        copies from S3, then loads them.
+        """
+        root = self.tk_app
+        s3load = S3LoadDialog(root)
+        # If dialogue box never got constructed due to error then
+        # it won't have a 'top' so doesn't need to be destroyed.
+        if hasattr(s3load, 'top'):
+            root.wait_window(s3load.top)
+        self.set_image_list(FileList(s3load.path_list))
+        self.load_next_file()
+
 
     def save_db_csv_event(self, event, rects = False, tags = False):
         """ Pop up a file dialog box asking for a CSV filename.
@@ -561,22 +946,35 @@ class App:
     def help_button_pressed(self, event=None):
         """ Display a dialog with some help text.
         """
-        tkinter.messagebox.showinfo(title="Help",
-            message="Keyboard actions:\n"
-                "r = redact the rectangle\n"
-                "i = info for this file\n"
-                "o = OCR this frame\n"
-                "A = apply all suggested rectangles\n"
-                "right-click = apply suggested rect\n"
-                "n = next frame\n"
-                "p = previous frame\n"
-                "f = fast forward\n"
-                "N = mark done; next file\n"
-                "Esc = next file\n"
-                "P = prev file\n"
-                "t = tag this image for further investigation\n"
-                "Z = reset file\n"
-                "q = quit\n")
+        message=("Keyboard actions:\n\n"
+            "i = display information about this file\n"
+            "+ = display image with rectangles redacted\n"
+            "- = display image without rectangles redacted\n"
+            "\n"
+            "n = display the next frame of this image\n"
+            "p = display the previous frame of this image\n"
+            "f = fast-forward to the last frame of this image\n"
+            "\n"
+            "Esc = move to the next file (does not mark this file as 'done')\n"
+            "N = move to the next file (marks this file as 'done' so you won't see it again)\n"
+            "P = back to the previous file (which has not been marked as 'done')\n"
+            "\n"
+            "r = redact the part of the frame which the draggable rectangle is over\n"
+            "A = apply (redact) all of the suggested rectangles to be redacted\n"
+            "right-click = apply (redact) the suggested rectangle under the mouse\n"
+            "Z = undo, remove all redaction rectables from this file\n"
+            "o = OCR, find redaction rectangles by finding text in the frame\n"
+            "\n"
+            "t = tag this image for further investigation (see the * in the window title bar)\n"
+            "c = write a comment about this file\n")
+        #tkinter.messagebox.showinfo(title="Help", message=message) # ugly
+        t=tkinter.Toplevel()
+        t.geometry(f'+{self.tk_app.winfo_x()+20}+{self.tk_app.winfo_y()+20}')
+        t.title("Help")
+        tx = tkinter.Text(t)
+        tx.insert(tkinter.END, message)
+        tx.pack()
+        tkinter.Button(t, text='OK', command=t.destroy).pack()
         return
 
     def press_event(self, event):
@@ -815,7 +1213,8 @@ class App:
             return
         self.render_flag = False
         if self.image is None:
-            self.app_image.configure(image=self.dummy_tkimage)
+            if hasattr(self, 'dummy_tkimage'):
+                self.app_image.configure(image=self.dummy_tkimage)
             self.info_label.configure(text="\n\n")
             return
 
@@ -1003,9 +1402,13 @@ class App:
             break
 
         try:
-            self.dcm = DicomImage(filename)
-        except:
+            filename_to_load = filename
+            if s3url_is(filename):
+                filename = s3url_sanitise(filename)
+            self.dcm = DicomImage(filename_to_load)
+        except Exception as e:
             logging.warning('Cannot load DICOM from file "%s"' % filename)
+            logging.error(traceback.format_exc())
             tkinter.messagebox.showerror(title="Help",
                 message='Cannot load DICOM from file "%s"' % filename)
             return True
@@ -1125,13 +1528,12 @@ if __name__=='__main__':
     else:
         logging.basicConfig(level = logging.INFO)
 
-    if not os.getenv('SMI_ROOT'):
-        logging.error('$SMI_ROOT must be set, so we can write into data/dicompixelanon directory')
-        exit(1)
-
     if args.db:
         database_path = args.db
     else:
+        if not os.getenv('SMI_ROOT'):
+            logging.error('$SMI_ROOT must be set, so we can write into data/dicompixelanon directory')
+            exit(1)
         database_path = os.path.join(os.getenv('SMI_ROOT'), "data", "dicompixelanon/") # needs trailing slash
     DicomRectDB.set_db_path(database_path)
 

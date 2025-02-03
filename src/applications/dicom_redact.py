@@ -19,8 +19,12 @@ import numpy as np
 import os
 import re
 import pydicom
-from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from pydicom.uid import JPEGLSLossless, JPEG2000Lossless
+# pack_bits moved from pixel_data_handlers to pixels.utils in pydicom v3
+try:
+    from pydicom.pixels.utils import pack_bits
+else:
+    from pydicom.pixel_data_handlers.numpy_handler import pack_bits
 from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
 from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.ocrenum import OCREnum
@@ -182,6 +186,9 @@ def remove_overlays_in_high_bits(ds):
     #    masked = (pixel_data[frame,:,:] & bit_mask)
     #else:
     #    masked = (pixel_data[frame,:,:,:] & bit_mask)
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = masked.tobytes()
 
     # XXX does not re-compress
@@ -239,6 +246,9 @@ def redact_rectangles_from_high_bit_overlay(ds, overlay=0, rect_list=None):
         y1 = y0 + h
         pixel_data[y0:y1, x0:x1] &= bit_mask_arr
 
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
     mark_as_uncompressed(ds)
@@ -296,6 +306,9 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
             # XXX assumes the colour channel is the last element
             pixel_data[frame, y0:y1, x0:x1, :] &= bit_mask_arr
 
+    # Set the pixel data from the numpy array
+    # XXX Should use set_pixel_data() ?
+    # XXX See https://github.com/pydicom/pydicom/pull/2082
     ds.PixelData = pixel_data.tobytes()
     # XXX does not re-compress
     mark_as_uncompressed(ds)
