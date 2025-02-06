@@ -1,0 +1,3 @@
+name,access,secret,endpoint
+myname,acc,sec,http://127.0.0.1:7070/
+bin,a,s,http://host.docker.internal:7070/
