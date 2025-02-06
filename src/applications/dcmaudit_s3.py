@@ -8,7 +8,7 @@ import os
 
 # =====================================================================
 
-CREDS_FILENAME = '.dcmaudit_s3creds.csv'
+CREDS_FILENAME = 's3creds.csv'
 
 # =====================================================================
 
@@ -16,7 +16,15 @@ class S3CredentialStore:
     """ Store S3 credentials in home directory
     """
     def __init__(self):
-        self.cred_path = os.path.join(os.environ.get('HOME','.'), CREDS_FILENAME)
+        # Store in ~/.config/dcmaudit/s3creds.csv
+        # or in ~/.dcmaudit/s3creds.csv if no .config dir.
+        dir = os.environ.get('XDG_CONFIG_HOME', '')
+        if dir:
+            dir = os.path.join(dir, 'dcmaudit')
+        else:
+            dir = os.path.join(os.environ.get('HOME', '.'), '.dcmaudit')
+        os.makedirs(dir, exist_ok = True)
+        self.cred_path = os.path.join(dir, CREDS_FILENAME)
         self.creds = dict()
         self.read_creds()
 
