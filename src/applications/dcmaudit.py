@@ -432,7 +432,7 @@ class S3LoadDialog:
                                 break
                     else:
                         # Skip if Series id is same as a previous one
-                        if self.onePerSeries and (key_parts[1] != prevSeries):
+                        if (not self.onePerSeries) or (key_parts[1] != prevSeries):
                             get_obj(obj)
                         prevSeries = key_parts[1]
             except:
