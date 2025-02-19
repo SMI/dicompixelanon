@@ -314,7 +314,6 @@ class S3LoadDialog:
         # Open CSV file
         csvr = None
         if self.csv_file:
-            print('Opening CSV file %s' % self.csv_file)
             fd = open(self.csv_file)
             csvr = csv.DictReader(fd)
             if 'StudyInstanceUID' not in csvr.fieldnames or 'SeriesInstanceUID' not in csvr.fieldnames:
@@ -326,7 +325,6 @@ class S3LoadDialog:
 
         # Random: read CSV and select random rows
         if self.random:
-            print('Reading CSV file')
             numrows = 0
             for row in csvr:
                 numrows += 1
@@ -376,9 +374,8 @@ class S3LoadDialog:
             else:
                 s3prefix_list.update(['%s/'%s for s in self.study_list])
 
-        print('Try a list of prefix:')
-        for pfx in s3prefix_list:
-            print('  %s' % pfx)
+        #for pfx in s3prefix_list:
+        #    print('S3 prefix: %s' % pfx)
 
         # Finished with CSV file now
         if csvr:
