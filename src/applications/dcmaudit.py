@@ -477,7 +477,7 @@ class App:
     us_rect_colour = 'yellow'  # ultrasound regions
 
 
-    def __init__(self):
+    def __init__(self, viewer_mode = False):
         """ GUI constructor
         """
 
@@ -490,6 +490,7 @@ class App:
         # Settings (have to be set after creating root window)
         self.skip_marked_files = tkinter.BooleanVar(value = True)
         self.skip_untagged_files = tkinter.BooleanVar(value = False)
+        self.viewer_mode = tkinter.BooleanVar(value = viewer_mode)
         self.highlight_rects = tkinter.BooleanVar(value = False)
         self.highlight_suggested_rects = tkinter.BooleanVar(value = True)
         self.highlight_deid_rects = tkinter.BooleanVar(value = False)
@@ -519,21 +520,22 @@ class App:
         #self.tk_app.bind("<Return>", self.done_file_event)
         self.tk_app.bind("<Escape>", self.escape_file_event)
         self.tk_app.bind("<Shift-Escape>", self.prev_file_event)
-        self.tk_app.bind("<t>", self.tag_file_event)
-        self.tk_app.bind("<c>", self.text_entry_event)
+        if not self.viewer_mode.get():
+            self.tk_app.bind("<t>", self.tag_file_event)
+            self.tk_app.bind("<c>", self.text_entry_event)
+            self.tk_app.bind("<minus>", self.display_without_rects)
+            self.tk_app.bind("<plus>", self.display_with_rects)
+            self.tk_app.bind("<o>", self.ocr_frame_event)
+            self.tk_app.bind("<r>", self.redact_event)
+            self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
+            self.tk_app.bind("<Z>", self.undo_file_event)
         self.tk_app.bind("<n>", self.next_frame_event)
         self.tk_app.bind("<N>", self.done_file_event)
         self.tk_app.bind("<p>", self.prev_frame_event)
         self.tk_app.bind("<P>", self.prev_file_event)
         self.tk_app.bind("<f>", self.ffwd_frame_event)
         self.tk_app.bind("<i>", self.info_file_event)
-        self.tk_app.bind("<minus>", self.display_without_rects)
-        self.tk_app.bind("<plus>", self.display_with_rects)
-        self.tk_app.bind("<o>", self.ocr_frame_event)
-        self.tk_app.bind("<r>", self.redact_event)
-        self.tk_app.bind("<A>", self.apply_all_possible_rects_event)
         self.tk_app.bind("<q>", self.quit_event)
-        self.tk_app.bind("<Z>", self.undo_file_event)
         self.tk_app.bind("?", self.help_button_pressed)
         self.tk_app.bind("<Control-o>", self.open_files_event)
         self.tk_app.bind("<Control-d>", self.open_directory_event)
@@ -581,19 +583,21 @@ class App:
         # Add other top-level menu items
         self.menu.add_command(label='Redact [r] the chosen rect', command=lambda: self.redact_event(None))
         self.menu.add_command(label='Info [i]', command=lambda: self.info_file_event(None))
-        self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
-        self.menu.add_command(label='Display redacted [+]', command=lambda: self.display_with_rects(None))
-        self.menu.add_command(label='Display unredacted [-]', command=lambda: self.display_without_rects(None))
-        self.menu.add_command(label='Apply all suggested rects [A]', command=lambda: self.apply_all_possible_rects_event(None))
+        if not self.viewer_mode.get():
+            self.menu.add_command(label='OCR frame [o]', command=lambda: self.ocr_frame_event(None))
+            self.menu.add_command(label='Display redacted [+]', command=lambda: self.display_with_rects(None))
+            self.menu.add_command(label='Display unredacted [-]', command=lambda: self.display_without_rects(None))
+            self.menu.add_command(label='Apply all suggested rects [A]', command=lambda: self.apply_all_possible_rects_event(None))
         self.menu.add_command(label='Next frame [n]', command=lambda: self.next_frame_event(None))
         self.menu.add_command(label='Fast forward frames [f]', command=lambda: self.ffwd_frame_event(None))
         self.menu.add_command(label='Previous frame [p]', command=lambda: self.prev_frame_event(None))
         self.menu.add_command(label='Mark done; Next file [N]', command=lambda: self.done_file_event(None))
         self.menu.add_command(label='Next file [Esc]', command=lambda: self.escape_file_event(None))
         self.menu.add_command(label='Prev file [P]', command=lambda: self.prev_file_event(None))
-        self.menu.add_command(label='Tag file [t]', command=lambda: self.tag_file_event(None))
-        self.menu.add_command(label='Comment on file [c]', command=lambda: self.text_entry_event(None))
-        self.menu.add_command(label='Undo file [Z]', command=lambda: self.undo_file_event(None))
+        if not self.viewer_mode.get():
+            self.menu.add_command(label='Tag file [t]', command=lambda: self.tag_file_event(None))
+            self.menu.add_command(label='Comment on file [c]', command=lambda: self.text_entry_event(None))
+            self.menu.add_command(label='Undo file [Z]', command=lambda: self.undo_file_event(None))
         self.menu.add_command(label='Quit [q]', command=lambda: self.quit_event(None))
 
         self.info_label = tkinter.Label(self.tk_app, justify="left")
@@ -607,7 +611,7 @@ class App:
         self.image_scale = 1 # if larger than screen then scale down 
         # Active rectangle
         self.rect_l = self.rect_r = self.rect_t = self.rect_b = 0
-        self.show_handles = True
+        self.show_handles = not self.viewer_mode.get()
         # Engines
         self.ocr_easy_loader_thread = ThreadWithReturn(target = self.ocr_easy_loader, args=())
         self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
@@ -654,6 +658,12 @@ class App:
         NB this is not called when menu is used. """
         self.skip_untagged_files.set(newval)
         logging.debug('skip_untagged_files = %s' % self.skip_untagged_files.get())
+
+    def set_viewer_only(self, newval):
+        """ Manully set this option.
+        NB this is not called when menu is used. """
+        self.viewer_mode.set(newval)
+        logging.debug('viewer_mode = %s' % self.viewer_mode.get())
 
     # User interface events
 
@@ -1003,13 +1013,15 @@ class App:
         return
 
     def enter_event(self, event):
-        self.show_handles = True
-        self.render()
+        if not self.viewer_mode.get():
+            self.show_handles = True
+            self.render()
         return
 
     def leave_event(self, event):
-        self.show_handles = False
-        self.render()
+        if not self.viewer_mode.get():
+            self.show_handles = False
+            self.render()
         return
 
     def done_file_event(self, event):
@@ -1512,6 +1524,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='DICOM Audit')
     parser.add_argument('-d', '--debug', action="store_true", help='debug')
     parser.add_argument('-q', '--quiet', action="store_true", help='quiet')
+    parser.add_argument('--viewer', action="store_true", help='only view DICOM files, no annotation features', default=False)
     parser.add_argument('--dump-database', action="store_true", help='show database content')
     parser.add_argument('--db', action="store", help='database directory')
     parser.add_argument('--review', action="store_true", help='review files already marked as done')
@@ -1539,10 +1552,12 @@ if __name__=='__main__':
         db.query_all()
         exit(0)
 
-    app = App()
+    app = App(viewer_mode = args.viewer)
     app.set_image_list(app.construct_FileList(args.infiles))
     if args.review:
         app.set_skip_marked_files(False)
     if args.tagged:
         app.set_skip_untagged_files(True)
+    if args.viewer:
+        app.set_viewer_only(True)
     app.run()
