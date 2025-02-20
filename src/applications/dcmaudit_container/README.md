@@ -3,8 +3,10 @@
 ## Build
 
 ```
-docker built -t dcmaudit .
+docker build --progress=plain --build-arg CACHEDATE=$(date +%N) -t dcmaudit .
 ```
+
+(CACHEDATE must change each time to prevent docker cache keeping an old copy of a repo from git pull)
 
 ## Push to registry
 
