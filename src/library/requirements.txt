@@ -37,4 +37,4 @@ easyocr
 # matplotlib is optional, only for debugging:
 #matplotlib
 # This one is completely optional, delete if you can't compile it:
-fastDamerauLevenshtein
+#fastDamerauLevenshtein
