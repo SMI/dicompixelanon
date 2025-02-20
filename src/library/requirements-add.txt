@@ -1,0 +1,11 @@
+# Additional requirements which were commented out in requirements.txt
+# spacy is optional unless you need NER:
+spacy
+# flair is optional:
+flair
+# stanza is optional:
+stanza
+# matplotlib is optional, only for debugging:
+matplotlib
+# This one is completely optional, delete if you can't compile it:
+fastDamerauLevenshtein
