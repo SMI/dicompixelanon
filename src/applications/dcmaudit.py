@@ -608,10 +608,11 @@ class App:
         self.screen_width_max  = self.tk_app.winfo_screenwidth() - 64
         # Image
         self.image = None    # the full-size image
-        self.image_scale = 1 # if larger than screen then scale down 
+        self.image_scale = 1 # if larger than screen then scale down
+        self.image_width = self.image_height = 0
         # Active rectangle
         self.rect_l = self.rect_r = self.rect_t = self.rect_b = 0
-        self.show_handles = not self.viewer_mode.get()
+        self.show_handles = not self.viewer_mode.get() # no handles in viewer mode
         # Engines
         self.ocr_easy_loader_thread = ThreadWithReturn(target = self.ocr_easy_loader, args=())
         self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
