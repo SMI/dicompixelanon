@@ -6,5 +6,5 @@ RUN virtualenv /venv
 RUN /venv/bin/python3 -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
 RUN /venv/bin/python3 -m pip install setuptools boto3 pydicom deid pydal opencv_python_headless pytesseract numpy easyocr tkinter-tooltip
 ARG CACHEDATE=1
-RUN git clone https://github.com/SMI/dicompixelanon && cd dicompixelanon/src/library && /venv/bin/python3 -m pip install -r requirements.txt && /venv/bin/python3 ./setup.py install
+RUN git clone https://github.com/SMI/dicompixelanon && cd dicompixelanon/src/library && /venv/bin/python3 -m pip install --upgrade build && /venv/bin/python3 -m build && /venv/bin/python3 -m pip install dist/DicomPixelAnon-0.0.0-py3-none-any.whl
 ENTRYPOINT [ "/venv/bin/python3", "dicompixelanon/src/applications/dcmaudit.py", "--db", "/tmp", "--review" ]
