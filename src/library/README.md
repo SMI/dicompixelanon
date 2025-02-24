@@ -17,12 +17,19 @@ so you need URLs to the compiled wheels specific for your Python version, e.g.
 
 ## Installation
 
-Run `python3 ./setup.py bdist_wheel` to create `dist/DicomPixelAnon-1.0.0-py3-none-any.whl`
+Install build tools: `python3 -m pip install --upgrade build`
 
-Run `python3 ./setup.py install` to install (including dependencies) into your python site-packages
-(whether that be global or inside a current virtualenv).
+Run `python3 -m build` to create `dist/DicomPixelAnon-0.0.0-py3-none-any.whl`
 
+Old information:
+
+Run `python3 ./setup_old.py bdist_wheel` to create `dist/DicomPixelAnon-1.0.0-py3-none-any.whl`
 Note that the version number is read from version.txt in the current directory.
+
+Run `python3 ./setup_old.py install` to install (including dependencies) into your python site-packages
+(whether that be global or inside a current virtualenv).
+Note that this no longer works, it silently breaks the installation of various other packages.
+
 
 ## Testing
 

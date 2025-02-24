@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DicomPixelAnon"
+#version = "1.2.3"
+license="Apache v2"
+readme="README.md"
+description="DICOM Pixel Anonymisation"
