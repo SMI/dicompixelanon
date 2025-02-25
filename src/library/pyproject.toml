@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "DicomPixelAnon"
-#version = "1.2.3"
+version = "1.0.0"
 license={text="Apache-2.0"}
 readme="README.md"
 description="DICOM Pixel Anonymisation"
