@@ -4,13 +4,17 @@
 mkdir -p s3
 touch s3/s3creds.csv
 
-# Two ways to get a container able to access a service on the host:
-#	--net=host \
-#	--add-host=host.docker.internal:host-gateway \
-
 XSOCK=/tmp/.X11-unix
-XAUTH=/tmp/.docker.xauth.$(id -u)
-xauth nlist "$DISPLAY" | sed -e 's/^..../ffff/' | xauth -f "$XAUTH" nmerge -
+if expr match "$DISPLAY" "^:" > /dev/null; then
+    # Unix domain sockets need a new Xauthority
+    XAUTH=/tmp/.docker.xauth.$(id -u)
+    xauth nlist "$DISPLAY" | sed -e 's/^..../ffff/' | xauth -f "$XAUTH" nmerge -
+else
+    # Network sockets and tunnels need real Xauthority, xhost, docker network
+    XAUTH="$XAUTHORITY"
+    xhost +local:docker
+    export DISPLAY=$(echo $DISPLAY | sed 's/localhost/host.docker.internal/')
+fi
 docker run --rm -it \
  --add-host=host.docker.internal:host-gateway \
  -e USER="$USER" \
