@@ -82,6 +82,31 @@ class ThreadWithReturn(Thread):
 
 
 # =====================================================================
+class SeekableCsv():
+    """ This class can be used instead of csv.DictReader because it allows
+    you to issue a seek into any part of the file and continue reading dicts.
+    """
+    def __init__(self, filename):
+        self.filename = filename
+        self.fd = open(self.filename)
+        self.csvr = csv.reader(self.fd)
+        self.fieldnames = next(self.csvr) # first line is header row
+    def seek(self, offset):
+        """ naive seek into file """
+        self.fd.seek(offset)
+    def seekafter(self, offset):
+        """ seek into file then discard the remainder of the text line """
+        self.seek(offset)
+        next(self.fd) # read remainder of text line
+    def __iter__(self):
+        return self
+    def __next__(self):
+        """ iterator which returns a dict of the next line in the file """
+        dd = dict(zip(self.fieldnames, next(self.csvr)))
+        return dd
+
+
+# =====================================================================
 class GridEntryDialog(tkinter.simpledialog.Dialog):
     """ A custom Tkinter dialog box to display a set of items in a grid
     as rows of label: text where text is editable, not so the user can
