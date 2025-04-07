@@ -339,30 +339,21 @@ class S3LoadDialog:
         # Open CSV file
         csvr = None
         if self.csv_file:
-            fd = open(self.csv_file)
-            csvr = csv.DictReader(fd)
+            csvr = SeekableCsv(self.csv_file)
             if 'StudyInstanceUID' not in csvr.fieldnames or 'SeriesInstanceUID' not in csvr.fieldnames:
                 tkinter.messagebox.showerror(title="Error", message="The CSV file does not have columns called StudyInstanceUID and SeriesInstanceUID")
                 return
             #if 'SOPInstanceUID' in csvr.fieldnames:
             #    tkinter.messagebox.showerror(title="Error", message="The CSV file has a column called SOPInstanceUID which means multiple instances of Study+Series so queries may not work well; please try a CSV file reduced to only Study and Series")
-            csvr.fd = fd # keep for later
 
         # Random: read CSV and select random rows
         if self.random:
-            numrows = 0
-            for row in csvr:
-                numrows += 1
-            # Rewind and skip header row
-            csvr.fd.seek(0)
-            next(csvr.fd)
-            # Pick ten random rows
-            rownum_list = [random.randint(0,numrows-1) for n in range(NUM_RANDOM_S3_IMAGES)]
-            while numrows > 0:
-                row = next(csvr)
-                if numrows in rownum_list:
-                    s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
-                numrows -= 1
+            csv_filesize = os.path.getsize(self.csv_file)
+            for _ in range(NUM_RANDOM_S3_IMAGES):
+                csv_offset = random.randint(0, max(0,csv_filesize-100))
+                csvr.seekafter(csv_offset)
+                csv_data = next(csvr)
+                s3prefix_list.add('%s/%s/' % (csv_data['StudyInstanceUID'], csv_data['SeriesInstanceUID']))
 
         # If we don't have Study or Series then read all
         if not self.study_list and not self.series_list:
@@ -403,8 +394,7 @@ class S3LoadDialog:
         #    print('S3 prefix: %s' % pfx)
 
         # Finished with CSV file now
-        if csvr:
-            csvr.fd.close()
+        # XXX Need to tidy up object
 
         # Connect to S3 service
         logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
