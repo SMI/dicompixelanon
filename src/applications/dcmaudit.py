@@ -97,7 +97,7 @@ class SeekableCsv():
     def seekafter(self, offset):
         """ seek into file then discard the remainder of the text line """
         self.seek(offset)
-        next(self.fd) # read remainder of text line
+        self.fd.readline() # read remainder of text line
     def __iter__(self):
         return self
     def __next__(self):
