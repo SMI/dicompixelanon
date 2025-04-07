@@ -104,6 +104,8 @@ class SeekableCsv():
         """ iterator which returns a dict of the next line in the file """
         dd = dict(zip(self.fieldnames, next(self.csvr)))
         return dd
+    def __del__(self):
+        self.fd.close()
 
 
 # =====================================================================
