@@ -357,8 +357,8 @@ class S3LoadDialog:
                 csv_data = next(csvr)
                 s3prefix_list.add('%s/%s/' % (csv_data['StudyInstanceUID'], csv_data['SeriesInstanceUID']))
 
-        # If we don't have Study or Series then read all
-        if not self.study_list and not self.series_list:
+        # If we don't have Study or Series then read all from CSV
+        if not self.study_list and not self.series_list and not self.random:
             numrows = 0
             for row in csvr:
                 s3prefix_list.add('%s/%s/' % (row['StudyInstanceUID'], row['SeriesInstanceUID']))
