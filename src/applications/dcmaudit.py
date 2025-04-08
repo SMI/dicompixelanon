@@ -415,12 +415,14 @@ class S3LoadDialog:
         # Format output path which can include {study} {series}
         # If a relative path is given then prefix it with our HOME directory
         if self.output_dir:
-            if not (self.output_dir[0]=='/' or self.output_dir=='~' or self.output_dir=='$'):
-                self.output_dir = os.environ.get('HOME','.')
+            # replace ~ and ~user and $var and ${var}
+            self.output_dir = os.path.expanduser(os.path.expandvars(self.output_dir))
+            # if relative then prefix with home
+            if not os.path.isabs(self.output_dir):
+                self.output_dir = os.path.expanduser(os.path.join('~', self.output_dir))
+            # if no template given then use standard directory hierarchy
             if not '{' in self.output_dir:
                 self.output_dir += '/{study}/{series}/{file}'
-            #if not '{file}' in self.output_dir:
-            #    self.output_dir += '/{file}'
             logging.debug('Files will be saved in\n%s' % self.output_dir)
 
         # List bucket and download files, creating directories as necessary
