@@ -352,10 +352,11 @@ class S3LoadDialog:
         if self.random:
             csv_filesize = os.path.getsize(self.csv_file)
             for _ in range(NUM_RANDOM_S3_IMAGES):
-                csv_offset = random.randint(0, max(0,csv_filesize-100))
+                csv_offset = random.randint(0, max(0,csv_filesize-10))
                 csvr.seekafter(csv_offset)
                 csv_data = next(csvr)
-                s3prefix_list.add('%s/%s/' % (csv_data['StudyInstanceUID'], csv_data['SeriesInstanceUID']))
+                if csv_data:
+                    s3prefix_list.add('%s/%s/' % (csv_data['StudyInstanceUID'], csv_data['SeriesInstanceUID']))
 
         # If we don't have Study or Series then read all from CSV
         if not self.study_list and not self.series_list and not self.random:
