@@ -335,7 +335,7 @@ class S3LoadDialog:
         s3prefix_list = set()
 
         # If same number of study and series then combine them
-        if len(self.study_list)>1 and (len(self.study_list) == len(self.series_list)):
+        if len(self.study_list)>0 and (len(self.study_list) == len(self.series_list)):
             s3prefix_list.update([ f'{stu}/{ser}' for (stu,ser) in zip(self.study_list, self.series_list)])
 
         # Open CSV file
