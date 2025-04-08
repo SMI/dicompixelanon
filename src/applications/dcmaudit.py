@@ -456,7 +456,7 @@ class S3LoadDialog:
                             get_obj(obj)
                         prevSeries = key_parts[1]
             except:
-                tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server")
+                tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server (%s)" % s3prefix)
                 return
 
         self.top.destroy()
