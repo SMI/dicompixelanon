@@ -50,7 +50,7 @@ from dcmaudit_s3 import S3CredentialStore
 
 
 # Configuration:
-DEFAULT_S3_ENDPOINT = 'http://127.0.0.1:7070/' # nsh-fs02:7070
+DEFAULT_S3_ENDPOINT = 'http://nsh-fs02:7070/' # 127.0.0.1 OR nsh-fs02
 NUM_RANDOM_S3_IMAGES = 10
 MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
 TTD=0.4                # delay in seconds before ToolTip is shown
