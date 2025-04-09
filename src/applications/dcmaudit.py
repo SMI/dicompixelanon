@@ -287,13 +287,15 @@ class S3DownloadDialog:
             return
         # Select the bucket given by the credential name
         s3bucket = s3.Bucket(name=self.bucket)
+        self.filelist = []
         try:
             for obj in s3bucket.objects.filter(Prefix = ''):
                 self.filelist.append(obj.key)
-                self.filelistvar.set(self.filelist)
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
+        self.filelist = sorted(self.filelist)
+        self.filelistvar.set(self.filelist)
         return
 
     def download(self):
