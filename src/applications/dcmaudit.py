@@ -226,6 +226,9 @@ class S3DownloadDialog:
     by selecting credentials, populating a listbox with the files in
     the bucket, and downloading the selected file to a given directory.
     """
+    # Class variable
+    default_output_dir = '~'
+
     def __init__(self, parent):
         self.bucket = None
         self.access = self.secret = None
@@ -261,6 +264,7 @@ class S3DownloadDialog:
         # Output directory
         tkinter.Label(top, text='Output directory (use ~ for your home directory):').grid(row=2, column=0)
         self.outputEntry = tkinter.Entry(top)
+        self.outputEntry.insert(tkinter.END, S3DownloadDialog.default_output_dir)
         ToolTip(self.outputEntry, msg="Enter an output directory, use ~ for your home directory", delay=TTD)
         self.outputEntry.grid(row=2, column=1)
         # List and Download buttons
@@ -274,6 +278,7 @@ class S3DownloadDialog:
         top.grid_rowconfigure(0, weight=1)
 
     def list(self):
+        # Check that credentials have been chosen
         if not self.access or not self.secret:
             tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
@@ -286,7 +291,7 @@ class S3DownloadDialog:
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
-        # Select the bucket given by the credential name
+        # Select the bucket given by the credential name and make a list of files
         s3bucket = s3.Bucket(name=self.bucket)
         self.filelist = []
         try:
@@ -298,23 +303,29 @@ class S3DownloadDialog:
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
+        # Sort the list of files and store in the listbox widget
         self.filelist = sorted(self.filelist)
         self.filelistvar.set(self.filelist)
         return
 
     def download(self):
+        # Check that credentials have been chosen (list() must have been called previously)
         if not self.access or not self.secret:
             tkinter.messagebox.showerror(title="Error", message='Please select some credentials')
             return
-        self.output_dir = os.path.expanduser(os.path.expandvars(self.outputEntry.get()))
+        self.output_dir = self.outputEntry.get()
         if not self.output_dir:
             tkinter.messagebox.showerror(title="Error", message='Please enter an output directory, for example use ~ for your home directory, or ~/s3 for the s3 directory inside your home directory.')
             return
+        # Keep output dir for next time
+        S3DownloadDialog.default_output_dir = self.output_dir
+        # Expand ~ and $var in output directory
+        self.output_dir = os.path.expanduser(os.path.expandvars(self.output_dir))
+        # Get the selected filename from the listbox widget
         selected_indices = self.myFileList.curselection()
         if selected_indices:
             selected_index = selected_indices[0]
             selected_item = self.myFileList.get(selected_index)
-            print("Selected item:", selected_item)
         else:
             tkinter.messagebox.showerror(title="Error", message='Please select a filename.')
             return
@@ -327,12 +338,11 @@ class S3DownloadDialog:
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
-        # Select the bucket given by the credential name
+        # Select the bucket given by the credential name and download the file
         s3bucket = s3.Bucket(name=self.bucket)
         try:
             for obj in s3bucket.objects.filter(Prefix = selected_item):
-                print('Download %s to %s' % (obj.key, self.output_dir))
-                os.makedirs(os.path.dirname(self.output_dir), exist_ok=True)
+                os.makedirs(self.output_dir, exist_ok=True)
                 s3bucket.download_file(obj.key, os.path.join(self.output_dir, os.path.basename(obj.key)))
                 tkinter.messagebox.showinfo(title="Error", message="Downloaded "+os.path.basename(obj.key))
         except Exception as e:
@@ -347,8 +357,12 @@ class S3LoadDialog:
     """ Display a window giving options to download or view a set
     of images held in a S3 bucket.
     """
+    # Class variables
+    default_csv_file_dir = '.'
+    default_output_dir = ''
+
     def __init__(self, parent, s3loadprefs = None):
-        # Initialise class variables
+        # Initialise instance variables
         self.bucket = None
         self.access = self.secret = None
         self.random = False
@@ -361,7 +375,8 @@ class S3LoadDialog:
             self.output_dir = s3loadprefs.output_dir
             self.csv_file_dir = s3loadprefs.csv_file_dir
         else:
-            self.csv_file_dir = '.'
+            self.csv_file_dir = S3LoadDialog.default_csv_file_dir
+            self.output_dir = S3LoadDialog.default_output_dir
         # Read the stored credentials
         cred_store = S3CredentialStore()
         cred_list = cred_store.read_creds()
@@ -420,6 +435,7 @@ class S3LoadDialog:
         self.seriesEntry.grid(row=5, column=1)
         tkinter.Label(top, text='Output directory:').grid(row=6, column=0)
         self.outputEntry = tkinter.Entry(top)
+        self.outputEntry.insert(tkinter.END, self.output_dir)
         ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
         self.outputEntry.grid(row=6, column=1)
         self.mySubmitButton = tkinter.Button(top, text='Load', command=self.load)
@@ -440,6 +456,9 @@ class S3LoadDialog:
         self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
         self.output_dir = self.outputEntry.get()
         self.csv_file = self.csvEntry.get()
+        # Save for next time
+        S3LoadDialog.default_output_dir = self.output_dir
+        S3LoadDialog.default_csv_file_dir = os.path.dirname(self.csv_file)
         # Sanity checks
         if self.random and not self.csv_file:
             tkinter.messagebox.showerror(title="Error", message="Please supply a CSV to use random sampling")
@@ -556,6 +575,7 @@ class S3LoadDialog:
         def get_obj(obj):
             (stu,ser,sop) = obj.key.split('/')
             path = self.output_dir.format(study=stu, series=ser, file=sop)
+            #print(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
             logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
             if self.output_dir:
                 os.makedirs(os.path.dirname(path), exist_ok=True)
