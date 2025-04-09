@@ -572,18 +572,21 @@ class S3LoadDialog:
 
         # List bucket and download files, creating directories as necessary
         self.path_list = []
-        def get_obj(obj):
-            (stu,ser,sop) = obj.key.split('/')
+        def get_obj(key):
+            # given a study/series/sop string in key, append S3 URL to
+            # self.path_list, and download to self.output_dir if set.
+            (stu,ser,sop) = key.split('/')
             path = self.output_dir.format(study=stu, series=ser, file=sop)
-            #print(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
-            logging.debug(f"{obj.key}\t{obj.size}\t{obj.last_modified}\t->\t{path}")
+            logging.debug(f"{key}\t->\t{path}")
             if self.output_dir:
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                s3bucket.download_file(obj.key, path)
+                s3bucket.download_file(key, path)
                 self.path_list.append(path)
             else:
-                self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, obj.key))
-        prevSeries = None
+                self.path_list.append(s3url_create(self.access, self.secret, self.endpoint, self.bucket, key))
+
+        # Build a list of objects to retrieve by doing an 'ls' in the series directories
+        s3objdict = {}
         for s3prefix in s3prefix_list:
             try:
                 for obj in s3bucket.objects.filter(Prefix = s3prefix):
@@ -591,19 +594,33 @@ class S3LoadDialog:
                     # then need to do an additional 'ls' inside the Series
                     # (typically if Series is a symlink):
                     key_parts = obj.key.split('/')
+                    if len(key_parts) < 2:
+                        # ignore files in root directory (also symlinks to directory)
+                        continue
+                    studyseries = key_parts[0] + '/' + key_parts[1]
                     if len(key_parts)==2:
+                        # iterate through Series
                         for obj2 in s3bucket.objects.filter(Prefix = '%s/' % obj.key):
-                            get_obj(obj2)
-                            if self.onePerSeries:
-                                break
+                            s3objdict.setdefault(studyseries, []).append(obj2.key.split('/')[2])
                     else:
-                        # Skip if Series id is same as a previous one
-                        if (not self.onePerSeries) or (key_parts[1] != prevSeries):
-                            get_obj(obj)
-                        prevSeries = key_parts[1]
+                        s3objdict.setdefault(studyseries, []).append(key_parts[2])
             except:
                 tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server (%s)" % s3prefix)
                 return
+
+        # Filter list if only one per series is required
+        if self.onePerSeries:
+            for studyseries in s3objdict:
+                s3objdict[studyseries] = [ random.choice(s3objdict[studyseries]) ]
+
+        # Get all objects
+        for studyseries in s3objdict:
+            for sop in s3objdict[studyseries]:
+                try:
+                    get_obj('%s/%s' % (studyseries, sop))
+                except:
+                    tkinter.messagebox.showerror(title="Error", message="Cannot retrieve object from the S3 server (%s)" % s3prefix)
+                    break
 
         self.top.destroy()
 
