@@ -53,6 +53,7 @@ from dcmaudit_s3 import S3CredentialStore
 DEFAULT_S3_ENDPOINT = 'http://nsh-fs02:7070/' # 127.0.0.1 OR nsh-fs02
 NUM_RANDOM_S3_IMAGES = 10
 MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
+MAX_S3_LIST = 100      # max files to list in download window
 TTD=0.4                # delay in seconds before ToolTip is shown
 
 
@@ -291,6 +292,9 @@ class S3DownloadDialog:
         try:
             for obj in s3bucket.objects.filter(Prefix = ''):
                 self.filelist.append(obj.key)
+                if len(self.filelist) > MAX_S3_LIST:
+                    tkinter.messagebox.showerror(title="Error", message="Limited to %d files" % MAX_S3_LIST)
+                    break
         except:
             tkinter.messagebox.showerror(title="Error", message="Cannot connect to the S3 server, check the endpoint URL and the credentials in the credential manager")
             return
