@@ -723,13 +723,13 @@ class App:
         # Create the Open menu as the second menu item
         self.openmenu = tkinter.Menu(self.menu)
         self.menu.add_cascade(label = 'File', menu = self.openmenu)
-        self.openmenu.add_command(label='Open files', accelerator='Ctrl+O', command=lambda: self.open_files_event(None))
+        self.openmenu.add_command(label='Open DICOM files', accelerator='Ctrl+O', command=lambda: self.open_files_event(None))
         self.openmenu.add_command(label='Open directory', accelerator='Ctrl+D', command=lambda: self.open_directory_event(None, False))
         self.openmenu.add_command(label='Open directory recursive', command=lambda: self.open_directory_event(None, True))
         self.openmenu.add_separator()
         self.openmenu.add_command(label='Manage S3 credentials', accelerator='Ctrl+3', command=lambda: self.manage_s3_event(None))
         self.openmenu.add_command(label='Open DICOM from S3', accelerator='Ctrl+S', command=lambda: self.open_s3_event(None))
-        self.openmenu.add_command(label='(Download reports from S3)', command=lambda: self.report_s3_event(None))
+        self.openmenu.add_command(label='Download file from S3', command=lambda: self.download_s3_event(None))
         self.openmenu.add_separator()
         self.openmenu.add_command(label='Choose database directory', command=lambda: self.open_db_directory_event(None))
         self.openmenu.add_command(label='Export database of rectangles as CSV', command=lambda: self.save_db_csv_event(None, rects=True, tags=False))
@@ -906,7 +906,7 @@ class App:
         self.set_image_list(FileList(s3load.path_list))
         self.load_next_file()
 
-    def report_s3_event(self, event):
+    def download_s3_event(self, event):
         """ Display dialogue box to pick a file to download from S3.
         """
         root = self.tk_app
