@@ -47,13 +47,14 @@ in `$SMI_ROOT/data/deid/`.
 Files to be redacted are specified on the command line:
 
 ```
-usage: dcmaudit.py [-h] [-d] [-q] [--db dir] [--dump-database] [--review]
+usage: dcmaudit.py [-h] [-d] [-q] [--db dir] [--viewer] [--dump-database] [--review]
                    [-i [INFILES [INFILES ...]]]
 optional arguments:
   -h, --help            show this help message and exit
   -d, --debug           debug
   -q, --quiet           quiet
   --db directory        database directory
+  --viewer              only view DICOM files, no annotation features
   --dump-database       show database content in JSON format
   --review              review files already marked as done
   --tagged              only view files which have been tagged
@@ -75,13 +76,110 @@ The menu options mirror the `--review` and `--tagged` command line options,
 to show all images including `done` ones, and to show only those which have been tagged
 as needed further inspection. See below for details.
 
+## Loading files from local disk
+
+DICOM files can be loaded by specifying their file names on the command line or
+using the options in the File menu.
+
+The `Open DICOM Files` option allows you to select one or more files to display.
+The files can be DICOM files, or you can select a CSV file which contains a list
+of filenames in the `DicomFilePath` column or the `filename` column. You can also
+select a database file, e.g. `dcmaudit.sqlite.db` which will display all images
+from the `DicomRects` and `DicomTags` tables (such a database could be images you
+have reviewed previously).
+
+The `Open Directory` option allows you to select a directory; all files inside
+will be displayed.
+
+The `Open Directory Recursive` option is similar but looks in all subdirectories too.
+This may be useful if you structure your DICOM files in a Study/Series/Instance
+hierarchy.
+
+In all cases, multiple files can be displayed, one by one, and the currently
+displayed image is identified by the number in the top left of the window,
+e.g. `2/185` means you are viewing image 2 and there are 185 in the list.
+
+## Loading DICOM files from S3 buckets
+
+DICOM files stored within buckets on a S3 service can be viewed and downloaded.
+Examples of S3 services are AWS, or a local server such as Minio or VersityGW.
+There is support for multiple buckets, each with their own credentials.
+DICOM files can be viewed, without the need to download a copy to a local disk first.
+
+To manage credentials use the option in the File menu. Enter the S3 details:
+endpoint URL, access key, secret key and bucket name, then click Save. The
+credentials will be saved using the bucket name. To edit credentials select
+the bucket name from the menu, edit the values, and click Save. To delete
+a set of credentials delete all the values except the bucket name and click Save.
+
+![dcmaudit S3 credentials](/resources/images/dcmaudit_s3creds.png)
+
+To save a single file to disk you can use the Download option in the File menu.
+Select the bucket name from the list of credentials, click on List to
+view the files in the bucket, enter your desired output directory, then click Download.
+Do not use this for buckets with millions of files, nor buckets with a deep
+hierarchy. It's more useful for text files and sample files.
+
+![dcmaudit S3 download](/resources/images/dcmaudit_s3load.png)
+
+To view and/or download images your bucket must contain images structured in the
+Study / Series / Instance hierarchy, i.e. each object key (filename) contains the
+StudyUID, SeriesUID and InstanceUID. You may also have a CSV file which lists all
+of the `StudyInstanceUIDs` and `SeriesInstanceUIDs` in the bucket. The CSV file
+may contain other columns but those two are required if you want to use a CSV.
+
+Use the Open DICOM from S3 option in the file menu.
+Select the bucket name from the list of credentials then choose how you want to select the images:
+
+* to view all images in all series of a particular study enter the Study UID.
+* to view all images in a particular series enter the Study and Series UIDs.
+* to view all images in a particular series enter the Series UID and provide a CSV
+file where the StudyUID can be found.
+* to view all images use the CSV option, leave Study and Series blank.
+
+To view a random selection of images (e.g. for audit purposes) use the Random option.
+This requires a CSV file; you can leave Study and Series blank.
+
+To view only a single image from each Series (maybe because they are all slices from a CT)
+use the Overview option. This is useful when using Random - tick both Random and Overview
+to view a single image from every Series from a randomly selected set of Studies. Note that
+the overview image from a series is chosen randomly, it is not the first image in each Series.
+
+![dcmaudit S3 view](/resources/images/dcmaudit_s3view.png)
+
+## Display of image metadata
+
+The DICOM tags can be displayed with the `Info` option (the `i` key) which
+opens a window showing a selection of tags. The values can be copied from this
+window if required. The full output of every tag is displayed in the terminal
+window if dcmaudit was started from the command-line.
+
+![DICOM tags](/resources/images/dcmaudit_tags.png)
+
 ## Display of frame/overlay
 
 Images have multiple frames, but then after all the frames come the overlays, and
 each overlay can have multiple frames.
 The overlay number is not shown until you have stepped through all the frames first.
 
-![screenshot](../resources/images/dcmaudit.png)
+![dcmaudit main window](../resources/images/dcmaudit.png)
+
+## Navigating through the list of images
+
+If a DICOM file has multiple frames and/or overlays, use Next Frame (`n`) to view the next.
+Use Previous Frame (`p`) to go backwards.
+
+To move to the next DICOM file use Next File (the `Esc` key), and Previous File (`P`) to go
+backwards (not the capital letter). These options do not update the database. If you review
+some images, exit the program, and come back later, you will review the same set of images.
+
+To make a note that an image has been reviewed using the Mark Done, Next File (`N`) option.
+This will make a note in the database that the file has been reviewed so you don't need to
+see it again in future.
+
+If not using the program as a simple viewer then it's possible to also tag and/or comment
+on images, and to mark up rectangles that need to be redacted (or otherwise investigated).
+All of these annotations will be stored in a database allowing a permanent record to be kept.
 
 ## Marking rectangles for redaction
 
