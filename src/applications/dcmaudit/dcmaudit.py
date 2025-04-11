@@ -1170,11 +1170,12 @@ if __name__=='__main__':
     args = parser.parse_args()
     if args.debug:
         logging.basicConfig(level = logging.DEBUG)
-        faulthandler.enable()
     elif args.quiet:
         logging.basicConfig(level = logging.WARNING)
     else:
         logging.basicConfig(level = logging.INFO)
+    # Stack trace upon signal SIGSEGV, SIGFPE, SIGABRT, SIGBUS or SIGILL
+    faulthandler.enable()
 
     if args.db:
         database_path = args.db
