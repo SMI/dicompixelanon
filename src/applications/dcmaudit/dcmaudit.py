@@ -27,6 +27,7 @@ import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.simpledialog
 from tkinter.ttk import Progressbar
+import faulthandler
 import numpy as np
 from PIL import Image
 from PIL import ImageTk
@@ -1017,12 +1018,13 @@ class App:
         self.filelist = filelist
 
     def gui_loop(self):
-        """ Returns -1 (close = quit) or 0 (cancel = next image) or 1 (done)
+        """ Returns one of the RC_ enums (RC_QUIT, RC_NEXTIMAGE, etc)
         """
         self.set_busy(0)
         v = self.wait_for_flag()
         self.set_busy()
-        logging.debug('XXX GUI loop finished with v=%d (-1=quit,0=next/prev frame,1=next image)' % v)
+        logging.debug('GUI loop finished with v=%d (%d=quit, %d=nextframe, %d=ffwd, %d=nextimg, %d=doneimg, %d=previmg)' % (v,
+            RC_QUIT, RC_NEXTFRAME, RC_FFWD, RC_NEXTIMAGE, RC_DONEIMAGE, RC_PREVIMAGE))
         return v
 
     def load_next_file(self):
@@ -1168,6 +1170,7 @@ if __name__=='__main__':
     args = parser.parse_args()
     if args.debug:
         logging.basicConfig(level = logging.DEBUG)
+        faulthandler.enable()
     elif args.quiet:
         logging.basicConfig(level = logging.WARNING)
     else:
