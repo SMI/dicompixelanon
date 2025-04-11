@@ -260,6 +260,42 @@ the redaction rectangles. Likewise only rectangles from images marked
 as done will be suggested as possible rectangles as the metadata
 for comparison is not written until images are marked as "done".
 
+## Options
+
+The options menu:
+
+![dcmaudit options](/resources/images/dcmaudit_options.png)
+
+There are three sets of options which relate to:
+* which images are displayed
+* which parts will be redacted automatically when displaying an image
+* which redaction rectangles will be highlighted on the image
+
+Image display:
+* You can ignore files which have already been marked in the database,
+so you don't have to review files which have already been examined.
+* You can view only those files which were tagged in the database,
+so you can review those images which were previously viewed but need
+another look, for example if one reviewer wasn't sure about something.
+
+Redaction:
+* You can redact parts which match certain rules (see deid above),
+for example certain machine models always write a name in the top-left
+corner, or Ultrasound image which contain metadata about text regions.
+* You can redact parts which are described by metadata in the DICOM tags,
+typically used in Ultrasound images.
+
+Rectangles:
+* You can display the rectangles which have already been identified and
+stored in the database, perhaps as a result of running `dicom_ocr` or
+from manually highlighting rectangles previously with this program.
+* You can highlight rectangles which were stored in the database for
+similar images (e.g. same machine model). Such highlighted rectangles
+can then be applied to the current image using the `A` Apply option.
+* You can highlight rectangles suggested by deid rules.
+* You can highlight rectangles suggested by DICOM metadata tags,
+typically used by Ultrasound images.
+
 ## Keyboard shortcuts
 
 ```
