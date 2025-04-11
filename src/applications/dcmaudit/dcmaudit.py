@@ -1024,7 +1024,7 @@ class App:
         v = self.wait_for_flag()
         self.set_busy()
         logging.debug('GUI loop finished with v=%d (%d=quit, %d=nextframe, %d=ffwd, %d=nextimg, %d=doneimg, %d=previmg)' % (v,
-            RC_QUIT, RC_NEXTFRAME, RC_FFWD, RC_NEXTIMAGE, RC_DONEIMAGE, RC_PREVIMAGE))
+            App.RC_QUIT, App.RC_NEXTFRAME, App.RC_FFWD, App.RC_NEXTIMAGE, App.RC_DONEIMAGE, App.RC_PREVIMAGE))
         return v
 
     def load_next_file(self):
