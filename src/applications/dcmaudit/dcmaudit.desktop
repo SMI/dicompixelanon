@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=dcmaudit
+Comment=dcmaudit - view DICOM images
+Exec=/nimble/work/dcmaudit/dcmaudit.sh
+Terminal=false
+Type=Application  
