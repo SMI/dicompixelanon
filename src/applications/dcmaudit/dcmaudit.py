@@ -44,8 +44,8 @@ from dcmaudit_s3creddialog import S3CredentialsDialog
 from dcmaudit_s3downloaddialog import S3DownloadDialog
 from dcmaudit_s3loaddialog import S3LoadDialog
 from tkgridentrydialog import GridEntryDialog
+from tkintertable import TableCanvas, TableModel
 from threadwithreturn import ThreadWithReturn
-
 
 # =====================================================================
 class App:
@@ -559,16 +559,43 @@ class App:
         imgtype = str(self.dcm.get_tag('ImageType'))
         moda = str(self.dcm.get_tag('Modality'))
         fn = self.dcm.get_filename()
+        # Output all tags to stdout (the terminal window)
         self.dcm.debug_tags()
-        GridEntryDialog(self.tk_app, [
-            ("Filename:", fn),
-            ("Modality:", moda),
-            ("Image type:", imgtype),
-            ("Manufacturer:", man),
-            ("Model:", mod),
-            ("Software:", swv),
-            ("Burned In Annotation:", bia)
-            ])
+        # DIsplay a selection of the tag values
+        #GridEntryDialog(self.tk_app, [
+        #    ("Filename:", fn),
+        #    ("Modality:", moda),
+        #    ("Image type:", imgtype),
+        #    ("Manufacturer:", man),
+        #    ("Model:", mod),
+        #    ("Software:", swv),
+        #    ("Burned In Annotation:", bia)
+        #    ])
+        # Create a top-level window
+        tagwindow = tkinter.Toplevel(self.tk_app)
+        tagwindow.geometry('640x480')
+        tagwindow.title('DICOM file tag values for %s' % fn)
+        frame = tkinter.Frame(tagwindow)
+        frame.pack(fill=tkinter.BOTH, expand=1)
+        tagdict1 = {
+            '0': {'Tag':'Filename', 'Value':fn},
+            '1': {'Tag':'Modality', 'Value':moda},
+            '2': {'Tag':'Image type', 'Value':imgtype},
+            '3': {'Tag':'Manufacturer', 'Value':man},
+            '4': {'Tag':'Model', 'Value':mod},
+            '5': {'Tag':'Software', 'Value':swv},
+            '6': {'Tag':'Burned In Annotation', 'Value':bia},
+            }
+        # Build a dict like {'rowname': {'Tag': 'the name of the tag', 'Value': 'the tag value'}}
+        # from all the tags in the DICOM dataset (XXX uses the private ds element from self.dcm)
+        tagdict2 = {t.name : {'Tag':t.name, 'Value':str(t.value)[:120]} for t in self.dcm.ds}
+        # Create a table in the window from the popular tags followed by all tags
+        table = TableCanvas(frame, data={**tagdict1, **tagdict2})
+        table.show()
+        # NB this window will persist (not modal) but not update when a new file is loaded
+        # XXX TODO: see https://github.com/dmnfarrell/tkintertable/wiki/Usage#add-and-delete-rows-and-columns
+        # use self.tagwindow to persist the window, (but need to detect when it is closed)
+        # and delete old rows then fill with new data.
 
     def display_without_rects(self, event=None):
         """ Update the display without the redaction rectangles

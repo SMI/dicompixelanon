@@ -1,4 +1,5 @@
 tkinter-tooltip
+tkintertable
 boto3
 pydicom
 pylibjpeg

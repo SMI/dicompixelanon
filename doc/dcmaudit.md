@@ -150,7 +150,7 @@ the overview image from a series is chosen randomly, it is not the first image i
 ## Display of image metadata
 
 The DICOM tags can be displayed with the `Info` option (the `i` key) which
-opens a window showing a selection of tags. The values can be copied from this
+opens a window showing all tags. The values can be copied from this
 window if required. The full output of every tag is displayed in the terminal
 window if dcmaudit was started from the command-line.
 
