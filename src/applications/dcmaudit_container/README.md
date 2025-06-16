@@ -8,6 +8,9 @@ docker build --progress=plain --build-arg CACHEDATE=$(date +%N) -t dcmaudit .
 
 (CACHEDATE must change each time to prevent docker cache keeping an old copy of a repo from git pull)
 
+To build for use on a GPU change Dockerfile:
+use `--extra-index-url https://download.pytorch.org/whl/cu118` (instead of `cpu`).
+
 ## Push to registry
 
 ```
