@@ -41,7 +41,7 @@ class S3DownloadDialog:
 
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
-        top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
+        top.geometry(f'+{max(0,parent.winfo_rootx()-30)}+{parent.winfo_rooty()}')
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         self.bucket_dropdown = tkinter.StringVar()
         def pick(_):
@@ -163,4 +163,8 @@ class S3DownloadDialog:
         except Exception as e:
             tkinter.messagebox.showerror(title="Error", message="Cannot download %s from S3 server, check the endpoint URL and the credentials in the credential manager, and check the output directory is writeable.")
             return
+
+        # Cannot raise window to front using attributes('-topmost',1)
+        # or lift() or focus_force(), so just close it:
+        self.top.destroy()
         return
