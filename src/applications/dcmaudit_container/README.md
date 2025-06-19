@@ -37,3 +37,4 @@ If you need to run a test S3 server, try:
 ```
 docker run --rm -p 7070:7070 -v /:/x versity/versitygw:v1.0.10 --access a --secret s posix --nometa /x &
 ```
+Bucket name will be a directory name in `/`, access key and secret key are `a` and `s` respectively.
