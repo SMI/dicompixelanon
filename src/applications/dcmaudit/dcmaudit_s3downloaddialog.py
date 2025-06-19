@@ -11,7 +11,7 @@ from dcmaudit_s3credstore import S3CredentialStore
 
 
 # Configuration:
-MAX_S3_LIST = 100      # max files to list in download window
+MAX_S3_LIST = 200      # max files to list in download window
 TTD=0.4                # delay in seconds before ToolTip is shown
 
 

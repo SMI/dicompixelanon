@@ -18,7 +18,7 @@ from seekablecsv import SeekableCsv
 
 # =====================================================================
 # Configuration:
-NUM_RANDOM_S3_IMAGES = 10
+NUM_RANDOM_S3_IMAGES = 50
 MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
 TTD=0.4                # delay in seconds before ToolTip is shown
 
