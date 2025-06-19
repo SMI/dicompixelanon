@@ -43,8 +43,7 @@ from DicomPixelAnon.s3url import s3url_is, s3url_sanitise
 from dcmaudit_s3creddialog import S3CredentialsDialog
 from dcmaudit_s3downloaddialog import S3DownloadDialog
 from dcmaudit_s3loaddialog import S3LoadDialog
-from tkgridentrydialog import GridEntryDialog
-from tkintertable import TableCanvas, TableModel
+from taginfowindow import TagInfoWindow
 from threadwithreturn import ThreadWithReturn
 
 # =====================================================================
@@ -80,6 +79,7 @@ class App:
     outline_colour = 0xff # white
     deid_rect_colour = 'green' # deid rules
     us_rect_colour = 'yellow'  # ultrasound regions
+    MAX_TAG_VALUE_LEN = 120 # max length of tag value string in info window
 
 
     def __init__(self, viewer_mode = False):
@@ -228,6 +228,7 @@ class App:
         # Make initial window bigger
         self.tkimage = ImageTk.PhotoImage(Image.new('L', (640,480)))
         self.app_image.configure(image=self.tkimage)
+        # Default values of variables
         self.drag_x0 = 0
         self.drag_y0 = 0
         self.drag_t0 = 0
@@ -244,6 +245,7 @@ class App:
         self.possible_rects = None
         self.deid_rects = None
         self.us_rects = None
+        self.taginfo_window = None
 
     # Thread functions to load big libraries in the background
     def ocr_easy_loader(self):
@@ -553,50 +555,18 @@ class App:
     def info_file_event(self, event=None):
         """ Display a dialog showing the content of some DICOM tags.
         """
-        man = str(self.dcm.get_tag('Manufacturer'))
-        mod = str(self.dcm.get_tag('ManufacturerModelName'))
-        swv = str(self.dcm.get_tag('SoftwareVersions'))
-        bia = str(self.dcm.get_tag('BurnedInAnnotation'))
-        imgtype = str(self.dcm.get_tag('ImageType'))
-        moda = str(self.dcm.get_tag('Modality'))
-        fn = self.dcm.get_filename()
         # Output all tags to stdout (the terminal window)
-        self.dcm.debug_tags()
-        # DIsplay a selection of the tag values
-        #GridEntryDialog(self.tk_app, [
-        #    ("Filename:", fn),
-        #    ("Modality:", moda),
-        #    ("Image type:", imgtype),
-        #    ("Manufacturer:", man),
-        #    ("Model:", mod),
-        #    ("Software:", swv),
-        #    ("Burned In Annotation:", bia)
-        #    ])
-        # Create a top-level window
-        tagwindow = tkinter.Toplevel(self.tk_app)
-        tagwindow.geometry('640x480')
-        tagwindow.title('DICOM file tag values for %s' % fn)
-        frame = tkinter.Frame(tagwindow)
-        frame.pack(fill=tkinter.BOTH, expand=1)
-        tagdict1 = {
-            '0': {'Tag':'Filename', 'Value':fn},
-            '1': {'Tag':'Modality', 'Value':moda},
-            '2': {'Tag':'Image type', 'Value':imgtype},
-            '3': {'Tag':'Manufacturer', 'Value':man},
-            '4': {'Tag':'Model', 'Value':mod},
-            '5': {'Tag':'Software', 'Value':swv},
-            '6': {'Tag':'Burned In Annotation', 'Value':bia},
-            }
-        # Build a dict like {'rowname': {'Tag': 'the name of the tag', 'Value': 'the tag value'}}
-        # from all the tags in the DICOM dataset (XXX uses the private ds element from self.dcm)
-        tagdict2 = {t.name : {'Tag':t.name, 'Value':str(t.value)[:120]} for t in self.dcm.ds}
-        # Create a table in the window from the popular tags followed by all tags
-        table = TableCanvas(frame, data={**tagdict1, **tagdict2})
-        table.show()
-        # NB this window will persist (not modal) but not update when a new file is loaded
-        # XXX TODO: see https://github.com/dmnfarrell/tkintertable/wiki/Usage#add-and-delete-rows-and-columns
-        # use self.tagwindow to persist the window, (but need to detect when it is closed)
-        # and delete old rows then fill with new data.
+        #self.dcm.debug_tags()
+        # When window is closed remove reference to it
+        def closed(event):
+            self.taginfo_window = None
+        # Create new window if not already created
+        # and ensure we keep track of when it's closed
+        if not self.taginfo_window:
+            self.taginfo_window = TagInfoWindow(self.tk_app)
+            self.taginfo_window.window().bind("<Destroy>", closed)
+        # Fill in the table with the tags from the current DICOM
+        self.taginfo_window.taginfo_window_populate(self.dcm)
 
     def display_without_rects(self, event=None):
         """ Update the display without the redaction rectangles
@@ -934,6 +904,9 @@ class App:
         num_overlays = self.dcm.get_num_overlays()
         db = DicomRectDB()
         marked, commented = db.query_tags(filename)
+        # Update the tag info window
+        if self.taginfo_window:
+            self.taginfo_window.taginfo_window_populate(self.dcm)
         # Update the info label
         short_filename = filename.replace('/home/arb/','')
         short_filename = filename.replace('/beegfs-hdruk/extract/v12/PACS/','')
