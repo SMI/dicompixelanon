@@ -220,10 +220,11 @@ class App:
         self.rect_l = self.rect_r = self.rect_t = self.rect_b = 0
         self.show_handles = not self.viewer_mode.get() # no handles in viewer mode
         # Engines
-        self.ocr_easy_loader_thread = ThreadWithReturn(target = self.ocr_easy_loader, args=())
-        self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
-        self.ocr_easy_loader_thread.start()
-        self.ocr_tess_loader_thread.start()
+        if not self.viewer_mode.get():
+            self.ocr_easy_loader_thread = ThreadWithReturn(target = self.ocr_easy_loader, args=())
+            self.ocr_tess_loader_thread = ThreadWithReturn(target = self.ocr_tess_loader, args=())
+            self.ocr_easy_loader_thread.start()
+            self.ocr_tess_loader_thread.start()
         # Make initial window bigger
         self.tkimage = ImageTk.PhotoImage(Image.new('L', (640,480)))
         self.app_image.configure(image=self.tkimage)
