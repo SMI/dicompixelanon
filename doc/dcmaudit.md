@@ -110,7 +110,8 @@ To manage credentials use the option in the File menu. Enter the S3 details:
 endpoint URL, access key, secret key and bucket name, then click Save. The
 credentials will be saved using the bucket name. To edit credentials select
 the bucket name from the menu, edit the values, and click Save. To delete
-a set of credentials delete all the values except the bucket name and click Save.
+a set of credentials use the Delete button; this does not delete the actual
+bucket.
 
 ![dcmaudit S3 credentials](/resources/images/dcmaudit_s3creds.png)
 
@@ -151,8 +152,7 @@ the overview image from a series is chosen randomly, it is not the first image i
 
 The DICOM tags can be displayed with the `Info` option (the `i` key) which
 opens a window showing all tags. The values can be copied from this
-window if required. The full output of every tag is displayed in the terminal
-window if dcmaudit was started from the command-line.
+window if required. Note that long tag values are truncated at 120 characters.
 
 ![DICOM tags](/resources/images/dcmaudit_tags.png)
 
