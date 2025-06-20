@@ -33,7 +33,7 @@ class S3CredentialsDialog:
         cred_store = S3CredentialStore()
         cred_list = cred_store.read_creds()
         cred_names = list(cred_list.keys())
-        options = cred_names if len(cred_names) else ['---']
+        options = cred_names if len(cred_names)>0 else ['---']
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
         top.geometry(f'+{max(0,parent.winfo_rootx()-20)}+{parent.winfo_rooty()}')
@@ -83,9 +83,23 @@ class S3CredentialsDialog:
         self.bucketEntry.grid(row=4, column=1)
 
         # Save button
+        self.myDeleteButton = tkinter.Button(top, text='Delete', command=self.delete)
         self.mySubmitButton = tkinter.Button(top, text='Save', command=self.save)
+        ToolTip(self.myDeleteButton, msg="The bucket credentials will be removed from the list (the bucket itself is not deleted)", delay=TTD)
         ToolTip(self.mySubmitButton, msg="The credentials will be saved under the name you have selected for the bucket", delay=TTD)
+        self.myDeleteButton.grid(row=5, column=0)
         self.mySubmitButton.grid(row=5, column=1)
+
+
+    def delete(self):
+        """ Called when the delete button os pressed.
+        Remove the bucket from the credential store
+        """
+        bucketname = self.bucketEntry.get()
+        if bucketname:
+            cred_store = S3CredentialStore()
+            cred_store.add_cred(bucketname, None, None, None)
+        self.top.destroy()
 
 
     def save(self):
@@ -101,7 +115,7 @@ class S3CredentialsDialog:
             cred_store.add_cred(self.bucketname, self.access, self.secret, self.endpoint)
             if self.access and self.secret and self.bucketname:
                 try:
-                    logging.debug('Logging into S3 at %s with %s:%s' % (self.endpoint, self.access, self.secret))
+                    logging.debug(f'Logging into S3 at {self.endpoint} with {self.access}:{self.secret}')
                     s3 = boto3.resource('s3',
                         endpoint_url=self.endpoint,
                         aws_access_key_id=self.access, aws_secret_access_key=self.secret)
