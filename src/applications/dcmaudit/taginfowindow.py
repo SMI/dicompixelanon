@@ -24,7 +24,9 @@ class TagInfoWindow:
         return self.taginfo_window
 
     def taginfo_window_populate(self, dcm):
+        prev_scroll = None
         if self.table:
+            prev_scroll = self.table.yview()
             del self.table
         self.table = TableCanvas(self.frame)
         man = str(dcm.get_tag('Manufacturer'))
@@ -49,3 +51,11 @@ class TagInfoWindow:
         tagdict2 = {t.name : {'Tag':t.name, 'Value':str(t.value)[:TagInfoWindow.MAX_TAG_VALUE_LEN]} for t in dcm.ds}
         self.table = TableCanvas(self.frame, data={**tagdict1, **tagdict2})
         self.table.show()
+        # Attempt to scroll this table to the same position as the previous table
+        if prev_scroll:
+            pass
+            #self.taginfo_window.after(250, lambda: self.table.set_yviews(*prev_scroll))
+            #self.taginfo_window.after(250, lambda: self.table.yview_moveto(prev_scroll[0]))
+            #self.taginfo_window.after(300, lambda: self.table.redrawVisible())
+            #self.table.yview_moveto(prev_scroll[0])
+            #self.table.redrawTable()
