@@ -904,9 +904,6 @@ class App:
         num_overlays = self.dcm.get_num_overlays()
         db = DicomRectDB()
         marked, commented = db.query_tags(filename)
-        # Update the tag info window
-        if self.taginfo_window:
-            self.taginfo_window.taginfo_window_populate(self.dcm)
         # Update the info label
         short_filename = filename.replace('/home/arb/','')
         short_filename = filename.replace('/beegfs-hdruk/extract/v12/PACS/','')
@@ -931,6 +928,13 @@ class App:
                 (marked_string, fileidx+1, numfiles, short_filename, dicom_text,
                 self.image_width, self.image_height,
                 frame+1, self.dcm.get_num_frames(), overlays_str, commented_string))
+
+    def update_taginfo_window(self):
+        """ Update the tag list when the file changes.
+        """
+        # Update the tag info window
+        if self.taginfo_window:
+            self.taginfo_window.taginfo_window_populate(self.dcm)
 
     def update_image(self, dicomrectlist = None, dicomtransrectlist = None):
         """ Uses the current self.image to update the display
@@ -1115,6 +1119,11 @@ class App:
             self.update_image(dicomrectlist = self.redacted_rects, dicomtransrectlist = self.possible_rects)
             # Update the info label
             self.update_info_label()
+            # Update the list of tag values
+            self.update_taginfo_window()
+            # Ensure the focus goes back to the main window, not the taginfo window
+            self.tk_app.focus_set()
+            self.tk_app.focus_force()
 
             # Enter the GUI loop
             rc = self.gui_loop()
