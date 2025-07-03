@@ -80,6 +80,7 @@ class App:
     deid_rect_colour = 'green' # deid rules
     us_rect_colour = 'yellow'  # ultrasound regions
     MAX_TAG_VALUE_LEN = 120 # max length of tag value string in info window
+    STAY_OPEN_AT_END_OF_FILELIST = True # False=quit after viewing all files, True=stay open
 
 
     def __init__(self, viewer_mode = False):
@@ -1042,7 +1043,7 @@ class App:
         while True:
             filename = self.filelist.next()
             if not filename:
-                return False
+                return App.STAY_OPEN_AT_END_OF_FILELIST
             if self.skip_marked_files.get() and db.file_marked_done(filename):
                 logging.info('Ignore file already done: %s' % filename)
                 continue
