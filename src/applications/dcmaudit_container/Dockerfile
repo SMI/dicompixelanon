@@ -8,4 +8,4 @@ RUN /venv/bin/python3 -m pip install setuptools boto3 pydicom deid pydal opencv_
 ARG CACHEDATE=1
 RUN git clone https://github.com/SMI/dicompixelanon && cd dicompixelanon/src/library && /venv/bin/python3 -m pip install --upgrade build && /venv/bin/python3 -m build && /venv/bin/python3 -m pip install dicompixelanon/src/library/dist/dicompixelanon-1.0.0-py3-none-any.whl
 RUN /venv/bin/python3 -c 'import DicomPixelAnon.ocrengine as o; o.OCR("easyocr")'
-ENTRYPOINT [ "/venv/bin/python3", "dicompixelanon/src/applications/dcmaudit.py", "--db", "/tmp", "--review" ]
+ENTRYPOINT [ "/venv/bin/python3", "dicompixelanon/src/applications/dcmaudit/dcmaudit.py", "--db", "/tmp", "--review" ]
