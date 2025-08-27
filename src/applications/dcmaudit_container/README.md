@@ -3,21 +3,27 @@
 ## Build
 
 ```
-docker build --progress=plain --build-arg CACHEDATE=$(date +%N) -t dcmaudit .
+docker build --progress=plain --build-arg CACHEDATE=$(date +%N) -t dcmaudit:cpu -f Dockerfile .
+docker build --progress=plain --build-arg CACHEDATE=$(date +%N) -t dcmaudit:gpu -f Dockerfile_gpu .
 ```
 
 (CACHEDATE must change each time to prevent docker cache keeping an old copy of a repo from git pull)
 
-To build for use on a GPU change Dockerfile:
-use `--extra-index-url https://download.pytorch.org/whl/cu118` (instead of `cpu`).
+The difference between building for CPU and for GPU is the pytorch repo `cpu` or `cu118`:
+```
+--extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cu118
+```
 
 ## Push to registry
 
 ```
 export CR_PAT=ghp_XXX
 echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
-docker tag dcmaudit ghcr.io/howff/dcmaudit:latest
-docker push ghcr.io/howff/dcmaudit:latest
+docker tag dcmaudit:cpu ghcr.io/howff/dcmaudit:cpu
+docker tag dcmaudit:gpu ghcr.io/howff/dcmaudit:gpu
+docker push ghcr.io/howff/dcmaudit:cpu
+docker push ghcr.io/howff/dcmaudit:gpu
 ```
 
 # Run
