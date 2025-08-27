@@ -30,6 +30,12 @@ The S3 credentials will be stored in the s3 directory.
 
 Any DICOM files in the current directory will be visible inside /dicom when using dcmaudit.
 
+If using the container execution service then you should use the following to ensure
+that the S3 preferences file is saved in your home directory:
+```
+ces-pull podman USER TOKEN ghcr.io/howff/dcmaudit:cpu
+ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit) ghcr.io/howff/dcmaudit:cpu
+```
 
 # VersityGW
 
