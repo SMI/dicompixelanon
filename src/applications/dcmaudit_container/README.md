@@ -26,6 +26,30 @@ docker push ghcr.io/howff/dcmaudit:cpu
 docker push ghcr.io/howff/dcmaudit:gpu
 ```
 
+# Run with ces-run
+
+You need the latest version of the ces-tools (specifically ces-pm-run having support for X11 applications).
+
+Download the container:
+```
+ces-pull podman howff KEY ghcr.io/howff/dcmaudit:cpu
+```
+
+Mounts:
+* The container needs to be able to read/write your `.dcmaudit/s3creds.csv` file so bind mount that directory.
+* The container needs to be able to write to your home directory so you can save files (e.g. reports, CSV files)
+but you can't mount your whole home directory as that would hide the container's downloaded models
+so bind mount a `~/s3` directory.
+
+If you don't have a safe_data directory because you are not in a research project then `mkdir -p ~/safe_data`.
+
+The proxy environment variables are passed into the container by default so disable this with `--http-proxy=false`.
+
+```
+mkdir -p ~/s3
+ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit -v $HOME/s3:/root/s3 --http-proxy=false) ghcr.io/howff/dcmaudit:cpu
+```
+
 # Run
 
 ```
