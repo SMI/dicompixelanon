@@ -22,7 +22,11 @@ class S3DownloadDialog:
     the bucket, and downloading the selected file to a given directory.
     """
     # Class variable
+    # Default to ~/s3 if it exists as a directory, else ~
     default_output_dir = '~'
+    if os.path.isdir(os.path.join(os.environ['HOME'], 's3')):
+        default_output_dir = '~/s3'
+
 
     def __init__(self, parent):
         self.bucket = None
