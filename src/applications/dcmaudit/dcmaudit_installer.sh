@@ -16,7 +16,7 @@ set -e
 
 # Create the .desktop file
 echo "Creating a desktop launcher"
-cat <<_EOF > $HOME/Desktop/dcmaudit.desktop
+cat <<_EOF > "${HOME}/Desktop/dcmaudit.desktop"
 [Desktop Entry]
 Name=dcmaudit
 Comment=dcmaudit - view DICOM images
@@ -24,6 +24,7 @@ Exec=$runscript
 Terminal=false
 Type=Application
 _EOF
+chmod +x "${HOME}/Desktop/dcmaudit.desktop"
 
 # Ensure we have a 's3' directory in our home directory
 echo "Creating an s3 directory"
@@ -53,10 +54,15 @@ ces-pull podman howff 'ghp'_"$GHCR" ghcr.io/howff/dcmaudit:cpu
 # Install a newer version of ces-pm-run to get X11 support
 if grep -q 'VERSION="2.5.0"' /usr/local/bin/ces-pm-run; then
 	# need a newer version than 2.5.0
-	echo "Using a patched ces-pm-run"
+	if [ ! -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
+		echo "Error: we need a new version of ces-pm-run but it's not installed; please raise a helpdesk ticket" >&2
+		exit 2
+	fi
 else
-	# hopefully ok
-	echo "Using the default ces-pm-run script"
+	if [ -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
+		echo "Error: we have an old version of ces-pm-run in /safe_data/tmp; please raise a helpdesk ticket" >&2
+		exit 3
+	fi
 fi
 
 # Create the script to run dcmaudit from a container
@@ -65,6 +71,7 @@ echo '#!/bin/bash' > "${runscript}"
 echo "# Created $(date) by $0" >> "${runscript}"
 echo 'export PATH=/safe_data/tmp/dcmaudit:${PATH}' >> "${runscript}"
 echo 'ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit -v $HOME/s3:/root/s3 --http-proxy=false) ghcr.io/howff/dcmaudit:cpu' >> "${runscript}"
+chmod +x "${runscript}"
 
 # Finished
 echo "OK - double-click on the dcmaudit icon on your desktop"
