@@ -45,6 +45,10 @@ class S3DownloadDialog:
 
         # Construct GUI
         top = self.top = tkinter.Toplevel(parent)
+        top.transient(parent) # appear above parent
+        top.grab_set() # modal
+        top.focus_set() # grab focus
+        top.lift() # on top
         top.geometry(f'+{max(0,parent.winfo_rootx()-30)}+{parent.winfo_rooty()}')
         tkinter.Label(top, text='Saved credentials:').grid(row=0, column=0)
         self.bucket_dropdown = tkinter.StringVar()
