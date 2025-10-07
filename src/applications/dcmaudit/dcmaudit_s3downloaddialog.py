@@ -4,6 +4,7 @@
 import logging
 import os
 import tkinter
+import tkinter.filedialog
 import tkinter.messagebox
 from tktooltip import ToolTip
 import boto3
@@ -70,7 +71,8 @@ class S3DownloadDialog:
         scroller.grid(row=1, column=1, sticky=(tkinter.N,tkinter.S))
 
         # Output directory
-        tkinter.Label(top, text='Output directory (use ~ for your home directory):').grid(row=2, column=0)
+        self.myDirButton = tkinter.Button(top, text='Output directory (use ~ for your home directory):', command=self.choose_dir)
+        self.myDirButton.grid(row=2, column=0)
         self.outputEntry = tkinter.Entry(top)
         self.outputEntry.insert(tkinter.END, S3DownloadDialog.default_output_dir)
         ToolTip(self.outputEntry, msg="Enter an output directory, use ~ for your home directory", delay=TTD)
@@ -85,6 +87,18 @@ class S3DownloadDialog:
         ToolTip(self.myDownloadButton, msg="Download the selected file into the Output directory.", delay=TTD)
         top.grid_columnconfigure(0, weight=1)
         top.grid_rowconfigure(0, weight=1)
+
+
+    def choose_dir(self):
+        """ Called when button to choose directory has been clicked.
+        Opens a directory choose starting in the directory listed in the text box
+        and replaces the text in the text box when a directory is chosen.
+        """
+        dir = command=tkinter.filedialog.askdirectory(initialdir = self.outputEntry.get())
+        if dir:
+            self.outputEntry.delete(0, tkinter.END)
+            self.outputEntry.insert(0, dir)
+            self.output_dir = dir
 
 
     def list(self):
