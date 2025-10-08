@@ -14,6 +14,7 @@ import boto3
 from DicomPixelAnon.s3url import s3url_create
 from dcmaudit_s3credstore import S3CredentialStore
 from seekablecsv import SeekableCsv
+import container_utils
 
 
 # =====================================================================
@@ -88,7 +89,7 @@ class S3LoadDialog:
         tkinter.Label(top, text='One image per series:').grid(row=2, column=0)
         self.singlePerSeriesVar = tkinter.IntVar()
         self.singlePerSeriesCheck = tkinter.Checkbutton(top, text='Overview',variable=self.singlePerSeriesVar, onvalue=1, offvalue=0)
-        ToolTip(self.singlePerSeriesCheck, msg=f"If selected then only one image is selected per-Series", delay=TTD)
+        ToolTip(self.singlePerSeriesCheck, msg="If selected then only one image is selected per-Series", delay=TTD)
         self.singlePerSeriesCheck.grid(row=2, column=1)
 
         # CSV file
@@ -122,7 +123,19 @@ class S3LoadDialog:
         self.seriesEntry.grid(row=5, column=1)
 
         # Output directory
-        tkinter.Label(top, text='Output directory:').grid(row=6, column=0)
+        def showDirChooser():
+            startingdir = self.output_dir
+            if not startingdir:
+                startingdir = self.outputEntry.get()
+            if not startingdir:
+                startingdir = os.path.join(os.environ['HOME'], 's3')
+            directory = tkinter.filedialog.askdirectory(initialdir = startingdir)
+            self.outputEntry.delete(0, tkinter.END)
+            self.outputEntry.insert(0, directory)
+            self.output_dir = directory
+        #Instead of Label use Button tkinter.Label(top, text='Output directory:').grid(row=6, column=0)
+        self.myDirButton = tkinter.Button(top, text='Output directory (blank to view images):', command=showDirChooser)
+        self.myDirButton.grid(row=6, column=0)
         self.outputEntry = tkinter.Entry(top)
         self.outputEntry.insert(tkinter.END, self.output_dir)
         ToolTip(self.outputEntry, msg="Leave blank to load the images straight into the viewer without saving as a file, or enter an output directory. You can add {study} and {series} to directory names. Directories will be created as necessary.", delay=TTD)
@@ -149,6 +162,9 @@ class S3LoadDialog:
         self.series_list = self.seriesEntry.get().split(',') if self.seriesEntry.get() else []
         self.output_dir = self.outputEntry.get()
         self.csv_file = self.csvEntry.get()
+
+        if self.output_dir and container_utils.running_in_container() and not container_utils.directory_is_mounted(self.output_dir):
+            tkinter.messagebox.showwarning(title="Warning", message="Files will be downloaded to an output directory which is not accessible outside this container")
 
         # Save for next time
         S3LoadDialog.default_output_dir = self.output_dir
@@ -270,7 +286,7 @@ class S3LoadDialog:
             # self.path_list, and download to self.output_dir if set.
             (stu,ser,sop) = key.split('/')
             path = self.output_dir.format(study=stu, series=ser, file=sop)
-            logging.debug(f"{key}\t->\t{path}")
+            logging.debug("%s\t->\t%s" % (key,path))
             if self.output_dir:
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 s3bucket.download_file(key, path)
