@@ -9,6 +9,7 @@ import tkinter.messagebox
 from tktooltip import ToolTip
 import boto3
 from dcmaudit_s3credstore import S3CredentialStore
+import container_utils
 
 
 # Configuration:
@@ -94,11 +95,11 @@ class S3DownloadDialog:
         Opens a directory choose starting in the directory listed in the text box
         and replaces the text in the text box when a directory is chosen.
         """
-        dir = command=tkinter.filedialog.askdirectory(initialdir = self.outputEntry.get())
-        if dir:
+        directory = tkinter.filedialog.askdirectory(initialdir = self.outputEntry.get())
+        if directory:
             self.outputEntry.delete(0, tkinter.END)
-            self.outputEntry.insert(0, dir)
-            self.output_dir = dir
+            self.outputEntry.insert(0, directory)
+            self.output_dir = directory
 
 
     def list(self):
@@ -181,7 +182,10 @@ class S3DownloadDialog:
             for obj in s3bucket.objects.filter(Prefix = selected_item):
                 os.makedirs(self.output_dir, exist_ok=True)
                 s3bucket.download_file(obj.key, os.path.join(self.output_dir, os.path.basename(obj.key)))
-                tkinter.messagebox.showinfo(title="Error", message="Downloaded "+os.path.basename(obj.key))
+                if container_utils.running_in_container() and not container_utils.directory_is_mounted(self.output_dir):
+                    tkinter.messagebox.showwarning(title="Warning", message="File downloaded but the output directory is not accessible outside this container")
+                else:
+                    tkinter.messagebox.showinfo(title="Info", message="Downloaded "+os.path.basename(obj.key))
         except Exception as e:
             tkinter.messagebox.showerror(title="Error", message="Cannot download %s from S3 server, check the endpoint URL and the credentials in the credential manager, and check the output directory is writeable.")
             return
