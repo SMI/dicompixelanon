@@ -19,7 +19,7 @@ import container_utils
 
 # =====================================================================
 # Configuration:
-NUM_RANDOM_S3_IMAGES = 50
+NUM_RANDOM_S3_IMAGES = 50 # XXX make this an environment variable?
 MAX_S3_LOAD = 10000    # max to load from S3 if not limited by study/series
 TTD=0.4                # delay in seconds before ToolTip is shown
 
@@ -30,8 +30,9 @@ class S3LoadDialog:
     of images held in a S3 bucket.
     """
     # Class variables
-    default_csv_file_dir = '.'
-    default_output_dir = ''
+    default_dir = os.path.join(os.environ['HOME'], 's3') if container_utils.running_in_container() else '.'
+    default_csv_file_dir = S3LoadDialog.default_dir
+    default_output_dir = ''    # blank so that images are loaded not saved as files
 
     def __init__(self, parent, s3loadprefs = None):
         # Initialise instance variables
