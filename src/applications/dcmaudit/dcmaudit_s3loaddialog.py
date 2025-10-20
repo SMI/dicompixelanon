@@ -31,7 +31,7 @@ class S3LoadDialog:
     """
     # Class variables
     default_dir = os.path.join(os.environ['HOME'], 's3') if container_utils.running_in_container() else '.'
-    default_csv_file_dir = S3LoadDialog.default_dir
+    default_csv_file_dir = default_dir
     default_output_dir = ''    # blank so that images are loaded not saved as files
 
     def __init__(self, parent, s3loadprefs = None):
