@@ -70,7 +70,7 @@ echo "Creating a start-up script ($runscript)"
 echo '#!/bin/bash' > "${runscript}"
 echo "# Created $(date) by $0" >> "${runscript}"
 echo 'export PATH=/safe_data/tmp/dcmaudit:${PATH}' >> "${runscript}"
-echo 'ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit -v $HOME/s3:/root/s3 --http-proxy=false) ghcr.io/howff/dcmaudit:cpu' >> "${runscript}"
+echo 'ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit -v $HOME/s3:/root/s3 --http-proxy=false) --arg-file <(echo --viewer) ghcr.io/howff/dcmaudit:cpu' >> "${runscript}"
 chmod +x "${runscript}"
 
 # Finished
