@@ -52,18 +52,18 @@ echo "Downloading the container"
 ces-pull podman howff 'ghp'_"$GHCR" ghcr.io/howff/dcmaudit:cpu
 
 # Install a newer version of ces-pm-run to get X11 support
-if grep -q 'VERSION="2.5.0"' /usr/local/bin/ces-pm-run; then
-	# need a newer version than 2.5.0
-	if [ ! -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
-		echo "Error: we need a new version of ces-pm-run but it's not installed; please raise a helpdesk ticket" >&2
-		exit 2
-	fi
-else
-	if [ -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
-		echo "Error: we have an old version of ces-pm-run in /safe_data/tmp; please raise a helpdesk ticket" >&2
-		exit 3
-	fi
-fi
+#if grep -q 'VERSION="2.5.0"' /usr/local/bin/ces-pm-run; then
+#	# need a newer version than 2.5.0
+#	if [ ! -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
+#		echo "Error: we need a new version of ces-pm-run but it's not installed; please raise a helpdesk ticket" >&2
+#		exit 2
+#	fi
+#else
+#	if [ -f /safe_data/tmp/dcmaudit/ces-pm-run ]; then
+#		echo "Error: we have an old version of ces-pm-run in /safe_data/tmp; please raise a helpdesk ticket" >&2
+#		exit 3
+#	fi
+#fi
 
 # Create the script to run dcmaudit from a container
 echo "Creating a start-up script ($runscript)"
