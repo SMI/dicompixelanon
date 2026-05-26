@@ -284,6 +284,35 @@ def process_dicom(filename, options : dict):
 
 
 # ---------------------------------------------------------------------
+# Return each filename from a given directory (recursive)
+
+def filepaths(path):
+    """ Iterator that returns filenames recursively under a given directory.
+    XXX symbolic links not handled.
+    """
+    with os.scandir(path) as it:
+        for entry in it:
+            if entry.is_dir(follow_symlinks=False):
+                yield from filepaths(entry.path)
+            else:
+                yield entry.path
+
+
+def file_list(args_list):
+    """ Iterator that returns each element of args_list if it's a file
+    and if it's a directory returns each filename recursively underneath.
+    Note uses isdir not isfile so a missing file can still be found later
+    under PACS_ROOT.
+    XXX symbolic links not handled.
+    """
+    for file in args_list:
+        if os.path.isdir(file):
+            yield from filepaths(file)
+        else:
+            yield file
+
+
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DICOM image OCR and NER')
     parser.add_argument('-v', '--verbose', action="store_true", help='more verbose (show INFO messages)')
@@ -357,7 +386,7 @@ if __name__ == "__main__":
             db_writer = DicomRectDB()
 
     # Process files
-    for file in args.files:
+    for file in file_list(args.files):
         # If already in database then ignore
         if db_writer and not args.review:
             if db_writer.query_rects(file):
