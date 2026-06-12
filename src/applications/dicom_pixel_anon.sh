@@ -26,10 +26,11 @@ while getopts "$options" var; do
         r) relative="--relative $OPTARG";;
         D) dbdir="$OPTARG";;
         ?) echo "$usage";
-            echo "-D is the path to the database directory"
+            echo "-D path to database directory (uses a temporary db if not given)"
             echo "-c to compress the output files"
             echo "-f to detect scanned forms"
-            echo "-o is the path to the output directory"
+            echo "-o path to the output directory"
+            echo "-r path removed from input to make output files relative"
             exit 1;;
     esac
 done
@@ -58,13 +59,13 @@ set -e
 # People might need to know all regions that are redacted so
 # add UltraSound regions (and any text found within them) to the db.
 # (i.e. use --use-ultrasound-regions not --except-ultrasound-regions).
-echo "$(date) ${prog} Running OCR on $@"
+echo "$(date +%Y%m%d-%H%M%S) ${prog} Running OCR on $@"
 dicom_ocr.py --db "${dbdir}" --review $opt_forms --pii ocr_allowlist --use-ultrasound-regions --rects "$@"
 
 # Redact by reading the database, and using UltraSound regions.
 # Use the deid rules to pick up any other redaction rules
 # (these rules may also include UltraSound regions).
-echo "$(date) ${prog} Redacting $input"
+echo "$(date +%Y%m%d-%H%M%S) ${prog} Redacting $input"
 dicom_redact.py --db "${dbdir}" \
     --remove-ultrasound-regions \
     --deid $opt_compression \
