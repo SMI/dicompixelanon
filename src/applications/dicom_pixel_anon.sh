@@ -2,6 +2,7 @@
 # Run OCR on a DICOM file, save the rectangles to a database, then
 # produce a redacted DICOM file by redacting the rectangles from the database.
 # Usage: -o output input...
+# Uses : dicom_ocr.py and dicom_redact.py
 # XXX need to implement an allowlist for safe words found by OCR, e.g. "AP ERECT"
 
 # Options
@@ -40,9 +41,6 @@ if [ "$output" == "" ]; then
     exit 1
 fi
 
-# Temporary! PATH for testing from current directory
-export PATH=${PATH}:.
-
 # Temporary directory for database if needed
 if [ "$dbdir" == "" ]; then
     tmpdir="/tmp/dicom_pixel_anon.$$"
@@ -70,23 +68,8 @@ dicom_redact.py --db "${dbdir}" \
     --remove-ultrasound-regions \
     --deid $opt_compression \
     --output "${output}" $relative \
+    --write-csv "${output}/rectangles.csv" \
     --dicom "$@"
-
-# Append to a record of all rectangles
-# Only outputs limited columns (esp. not the ocrtext!)
-if [ $keep_rects -eq 1 -a -d "$output" ]; then
-    rects_file="$output/rectangles.csv"
-    rects_cols="filename,left,top,right,bottom,frame,overlay"
-    if [ ! -f "$rects_file" ]; then
-        echo "$rects_cols" > "$rects_file"
-    fi
-    filename_arr=( "$@" )
-    join_with_sep() { local d=$1 s=$2; shift 2 && printf %s "$s${@/#/$d}"; }
-    filenames=$(join_with_sep "','" "${filename_arr[@]}")
-    sqlite3 -csv -separator , \
-        -cmd "select $rects_cols from DicomRects where left != -1 and filename in ('$filenames')" \
-        "$dbdir/dcmaudit.sqlite.db" >> "$rects_file" < /dev/null
-fi
 
 # Tidy up if necessary
 if [ "${tmpdir}" != "" ]; then
