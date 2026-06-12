@@ -761,4 +761,7 @@ if __name__ == '__main__':
         redact_DicomRect_rectangles(ds, rect_list)
         if args.compress:
             compress_dataset(ds)
+        # Some of the sample DICOMs have curves which are deprecated and cause a crash
+        if pydicom.tag.Tag(0x5004, 0x3000) in ds:
+            del ds[(0x5004, 0x3000)]
         ds.save_as(outfilename)
