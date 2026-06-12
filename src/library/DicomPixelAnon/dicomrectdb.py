@@ -262,12 +262,18 @@ class DicomRectDB():
         print(rc, file=fd)
         return rc
 
-    def query_rect_filenames(self):
+    def query_rect_filenames(self, filter_filename = None):
         """ Return a list of filenames which have rectangles in the database.
+        If filter_filename is given then only filenames containing it are returned
+        i.e. a substring match.
         """
         rc = []
-        for row in self.db(self.db.DicomRects).select('filename', distinct=True):
-            rc.append(row['filename'])
+        if filter:
+            for row in self.db(self.db.DicomRects.filename.like(f'%{filter_filename}%')).select('filename', distinct=True):
+                rc.append(row['filename'])
+        else:
+            for row in self.db(self.db.DicomRects).select('filename', distinct=True):
+                rc.append(row['filename'])
         return rc
 
     def query_tag_filenames(self):
