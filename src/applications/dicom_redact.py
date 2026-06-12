@@ -84,6 +84,9 @@ def mark_as_uncompressed(ds):
 def compress_dataset(ds):
     """ Do lossless compression of the pydicom Dataset
     """
+    if ds.file_meta.TransferSyntaxUID.is_compressed:
+        logger.warning('dataset already compressed, cannot compress again')
+        return
     if compression_scheme == 'JPEG-LS':
         ds.compress(JPEGLSLossless)
         # ds.file_meta.TransferSyntaxUID = JPEGLSLossless # should already be done
@@ -629,6 +632,38 @@ def test_decode_rect_list_string():
 
 
 # ---------------------------------------------------------------------
+# Append to a record of all rectangles
+# Only outputs limited columns (esp. not the ocrtext!)
+
+def write_rects_to_csv(rect_list_map, csvfilename, relative = None):
+    """ Write CSV from the rectangles in rect_list_map
+    to csvfilename. If relative is given then that path is
+    stripped from each rect filename.
+    """
+    if relative:
+        if len(relative) > 1 and relative[-1] != '/':
+            relative += '/'
+    else:
+        relative = ''
+    fieldnames = ['filename', 'left', 'top', 'right', 'bottom', 'frame', 'overlay']
+    with open(csvfilename, 'w', newline='') as csvfd:
+        csvw = csv.DictWriter(csvfd, fieldnames=fieldnames, lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+        csvw.writeheader()
+        for fn in rect_list_map.keys():
+            # each entry is a list of rects for that filename
+            for rect in rect_list_map[fn]:
+                if rect.L() != -1:
+                    csvw.writerow({'filename': fn.replace(relative, ''),
+                        'left': rect.L(),
+                        'right': rect.R(),
+                        'top': rect.T(),
+                        'bottom': rect.B(),
+                        'frame': rect.F(),
+                        'overlay': rect.O()})
+
+
+# ---------------------------------------------------------------------
+
 
 def is_directory_writable(dirname):
     """ Test if a directory is writable by trying to write a file
@@ -694,7 +729,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose')
     parser.add_argument('--db', dest='db', action="store", help='database directory to read rectangles (needs --dicom)')
     parser.add_argument('--compress', dest='compress', action="store_true", help='Use lossless compression (JPEG2000)')
-    parser.add_argument('--csv', dest='csv', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
+    parser.add_argument('--read-csv', dest='csvin', action="store", help='CSV path to read rectangles (redacts all files in csv if --dicom not used)')
+    parser.add_argument('--write-csv', dest='csvout', action="store", help='CSV path to write rectangles (taken from database)')
     parser.add_argument('--dicom', dest='dicom', nargs='*', action="store", help='DICOM filename(s) to be redacted', default=None)
     parser.add_argument('-o', '--output', dest='output', action="store", help='Output DICOM dir or filename (created automatically if not specified)', default=[])
     parser.add_argument('--relative-path', dest='relative', action="store", help='Output DICOM dir will be relative to input but with this prefix removed from input path', default=None)
@@ -707,6 +743,16 @@ if __name__ == '__main__':
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+
+    # Sanity checks
+    if args.db and not dbEnabled:
+        logger.error('Database support is not available')
+        sys.exit(1)
+    if args.db and not args.dicom:
+        logger.error('Must specify a DICOM file to find in the database')
+        sys.exit(1)
+    if args.csvout and not args.db:
+        logger.error('Must specify an input database when writing a CSV')
 
     # Build list of filenames from those given on the command line.
     # If dicom_ocr was given a directory then all files underneath
@@ -772,6 +818,9 @@ if __name__ == '__main__':
                 rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csvin, filename = filename)
         else:
             rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csvin)
+
+    if args.csvout:
+        write_rects_to_csv(rect_list_map, args.csvout, args.relative)
 
     # Redact 
     for infilename in rect_list_map.keys():
