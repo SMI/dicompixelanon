@@ -566,6 +566,18 @@ def read_DicomRectText_list_from_database(db_dir=None, filename=None, frame=-1, 
 
 
 # ---------------------------------------------------------------------
+def read_filenames_from_database(db_dir = None, filter_filename = None):
+    """ Return a list of filenames from the database which include
+    the given filter_filename substring.
+    """
+    if db_dir:
+        DicomRectDB.set_db_path(db_dir)
+    db = DicomRectDB()
+    db_files = db.query_rect_filenames(filter_filename = filename)
+    return db_files
+
+
+# ---------------------------------------------------------------------
 
 def decode_rect_list_string(rect_str):
     """
@@ -696,17 +708,30 @@ if __name__ == '__main__':
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
+    # Build list of filenames from those given on the command line.
+    # If dicom_ocr was given a directory then all files underneath
+    # will be in the database so if we are also given the same directory
+    # and a database then we can deduce all filenames from database.
+    filename_list = []
+    if args.db:
+        # Go through a list of filenames on the command line
+        for filename in args.dicom:
+            if os.path.isfile(filename):
+                filename_list += [filename]
+            else:
+                filename_list += read_filenames_from_database(db_dir = args.db, filter_filename = filename)
+
     # Will be a map from filename to a list of DicomRect
     rect_list_map = {}
-    for filename in args.dicom:
+    for filename in filename_list:
         rect_list_map[filename] = []
 
     # If we only want to remove the high bit overlays
-    if args.dicom and args.remove_high_bit_overlays:
+    if filename_list and args.remove_high_bit_overlays:
         if args.rects:
             logger.error('Sorry, cannot redact rectangles at the same time as removing high bit overlays (yet)')
             sys.exit(2)
-        for infilename in args.dicom:
+        for infilename in filename_list:
             outfile = os.path.basename(infile) + ".nooverlays.dcm" # XXX should use create_output_filename(infilename, args.output, args.relative)
             ds = pydicom.dcmread(infilename)
             remove_overlays_in_high_bits(ds)
@@ -715,43 +740,38 @@ if __name__ == '__main__':
 
     # If given a list of rectangles explicitly then it must be for a given filename
     if args.rects:
-        if not args.dicom:
+        if not filename_list:
             logger.error('Must specify a DICOM file to go with the rectangles')
             sys.exit(1)
-        for filename in args.dicom:
+        for filename in filename_list:
             rect_list_map[filename] += decode_rect_list_string(args.rects)
 
     # Get a list of rectangles surrounding the UltrasoundRegions
-    if args.dicom and args.remove_ultrasound_regions:
-        for filename in args.dicom:
+    if filename_list and args.remove_ultrasound_regions:
+        for filename in filename_list:
             rect_list_map[filename] += ultrasound.read_DicomRectText_list_from_region_tags(filename = filename)
 
     # If given a database then we need a filename to search for
     if args.db:
-        if not dbEnabled:
-            logger.error('Database support is not available')
-            sys.exit(1)
-        if not args.dicom:
-            logger.error('Must specify a DICOM file to find in the database')
-            sys.exit(1)
-        for filename in args.dicom:
+        # Go through a list of filenames on the command line and found in database
+        for filename in filename_list:
             rect_list_map[filename] += read_DicomRectText_list_from_database(db_dir = args.db, filename = filename)
 
     # If using deid recipes then find the recipe files and use them to add rectangles
     if args.deid:
         if args.deid_rules:
             logger.error('Sorry, specifying a deid rules file/directory is not yet implemented')
-        for filename in args.dicom:
+        for filename in filename_list:
             rect_list_map[filename] += deidrules.detect(filename)
 
     # If given a CSV file then we can process every DICOM in the file
     # or just the filename(s) provided
-    if args.csv:
-        if args.dicom:
-            for filename in args.dicom:
-                rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv, filename = filename)
+    if args.csvin:
+        if filename_list:
+            for filename in filename_list:
+                rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csvin, filename = filename)
         else:
-            rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csv)
+            rect_list_map = read_DicomRectText_listmap_from_csv(csv_filename = args.csvin)
 
     # Redact 
     for infilename in rect_list_map.keys():
