@@ -764,4 +764,15 @@ if __name__ == '__main__':
         # Some of the sample DICOMs have curves which are deprecated and cause a crash
         if pydicom.tag.Tag(0x5004, 0x3000) in ds:
             del ds[(0x5004, 0x3000)]
+        # If the output file already exists then rename it temporarily
+        output_already_exists = os.path.isfile(outfilename)
+        if output_already_exists:
+            os.rename(outfilename, outfilename+'.bak')
+        # Save the new DICOM file, any error during this should raise an exception
         ds.save_as(outfilename)
+        # If no error then remove the backup
+        if output_already_exists:
+            os.remove(outfilename+'.bak')
+
+
+#=============================================================================================
