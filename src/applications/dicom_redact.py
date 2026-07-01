@@ -678,7 +678,7 @@ def is_directory_writable(dirname):
         return False
 
 
-def create_output_filename(infilename, outfilename = None, relative = None):
+def create_output_filename(infilename, outfilename = None, relative = None, suffix = '.redacted.dcm'):
     """ Return a suitable output filename given an input filename
     and an optional output file name or directory.
     If outfilename is specified (and is not a directory) then use it.
@@ -690,7 +690,7 @@ def create_output_filename(infilename, outfilename = None, relative = None):
     If outfilename is not specified then use the the same directory
     as the input unless it's read-only in which case use current dir.
     Output filename (if not specified) will be the infilename but
-    with .dcm extension removed and .redacted.dcm added.
+    with .dcm extension removed and the specified suffix added.
     """
     infile = os.path.basename(infilename)
     if outfilename:
@@ -700,13 +700,19 @@ def create_output_filename(infilename, outfilename = None, relative = None):
                 os.makedirs(os.path.dirname(outfilename), exist_ok = True)
                 return outfilename
             else:
-                return os.path.join(outfilename, infile.replace('.dcm', '') + '.redacted.dcm')
+                if suffix:
+                    return os.path.join(outfilename, infile.replace('.dcm', '') + suffix)
+                else:
+                    return os.path.join(outfilename, infile)
         else:
             return outfilename
     dirname = os.path.dirname(infilename)
     if not is_directory_writable(dirname):
         dirname = '.'
-    return os.path.join(dirname, infile.replace('.dcm', '') + '.redacted.dcm')
+    if suffix:
+        return os.path.join(dirname, infile.replace('.dcm', '') + suffix)
+    else:
+        return os.path.join(dirname, infile)
 
 
 def test_create_output_filename():
@@ -714,11 +720,18 @@ def test_create_output_filename():
     assert(create_output_filename('file.dcm') == 'file.redacted.dcm')
     assert(create_output_filename('no_such_dir/file.dcm') == './file.redacted.dcm')
     assert(create_output_filename('/tmp/file.dcm') == '/tmp/file.redacted.dcm')
+    assert(create_output_filename('/tmp/file.dcm', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm')
+    assert(create_output_filename('/tmp/file', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm')
     assert(create_output_filename('file.dcm', 'newfile.dcm') == 'newfile.dcm')
     assert(create_output_filename('file.dcm', '/tmp') == '/tmp/file.redacted.dcm')
-    assert(create_output_filename('file.dcm', '/bin') == '/bin') # XXX !!!
-    assert(create_output_filename('/path/to/my/file.dcm', '.', '/path/to') == './my/file.dcm')
-    assert(create_output_filename('/path/to/my/file.dcm', '/tmp', '/path/to') == '/tmp/my/file.dcm')
+    assert(create_output_filename('file.dcm', '/bin') == '/bin') # XXX because /bin not writable
+    assert(create_output_filename('/path/to/Study/Series/file.dcm', '.', '/path/to') == './Study/Series/file.dcm')
+    assert(create_output_filename('/path/to/Study/Series/file.dcm', '/tmp', '/path/to') == '/tmp/Study/Series/file.dcm')
+    assert(create_output_filename('/path/to/Study/Series/file-an', '/tmp', '/path/to') == '/tmp/Study/Series/file-an')
+    assert(create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', '_redacted.dcm') == '/tmp/Study/Series/file-an')
+    assert(create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', None) == '/tmp/Study/Series/file-an')
+    assert(create_output_filename('/tmp/Study/Series/file-an', None, None, None) == '/tmp/Study/Series/file-an')
+    assert(create_output_filename('/tmp/Study/Series/file-an', [], None, None) == '/tmp/Study/Series/file-an')
 
 
 # ---------------------------------------------------------------------
