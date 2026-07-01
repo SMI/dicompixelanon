@@ -289,6 +289,8 @@ class DicomRectDB():
         by reading from the database.
         Filtered to just the given frame and overlay, if specified,
         or returns all if both frame and overlay are unspecified or -1.
+        If ignore_allowlisted is True then any rectangles which were detected as allowlisted PII are ignored.
+        If ignore_summaries is True then any rectangles which are summaries (left=-1,right=-1) are ignored.
         """
         rc = []
         for row in self.db(self.db.DicomRects.filename == filename).select():
