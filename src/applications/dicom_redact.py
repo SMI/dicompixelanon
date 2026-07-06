@@ -15,9 +15,9 @@
 import csv
 import argparse
 import logging
-import numpy as np
 import os
-import re
+import sys
+import numpy as np
 import pydicom
 from pydicom.uid import JPEGLSLossless, JPEG2000Lossless, RLELossless
 # pack_bits moved from pixel_data_handlers to pixels.utils in pydicom v3
@@ -31,7 +31,6 @@ from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerenum import NEREnum
 from DicomPixelAnon import ultrasound
 from DicomPixelAnon import deidrules
-import sys
 try:
     from DicomPixelAnon.dicomrectdb import DicomRectDB
     dbEnabled = True
@@ -381,8 +380,8 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
     if overlay == -1 and frame == -1:
         num_frames = ds['NumberOfFrames'].value if 'NumberOfFrames' in ds else 1
         # Redact all the frames
-        for frame in range(num_frames):
-            redact_rectangles_from_image_frame(ds, frame, rect_list)
+        for framen in range(num_frames):
+            redact_rectangles_from_image_frame(ds, framen, rect_list)
         # Redact all the high-bit overlays (if any)
         for overlay_num in range(16):
             if overlay_bit_position(ds, overlay_num) > 0:
@@ -410,8 +409,7 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
             logger.error('cannot specify an overlay frame %d when overlay %d is in image high bits' % (frame, overlay))
             return None
         return redact_rectangles_from_high_bit_overlay(ds, overlay, rect_list)
-    else:
-        return redact_rectangles_from_overlay_frame(ds, frame, overlay, rect_list)
+    return redact_rectangles_from_overlay_frame(ds, frame, overlay, rect_list)
 
 
 # ---------------------------------------------------------------------
@@ -434,9 +432,10 @@ def load_allowlist(filename = None):
     return ocr_allowlist
 
 def test_load_allowlist():
+    """ test load_allowlist """
     allowlist = load_allowlist()
-    assert(allowlist)
-    
+    assert allowlist
+
 
 def rect_in_allowlist(rect):
     """ Return True if the text contained in the rectangle is safe
@@ -459,11 +458,12 @@ def rect_in_allowlist(rect):
     return False
 
 def test_rect_in_allowlist():
-    assert(rect_in_allowlist(DicomRectText(ocrtext='ERECT')))
-    assert(rect_in_allowlist(DicomRectText(ocrtext='AP ERECT')))
-    assert(rect_in_allowlist(DicomRectText(ocrtext='PA ERECT')))
-    assert(not rect_in_allowlist(DicomRectText(ocrtext='NOT ERECT', top=0)))
-    
+    """ test rect_in_allowlist """
+    assert rect_in_allowlist(DicomRectText(ocrtext='ERECT'))
+    assert rect_in_allowlist(DicomRectText(ocrtext='AP ERECT'))
+    assert rect_in_allowlist(DicomRectText(ocrtext='PA ERECT'))
+    assert not rect_in_allowlist(DicomRectText(ocrtext='NOT ERECT', top=0))
+
 
 def filter_rect_list(rect_list):
     """ Filter the DicomRectText list to remove all items which are "safe"
@@ -476,13 +476,14 @@ def filter_rect_list(rect_list):
     return rect_list
 
 def test_filter_rect_list():
+    """ test filter_rect_list """
     rect1 = DicomRectText(ocrtext = 'ERECT')
     rect2 = DicomRectText(ocrtext = 'NOT ERECT')
     rect3 = DicomRectText(ocrtext = 'AP ERECT')
     rect_list = [rect1, rect2, rect3]
     filtered_rect_list = filter_rect_list(rect_list)
-    assert(len(filtered_rect_list) == 1) # one bad rect remains
-    assert(filtered_rect_list[0].text_tuple()[1] == 'NOT ERECT')
+    assert len(filtered_rect_list) == 1 # one bad rect remains
+    assert filtered_rect_list[0].text_tuple()[1] == 'NOT ERECT'
 
 # ---------------------------------------------------------------------
 
@@ -628,11 +629,12 @@ def decode_rect_list_string(rect_str):
     return rect_list
 
 def test_decode_rect_list_string():
-    assert(decode_rect_list_string('1,2,3,4') == [DicomRect(2,4,1,3)])
-    assert(decode_rect_list_string('1,2,+3,+4') == [DicomRect(2,6,1,4)])
-    assert(decode_rect_list_string('1,2,+3,+4,5,6') == [DicomRect(2,6,1,4,5,6)])
-    assert(decode_rect_list_string('1,2,3,4;5,6,7,8') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)])
-    assert(decode_rect_list_string('(1,2,3,4) ; (5,6,7,8)') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)])
+    """ test decode_rect_list_string """
+    assert decode_rect_list_string('1,2,3,4') == [DicomRect(2,4,1,3)]
+    assert decode_rect_list_string('1,2,+3,+4') == [DicomRect(2,6,1,4)]
+    assert decode_rect_list_string('1,2,+3,+4,5,6') == [DicomRect(2,6,1,4,5,6)]
+    assert decode_rect_list_string('1,2,3,4;5,6,7,8') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)]
+    assert decode_rect_list_string('(1,2,3,4) ; (5,6,7,8)') == [DicomRect(2,4,1,3), DicomRect(6,8,5,7)]
 
 
 # ---------------------------------------------------------------------
@@ -703,39 +705,36 @@ def create_output_filename(infilename, outfilename = None, relative = None, suff
                 outfilename = os.path.join(outfilename, os.path.relpath(infilename, relative))
                 os.makedirs(os.path.dirname(outfilename), exist_ok = True)
                 return outfilename
-            else:
-                if suffix:
-                    return os.path.join(outfilename, infile.replace('.dcm', '') + suffix)
-                else:
-                    return os.path.join(outfilename, infile)
-        else:
-            return outfilename
+            if suffix:
+                return os.path.join(outfilename, infile.replace('.dcm', '') + suffix)
+            return os.path.join(outfilename, infile)
+        return outfilename
     dirname = os.path.dirname(infilename)
     if not is_directory_writable(dirname):
         dirname = '.'
     if suffix:
         return os.path.join(dirname, infile.replace('.dcm', '') + suffix)
-    else:
-        return os.path.join(dirname, infile)
+    return os.path.join(dirname, infile)
 
 
 def test_create_output_filename():
-    assert(create_output_filename('file') == 'file.redacted.dcm')
-    assert(create_output_filename('file.dcm') == 'file.redacted.dcm')
-    assert(create_output_filename('no_such_dir/file.dcm') == './file.redacted.dcm')
-    assert(create_output_filename('/tmp/file.dcm') == '/tmp/file.redacted.dcm')
-    assert(create_output_filename('/tmp/file.dcm', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm')
-    assert(create_output_filename('/tmp/file', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm')
-    assert(create_output_filename('file.dcm', 'newfile.dcm') == 'newfile.dcm')
-    assert(create_output_filename('file.dcm', '/tmp') == '/tmp/file.redacted.dcm')
-    assert(create_output_filename('file.dcm', '/bin') == '/bin') # XXX because /bin not writable
-    assert(create_output_filename('/path/to/Study/Series/file.dcm', '.', '/path/to') == './Study/Series/file.dcm')
-    assert(create_output_filename('/path/to/Study/Series/file.dcm', '/tmp', '/path/to') == '/tmp/Study/Series/file.dcm')
-    assert(create_output_filename('/path/to/Study/Series/file-an', '/tmp', '/path/to') == '/tmp/Study/Series/file-an')
-    assert(create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', '_redacted.dcm') == '/tmp/Study/Series/file-an')
-    assert(create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', None) == '/tmp/Study/Series/file-an')
-    assert(create_output_filename('/tmp/Study/Series/file-an', None, None, None) == '/tmp/Study/Series/file-an')
-    assert(create_output_filename('/tmp/Study/Series/file-an', [], None, None) == '/tmp/Study/Series/file-an')
+    """ test create_output_filename """
+    assert create_output_filename('file') == 'file.redacted.dcm'
+    assert create_output_filename('file.dcm') == 'file.redacted.dcm'
+    assert create_output_filename('no_such_dir/file.dcm') == './file.redacted.dcm'
+    assert create_output_filename('/tmp/file.dcm') == '/tmp/file.redacted.dcm'
+    assert create_output_filename('/tmp/file.dcm', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm'
+    assert create_output_filename('/tmp/file', suffix='_redacted.dcm') == '/tmp/file_redacted.dcm'
+    assert create_output_filename('file.dcm', 'newfile.dcm') == 'newfile.dcm'
+    assert create_output_filename('file.dcm', '/tmp') == '/tmp/file.redacted.dcm'
+    assert create_output_filename('file.dcm', '/bin') == '/bin' # XXX because /bin not writable
+    assert create_output_filename('/path/to/Study/Series/file.dcm', '.', '/path/to') == './Study/Series/file.dcm'
+    assert create_output_filename('/path/to/Study/Series/file.dcm', '/tmp', '/path/to') == '/tmp/Study/Series/file.dcm'
+    assert create_output_filename('/path/to/Study/Series/file-an', '/tmp', '/path/to') == '/tmp/Study/Series/file-an'
+    assert create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', '_redacted.dcm') == '/tmp/Study/Series/file-an'
+    assert create_output_filename('/tmp/Study/Series/file-an', '/tmp', '/tmp', None) == '/tmp/Study/Series/file-an'
+    assert create_output_filename('/tmp/Study/Series/file-an', None, None, None) == '/tmp/Study/Series/file-an'
+    assert create_output_filename('/tmp/Study/Series/file-an', [], None, None) == '/tmp/Study/Series/file-an'
 
 
 # ---------------------------------------------------------------------
