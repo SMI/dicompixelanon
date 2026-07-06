@@ -22,20 +22,7 @@ from DicomPixelAnon.torchdicom import ScannedFormDetector
 from DicomPixelAnon.ultrasound import read_DicomRectText_list_from_region_tags
 import DicomPixelAnon.torchmem # ignore W0611 unused-import
 
-
-# ---------------------------------------------------------------------
-# Reporting functions
-def err(msg):
-    logging.error(msg)
-
-def msg(msg):
-    logging.info(msg)
-
-def warn(msg):
-    logging.warning(msg)
-
-def debug(msg):
-    logging.debug(msg)
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------
@@ -49,7 +36,7 @@ def find_file(filename : str) -> str:
     tmp = os.path.join(os.environ.get('PACS_ROOT','.'), filename)
     if os.path.isfile(tmp):
         return tmp
-    err('Cannot find file %s' % filename)
+    logger.error('Cannot find file %s' % filename)
     return None
 
 
@@ -172,7 +159,7 @@ def process_image(img, filename = None,
         us_rectlist = read_DicomRectText_list_from_region_tags(filename = filename)
 
     # Run OCR
-    debug('OCR(%s,%s) %s (%d,%d)' % (ocr_engine_name, nlp_engine_name, filename, frame, overlay))
+    logger.debug('OCR(%s,%s) %s (%d,%d)' % (ocr_engine_name, nlp_engine_name, filename, frame, overlay))
     ocr_text = ''
     if output_rects:
         # Get a list of rectangles and construct text string
@@ -230,17 +217,17 @@ def process_dicom(filename, options : dict):
         ds = pydicom.dcmread(filename)
         dicomimg = DicomImage(filename)
     except Exception as e:
-        err('ERROR reading DICOM file %s (%s)' % (filename, e))
+        logger.error('ERROR reading DICOM file %s (%s)' % (filename, e))
         return
 
     # Check that it's an image file
     if not 'PixelData' in ds:
-        warn('No pixel data in %s' % filename)
+        logger.warning('No pixel data in %s' % filename)
         return
     try:
         pixel_data = ds.pixel_array
     except Exception as e:
-        err('ERROR decoding pixel data from DICOM file %s (%s)' % (filename, e))
+        logger.error('ERROR decoding pixel data from DICOM file %s (%s)' % (filename, e))
         return
 
     # Check for multiple frames
@@ -249,7 +236,7 @@ def process_dicom(filename, options : dict):
     # Check which bits in PixelData are actually used
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
     bits_allocated = ds['BitsAllocated'].value if 'BitsAllocated' in ds else -1
-    msg('%s is %s using %d/%d bits with %d frames' % (filename, str(pixel_data.shape), bits_stored, bits_allocated, num_frames))
+    logger.info('%s is %s using %d/%d bits with %d frames' % (filename, str(pixel_data.shape), bits_stored, bits_allocated, num_frames))
 
     # Additional parameters passes to process_image()
     # Get some tag values massaged to return proper values
@@ -257,11 +244,11 @@ def process_dicom(filename, options : dict):
 
     # Save all the frames
     for idx in range(dicomimg.get_total_frames()):
-        msg(" extracting frame %d from %s" % (idx, filename))
+        logger.info(" extracting frame %d from %s" % (idx, filename))
         try:
             img = dicomimg.next_image()
         except Exception as e:
-            err('Cannot extract frame %d from %s (%s)' % (idx, filename, e))
+            logger.error('Cannot extract frame %d from %s (%s)' % (idx, filename, e))
             continue
         frame, overlay = dicomimg.get_current_frame_overlay()
         if idx == 0 and options.get('redact_forms', None):
@@ -277,7 +264,7 @@ def process_dicom(filename, options : dict):
         if options['ignore_overlays'] and overlay != -1:
             continue
         if not img:
-            err('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
+            logger.error('Cannot extract frame %d overlay %d from %s' % (frame, overlay, filename))
             continue
         process_image(img, filename=filename, frame=frame, overlay=overlay, options = options, meta = meta)
     return
@@ -362,7 +349,7 @@ if __name__ == "__main__":
         pii_params = args.pii.split(',')
         nlp_engine = NER(pii_params[0], model = pii_params[1] if len(pii_params)>1 else None)
         if not nlp_engine.isValid():
-            warn('Cannot run NLP on the OCR output because %s is not installed' % pii_params[0])
+            logger.warning('Cannot run NLP on the OCR output because %s is not installed' % pii_params[0])
             nlp_engine = None
 
     # Output header for CSV format
@@ -400,14 +387,14 @@ if __name__ == "__main__":
         # If already in database then ignore
         if db_writer and not args.review:
             if db_writer.query_rects(file):
-                debug("ignore (already in db) %s" % file)
+                logger.debug("ignore (already in db) %s" % file)
                 continue
         # Find full path if given relative to PACS_ROOT
         file = find_file(file)
         # Test database again with full pathname
         if db_writer and not args.review:
             if db_writer.query_rects(file):
-                debug("ignore (already in db) %s" % file)
+                logger.debug("ignore (already in db) %s" % file)
                 continue
         # Run the OCR
         options = {
