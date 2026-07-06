@@ -25,7 +25,7 @@ try:
     from pydicom.pixels.utils import pack_bits
 except:
     from pydicom.pixel_data_handlers.numpy_handler import pack_bits
-from DicomPixelAnon.rect import Rect, DicomRect, DicomRectText, rect_exclusive_list
+from DicomPixelAnon.rect import DicomRect, DicomRectText
 from DicomPixelAnon.nerengine import NER
 from DicomPixelAnon.ocrenum import OCREnum
 from DicomPixelAnon.nerenum import NEREnum
@@ -181,7 +181,7 @@ def remove_overlays_in_high_bits(ds):
         return
 
     pixel_data = ds.pixel_array # this can raise an exception in some files
-    logger.debug('ndim = %d' % pixel_data.ndim)
+    logger.debug('pixel_data ndim = %d' % pixel_data.ndim)
 
     # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
     masked = (pixel_data & bit_mask)
@@ -270,6 +270,7 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
     photometric = ds['PhotometricInterpretation'].value if 'PhotometricInterpretation' in ds else 'MONOCHROME2'
     num_frames = ds['NumberOfFrames'].value if 'NumberOfFrames' in ds else 1
     bits_stored = ds['BitsStored'].value if 'BitsStored' in ds else -1
+    logger.debug('redact_rectangles_from_image_frame: frame=%d, num_frames=%d, samples=%d, photometric=%s, bits_stored=%d' % (frame, num_frames, samples, photometric, bits_stored))
 
     # Calculate mask to set pixel to black without breaking high bit overlays
     bit_mask = np.array(0xffff << bits_stored).astype(np.uint16)
@@ -318,13 +319,15 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
     ds.set_pixel_data(pixel_data, photometric_interpretation="RGB", bits_stored=bits_stored, generate_instance_uid=False)
     # XXX does not re-compress
     mark_as_uncompressed(ds)
+    # OR, ds.compress(JPEG2000Lossless, pixel_data)
     return
 
 
-def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=[]):
+def redact_rectangles_from_overlay_frame(ds, frame=0, overlay=0, rect_list=None):
     """ Redact a list of rectangles from a specific frame of an overlay.
     Frame and overlay count from zero.
     """
+    if not rect_list: rect_list = []
 
     redacted_colour = 0
 
@@ -367,11 +370,11 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
         rect_list = []
 
     if not rect_list:
-        logger.debug('no rectangles to redact')
+        logger.debug('redact_rectangles: no rectangles to redact')
         return None
 
     if not 'PixelData' in ds:
-        logger.error('no pixel data present')
+        logger.error('redact_rectangles: no pixel data present')
         return None
 
     # Redact all frames, all overlays, all frames in overlays
@@ -382,7 +385,6 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
             redact_rectangles_from_image_frame(ds, frame, rect_list)
         # Redact all the high-bit overlays (if any)
         for overlay_num in range(16):
-            overlay_bit = overlay_bit_position(ds, overlay_num)
             if overlay_bit_position(ds, overlay_num) > 0:
                 redact_rectangles_from_high_bit_overlay(ds, overlay_num, rect_list)
         # Redact all the frames in all the overlays
@@ -392,7 +394,7 @@ def redact_rectangles(ds, frame=-1, overlay=-1, rect_list=None):
                 # Redact the first frame in this overlay
                 redact_rectangles_from_overlay_frame(ds, 0, overlay_num, rect_list)
                 # XXX not yet implemented - does not redact ALL frames in this overlay
-        return
+        return None
 
     # Only a single frame
     if overlay == -1:
@@ -793,7 +795,7 @@ if __name__ == '__main__':
             logger.error('Sorry, cannot redact rectangles at the same time as removing high bit overlays (yet)')
             sys.exit(2)
         for infilename in filename_list:
-            outfile = os.path.basename(infile) + ".nooverlays.dcm" # XXX should use create_output_filename(infilename, args.output, args.relative)
+            outfile = os.path.basename(infilename) + ".nooverlays.dcm" # XXX should use create_output_filename(infilename, args.output, args.relative)
             ds = pydicom.dcmread(infilename)
             remove_overlays_in_high_bits(ds)
             ds.save_as(outfile)
