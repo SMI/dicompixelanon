@@ -286,6 +286,16 @@ def process_dicom(filename, options : dict):
 # ---------------------------------------------------------------------
 # Return each filename from a given directory (recursive)
 
+def is_usable_filename(filename):
+    """ A very simple check on a filename to see if it's a text file
+    so that we don't try to process it as a DICOM file
+    """
+    bn = os.path.basename(filename)
+    if 'README' in bn or '.txt' in bn or '.md' in bn or '.csv' in bn:
+        return False
+    return True
+
+
 def filepaths(path):
     """ Iterator that returns filenames recursively under a given directory.
     XXX symbolic links not handled.
@@ -294,7 +304,7 @@ def filepaths(path):
         for entry in it:
             if entry.is_dir(follow_symlinks=False):
                 yield from filepaths(entry.path)
-            else:
+            elif is_usable_filename(entry.path):
                 yield entry.path
 
 
@@ -308,7 +318,7 @@ def file_list(args_list):
     for file in args_list:
         if os.path.isdir(file):
             yield from filepaths(file)
-        else:
+        elif is_usable_filename(file):
             yield file
 
 
