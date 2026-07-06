@@ -279,12 +279,15 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
         return
 
     pixel_data = ds.pixel_array # this can raise an exception in some files
-    if photometric not in ['MONOCHROME1', 'MONOCHROME2', 'PALETTE COLOR', 'RGB']:
+
+    # NB. colour conversion is no longer needed (pydicom already does it?)
+    #if photometric not in ['MONOCHROME1', 'MONOCHROME2', 'PALETTE COLOR', 'RGB']:
         # Typically one of HSV,ARGB,CMYK,YBR_FULL,YBR_FULL_422,YBR_PARTIAL_422,YBR_PARTIAL_420,YBR_ICT,YBR_RCT
         # Must be converted to RGB simply because it would confuse the TransferSyntax otherwise
         # (e.g. jpeg colour in an uncompressed transfersyntax) ?
-        pixel_data = pydicom.pixel_data_handlers.convert_color_space(ds.pixel_array, photometric, "RGB", per_frame=True)
-        ds.PhotometricInterpretation = 'RGB'
+        #pixel_data = pydicom.pixel_data_handlers.convert_color_space(ds.pixel_array, photometric, "RGB", per_frame=True)
+        #ds.PhotometricInterpretation = 'RGB'
+
     #logger.debug('ndim = %d (should be the same as samples)' % pixel_data.ndim)
 
     # Use numpy to mask the bits, handles both 8 and 16 bits per pixel.
