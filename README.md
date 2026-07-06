@@ -56,6 +56,7 @@ Utilities:
 * `dbrects_to_deid_rules.py` - convert rectangles from files marked as Done into deid rules
 * `dicomls.py` - simply list all DICOM tags and values from a file
 * `dicom_pixel_anon.sh` - anonymise a DICOM by running OCR and redacting all rectangles
+* `dicom_pixel_anon.py` - replacement for `dicom_pixel_anon.sh`
 * `build_allowlist.py` - create list of regex rules for allowlisting OCR output and write to file, optionally reduce the number of rules by 20 percent (leading to more redactions of non-PII data, but significantly shorter runtime)
 
 # Usage
