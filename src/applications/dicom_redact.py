@@ -314,9 +314,8 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
             pixel_data[frame, y0:y1, x0:x1, :] &= bit_mask_arr
 
     # Set the pixel data from the numpy array
-    # XXX Should use set_pixel_data() ?
-    # XXX See https://github.com/pydicom/pydicom/pull/2082
-    ds.PixelData = pixel_data.tobytes()
+    #ds.PixelData = pixel_data.tobytes() photometric_interpretation="RGB"
+    ds.set_pixel_data(pixel_data, photometric_interpretation="RGB", bits_stored=bits_stored, generate_instance_uid=False)
     # XXX does not re-compress
     mark_as_uncompressed(ds)
     return
