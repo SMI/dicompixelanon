@@ -67,6 +67,17 @@ ces-pull podman USER TOKEN ghcr.io/howff/dcmaudit:cpu
 ces-pm-run --opt-file <(echo -v $HOME/.dcmaudit:/root/.dcmaudit) ghcr.io/howff/dcmaudit:cpu
 ```
 
+# Troubleshooting
+
+Issues specific to the container version of dcmaudit may include:
+* Error creating container storage: the container name "dcmaudit" is already in use by xxx
+  - dcmaudit is already running. If you cannot find any window then you can delete the instance using `podman rm -f dcmaudit`
+* Unmounting container "dcmaudit" while attempting to delete storage: unmounting "/xxx/merged": invalid argument
+  - could not delete the container as above. Try unmounting the storage or removing the directory.
+e.g. `podman unshare mount -f tmpfs none "/xxx/merged"` (use the path as given in your error message)
+followed by `podman rm -f dcmaudit` again.
+As a last resort, `podman system reset`.
+
 # VersityGW
 
 If you need to run a test S3 server, try:
