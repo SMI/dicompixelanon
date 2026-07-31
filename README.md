@@ -79,9 +79,7 @@ from their directory without building and installing the library
 * Create a Python virtual environment and activate it
 * Create a config file directory `$SMI_ROOT/data` (you can set `$SMI_ROOT` anywhere)
 * Install all of the Python requirements (see below)
-* Copy `data/ocr_allowlist_regex.txt` into `$SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt` if required for dicom_redact
-* Copy `data/deid.dicom.smi` into `$SMI_ROOT/data/deid/deid.dicom.smi`
-* Copy `scannedforms_model.pth` into `$SMI_ROOT/data/dicompixelanon`
+* Install all of the static data files (see below)
 * Build the DicomPixelAnon library, see the instructions in the `src/library` directory
 * Install the DicomPixelAnon wheel into the virtual environment
 
@@ -106,7 +104,59 @@ Now you can run the applications:
 
 See below for a suggested workflow.
 
-# Sample data
+# Static data files
+
+Some files are kept in this repo, but other large files are cached in a separate private repo.
+
+The files are accessed from `$SMI_ROOT/data` so inside `$SMI_ROOT` run:
+```
+mkdir -p  data/deid  data/dicompixelanon  data/deid  data/torch/hub/checkpoints
+```
+
+Copy the data files from this repo:
+```
+cp dicompixelanon/data/deid.dicom.smi              $SMI_ROOT/data/deid/deid.dicom.smi
+cp dicompixelanon/data/ocr_allowlist_regex.txt     $SMI_ROOT/data/dicompixelanon/ocr_allowlist_regex.txt
+```
+
+Copy the Scanned Forms trained model from the secure part of the NSH:
+```
+cp /mnt/smi-fs01-nfs/data/dicompixelanon/scannedforms_model.pth  $SMI_ROOT/data/dicompixelanon/scannedforms_model.pth
+```
+
+The easyocr files are normally downloaded automatically but a) you need internet access
+and b) they will be stored in your home directory. A safe copy is stored in a private repo
+from where the files can be copied into $SMI_ROOT.
+
+* If necessary, install git lfs locally
+```
+wget https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-linux-amd64-v3.7.1.tar.gz
+tar xf git-lfs-linux-amd64-v3.7.1.tar.gz
+export PATH=${PATH}:$(pwd)/git-lfs-3.7.1
+git lfs install
+```
+
+* Unpack the archives in the data_repo
+```
+git clone https://git.ecdf.ed.ac.uk/SMI/data
+mv data data_repo
+cd data_repo
+git lfs fetch --all
+git lfs pull
+cd DicomPixelAnon
+unzip craft_mlt_25k.zip
+unzip english_g2.zip
+unzip resnet18-f37072fd.zip
+```
+
+* Copy data_repo files into $SMI_ROOT
+```
+cp data_repo/DicomPixelAnon/craft_mlt_25k.pth      $SMI_ROOT/data/easyocr/craft_mlt_25k.pth
+cp data_repo/DicomPixelAnon/english_g2.pth         $SMI_ROOT/data/easyocr/english_g2.pth
+cp data_repo/DicomPixelAnon/resnet18-f37072fd.pth  $SMI_ROOT/data/torch/hub/checkpoints/resnet18-f37072fd.pth
+```
+
+# Sample DICOM files
 
 Some sample data is provided as part of the GDCM repo:
 
