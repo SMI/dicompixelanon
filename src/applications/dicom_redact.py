@@ -315,7 +315,7 @@ def redact_rectangles_from_image_frame(ds, frame=0, rect_list=None):
 
     # Set the pixel data from the numpy array
     #ds.PixelData = pixel_data.tobytes() photometric_interpretation="RGB"
-    ds.set_pixel_data(pixel_data, photometric_interpretation="RGB", bits_stored=bits_stored, generate_instance_uid=False)
+    ds.set_pixel_data(pixel_data, photometric_interpretation=photometric, bits_stored=bits_stored, generate_instance_uid=False)
     # XXX does not re-compress
     mark_as_uncompressed(ds)
     # OR, ds.compress(JPEG2000Lossless, pixel_data)
